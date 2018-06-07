@@ -13,7 +13,7 @@ namespace Defra.Customer.Plugins.Model
         [DataMember]
         public string b2cobjectid;
         [DataMember]
-        public string title;
+        public int title;
         [DataMember]
         public string firstname;
         [DataMember]
@@ -25,7 +25,7 @@ namespace Defra.Customer.Plugins.Model
         [DataMember]
         public string dob;
         [DataMember]
-        public string gender;
+        public int gender;
         [DataMember]
         public string telephone;
         [DataMember]
