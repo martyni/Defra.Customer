@@ -17,6 +17,7 @@ namespace Defra.Customer.Plugins.WorkflowActivities
     public class CreateContact : CodeActivity
     {
         #region "Parameter Definition"
+
         [RequiredArgument]
         [Input("payload")]
         public InArgument<String> Payload { get; set; }
@@ -40,6 +41,7 @@ namespace Defra.Customer.Plugins.WorkflowActivities
 
         #endregion
         Common objCommon;
+
         protected override void Execute(CodeActivityContext executionContext)
         {
             #region "Load CRM Service from context"
@@ -70,7 +72,7 @@ namespace Defra.Customer.Plugins.WorkflowActivities
                 {
                     Contact contactPayload = (Contact)deserializer.ReadObject(ms);
                     objCommon.tracingService.Trace("deseriaized contact" + contactPayload.b2cobjectid);
-                   Entity contact = new Entity("contact");//,"defra_upn", _UPN);
+                    Entity contact = new Entity("contact");//,"defra_upn", _UPN);
                     if (string.IsNullOrEmpty(contactPayload.b2cobjectid) || string.IsNullOrWhiteSpace(contactPayload.b2cobjectid))
                         _ErrorMessage = "B2C Object Id can not be empty";
                     if (string.IsNullOrEmpty(contactPayload.firstname) || string.IsNullOrWhiteSpace(contactPayload.firstname))
@@ -115,11 +117,11 @@ namespace Defra.Customer.Plugins.WorkflowActivities
 
                             ErrorCode = 200;//Success
                             if (contactPayload.title != null)
-                                contact["defra_title"] = contactPayload.title;
-                            if(contactPayload.firstname!=null)
-                            contact["firstname"] = contactPayload.firstname;
-                            if(contactPayload.lastname!=null)
-                            contact["lastname"] = contactPayload.lastname;
+                                contact["defra_title"] = new OptionSetValue((int)contactPayload.title);
+                            if (contactPayload.firstname != null)
+                                contact["firstname"] = contactPayload.firstname;
+                            if (contactPayload.lastname != null)
+                                contact["lastname"] = contactPayload.lastname;
                             if (contactPayload.middlename != null)
                                 contact["middlename"] = contactPayload.middlename;
                             if (contactPayload.email != null)
@@ -128,7 +130,7 @@ namespace Defra.Customer.Plugins.WorkflowActivities
                                 contact["defra_b2cobjectid"] = contactPayload.b2cobjectid;
                             if (contactPayload.tacsacceptedversion != null)
                                 contact["defra_tacsacceptedversion"] = contactPayload.tacsacceptedversion;
-                            if (contact["telephone1"] != null)
+                            if (contactPayload.telephone != null)
                                 contact["telephone1"] = contactPayload.telephone;
 
                             objCommon.tracingService.Trace("setting contact date params:started..");
@@ -148,14 +150,14 @@ namespace Defra.Customer.Plugins.WorkflowActivities
                             }
 
 
-                            if (contactPayload.gender!=null)
+                            if (contactPayload.gender != null)
                             {
-                                
-                                    contact["gendercode"] = new OptionSetValue((int)contactPayload.gender);
+
+                                contact["gendercode"] = new OptionSetValue((int)contactPayload.gender);
                             }
                             objCommon.tracingService.Trace("CreateContact activity:started..");
                             ContactId = objCommon.service.Create(contact);
-                            objCommon.tracingService.Trace("CreateContact activity:ended. " + ContactId);
+                            objCommon.tracingService.Trace("CreateContact activity:ended. " + ContactId.ToString());
                             //var CreatedContacts = from c in orgSvcContext.CreateQuery("contact")
                             //                      where ((Guid)c["contactid"]).Equals((ContactId))
                             //                      select new { ContactUID = c["defra_uniquereference"] };
@@ -200,6 +202,7 @@ namespace Defra.Customer.Plugins.WorkflowActivities
                 this.Code.Set(executionContext, ErrorCode.ToString());
                 this.Message.Set(executionContext, _ErrorMessage);
                 this.MessageDetail.Set(executionContext, _ErrorMessageDetail);
+                objCommon.tracingService.Trace(ex.Message);
             }
 
             #endregion
