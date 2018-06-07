@@ -69,8 +69,8 @@ namespace Defra.Customer.Plugins.WorkflowActivities
                 using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonPayload)))
                 {
                     Contact contactPayload = (Contact)deserializer.ReadObject(ms);
-
-                    Entity contact = new Entity("contact");//,"defra_upn", _UPN);
+                    objCommon.tracingService.Trace("deseriaized contact" + contactPayload.b2cobjectid);
+                   Entity contact = new Entity("contact");//,"defra_upn", _UPN);
                     if (string.IsNullOrEmpty(contactPayload.b2cobjectid) || string.IsNullOrWhiteSpace(contactPayload.b2cobjectid))
                         _ErrorMessage = "B2C Object Id can not be empty";
                     if (string.IsNullOrEmpty(contactPayload.firstname) || string.IsNullOrWhiteSpace(contactPayload.firstname))
@@ -116,11 +116,13 @@ namespace Defra.Customer.Plugins.WorkflowActivities
                             ErrorCode = 200;//Success
                             if (contactPayload.title != null)
                                 contact["defra_title"] = contactPayload.title;
+                            if(contactPayload.firstname!=null)
                             contact["firstname"] = contactPayload.firstname;
+                            if(contactPayload.lastname!=null)
                             contact["lastname"] = contactPayload.lastname;
                             if (contactPayload.middlename != null)
                                 contact["middlename"] = contactPayload.middlename;
-                            if (contactPayload.middlename != null)
+                            if (contactPayload.email != null)
                                 contact["emailaddress1"] = contactPayload.email;
                             if (contactPayload.b2cobjectid != null)
                                 contact["defra_b2cobjectid"] = contactPayload.b2cobjectid;
@@ -146,11 +148,10 @@ namespace Defra.Customer.Plugins.WorkflowActivities
                             }
 
 
-                            if (!string.IsNullOrEmpty(contactPayload.gender) && !string.IsNullOrWhiteSpace(contactPayload.gender))
+                            if (contactPayload.gender!=null)
                             {
-                                int genderCode;
-                                if (int.TryParse(contactPayload.gender, out genderCode))
-                                    contact["gendercode"] = new OptionSetValue(genderCode);
+                                
+                                    contact["gendercode"] = new OptionSetValue((int)contactPayload.gender);
                             }
                             objCommon.tracingService.Trace("CreateContact activity:started..");
                             ContactId = objCommon.service.Create(contact);
