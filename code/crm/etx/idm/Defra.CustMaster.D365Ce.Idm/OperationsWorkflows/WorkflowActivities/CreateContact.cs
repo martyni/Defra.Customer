@@ -138,7 +138,7 @@ namespace Defra.Customer.Plugins.WorkflowActivities
                             {
                                 DateTime resultDate;
                                 if (DateTime.TryParse(contactPayload.tacsacceptedon, out resultDate))
-                                    contact["defra_tandcagreedon"] = resultDate;
+                                    contact["defra_tacsacceptedon"] = resultDate;
                             }
 
                             //set birthdate
