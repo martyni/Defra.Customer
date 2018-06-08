@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Defra.Customer.Plugins.Model
+namespace Defra.CustMaster.D365Ce.Idm.OerationsWorkflows.Model
 {
     [DataContract]
     public class Contact

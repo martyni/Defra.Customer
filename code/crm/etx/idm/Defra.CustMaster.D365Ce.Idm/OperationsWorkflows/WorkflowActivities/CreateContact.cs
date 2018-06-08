@@ -1,5 +1,4 @@
-﻿using Defra.Customer.Plugins.Model;
-using Microsoft.Xrm.Sdk;
+﻿using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
@@ -11,8 +10,9 @@ using System.Linq;
 using System.ServiceModel;
 using System.IO;
 using System.Text;
+using Defra.CustMaster.D365Ce.Idm.OerationsWorkflows.Model;
 
-namespace Defra.Customer.Plugins.WorkflowActivities
+namespace Defra.CustMaster.D365Ce.Idm.OerationsWorkflows.WorkflowActivities
 {
     public class CreateContact : CodeActivity
     {
