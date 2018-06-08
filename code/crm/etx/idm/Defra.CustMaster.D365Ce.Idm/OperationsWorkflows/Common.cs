@@ -1,4 +1,4 @@
-using Defra.CustMaster.D365Ce.Idm.OerationsWorkflows.Model;
+using Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.Model;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Messages;
@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Defra.CustMaster.D365Ce.Idm.OerationsWorkflows
+namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
 {
     public class Common
     {

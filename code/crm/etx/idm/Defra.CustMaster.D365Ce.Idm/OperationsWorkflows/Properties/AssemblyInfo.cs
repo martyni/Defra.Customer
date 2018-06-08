@@ -1,10 +1,13 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
+//[assembly: SecurityTransparent()]
+
 [assembly: AssemblyTitle("Microsoft Dynamics 365 Developer Toolkit")]
 [assembly: AssemblyDescription("Dynamics 365 Developer Toolkit for Visual Studio")]
 [assembly: AssemblyConfiguration("")]

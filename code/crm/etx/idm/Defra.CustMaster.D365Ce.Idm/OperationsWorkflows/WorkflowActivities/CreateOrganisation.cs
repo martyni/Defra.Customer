@@ -1,4 +1,4 @@
-using Defra.CustMaster.D365Ce.Idm.OerationsWorkflows;
+using Defra.CustMaster.D365Ce.Idm.OperationsWorkflows;
 using Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.Model;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
@@ -14,7 +14,7 @@ using System.Runtime.Serialization.Json;
 using System.ServiceModel;
 using System.Text;
 
-namespace Defra.Customer.Plugins.WorkflowActivities
+namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
 {
 
 

@@ -10,9 +10,10 @@ using System.Linq;
 using System.ServiceModel;
 using System.IO;
 using System.Text;
-using Defra.CustMaster.D365Ce.Idm.OerationsWorkflows.Model;
+using Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.Model;
+using Defra.CustMaster.D365Ce.Idm.OperationsWorkflows;
 
-namespace Defra.CustMaster.D365Ce.Idm.OerationsWorkflows.WorkflowActivities
+namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
 {
     public class CreateContact : CodeActivity
     {
@@ -51,9 +52,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OerationsWorkflows.WorkflowActivities
             #endregion
 
             #region "Read Parameters"
-            string jsonPayload = Payload.Get(executionContext);
-            DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(Contact));
-            //Contact contactPayload = JsonConvert.DeserializeObject<Contact>(jsonPayload);
+
 
 
             //EntityReference _Contact;
@@ -68,8 +67,13 @@ namespace Defra.CustMaster.D365Ce.Idm.OerationsWorkflows.WorkflowActivities
 
             try
             {
+                string jsonPayload = Payload.Get(executionContext);
                 using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonPayload)))
                 {
+                    DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(Contact));
+                    //Contact contactPayload = JsonConvert.DeserializeObject<Contact>(jsonPayload);
+                    //Contact contactPayload = jsonPayload.FromJson<Contact>();
+
                     Contact contactPayload = (Contact)deserializer.ReadObject(ms);
                     objCommon.tracingService.Trace("deseriaized contact" + contactPayload.b2cobjectid);
                     Entity contact = new Entity("contact");//,"defra_upn", _UPN);
@@ -136,9 +140,13 @@ namespace Defra.CustMaster.D365Ce.Idm.OerationsWorkflows.WorkflowActivities
                             objCommon.tracingService.Trace("setting contact date params:started..");
                             if (!string.IsNullOrEmpty(contactPayload.tacsacceptedon) && !string.IsNullOrWhiteSpace(contactPayload.tacsacceptedon))
                             {
+                                objCommon.tracingService.Trace("date accepted on in string" + contactPayload.tacsacceptedon);
                                 DateTime resultDate;
                                 if (DateTime.TryParse(contactPayload.tacsacceptedon, out resultDate))
-                                    contact["defra_tacsacceptedon"] = resultDate;
+                                {
+                                    objCommon.tracingService.Trace("date accepted on in dateformat" + resultDate);
+                                    contact["defra_tacsacceptedon"] = (resultDate);
+                                }
                             }
 
                             //set birthdate
@@ -194,6 +202,18 @@ namespace Defra.CustMaster.D365Ce.Idm.OerationsWorkflows.WorkflowActivities
                 }
             }
             catch (FaultException<OrganizationServiceFault> ex)
+            {
+                ErrorCode = 500;//Internal Error
+                _ErrorMessage = "Error occured while processing request";
+                _ErrorMessageDetail = ex.Message;
+                //throw ex;
+                this.Code.Set(executionContext, ErrorCode.ToString());
+                this.Message.Set(executionContext, _ErrorMessage);
+                this.MessageDetail.Set(executionContext, _ErrorMessageDetail);
+                objCommon.tracingService.Trace(ex.Message);
+             
+            }
+            catch (Exception ex)
             {
                 ErrorCode = 500;//Internal Error
                 _ErrorMessage = "Error occured while processing request";

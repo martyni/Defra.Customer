@@ -22,7 +22,7 @@ using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Workflow;
 using System.Runtime.Serialization;
 
-namespace Defra.CustMaster.D365Ce.Idm.OerationsWorkflows
+namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
 {
     public abstract class WorkFlowActivityBase : CodeActivity
     {
