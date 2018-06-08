@@ -11,6 +11,6 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.Model
     public class ParentOrganisation
     {
         [DataMember]
-        public Guid parentorganisationcrmid;
+        public String parentorganisationcrmid;
     }
 }
