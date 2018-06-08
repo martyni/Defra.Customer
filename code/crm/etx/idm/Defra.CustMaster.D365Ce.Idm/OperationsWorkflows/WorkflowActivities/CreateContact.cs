@@ -61,6 +61,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
             String _ErrorMessage = string.Empty;
             String _ErrorMessageDetail = string.Empty;
             Guid ContactId = Guid.Empty;
+            Guid ContactRecordGuidWithEmail = Guid.Empty;
             #endregion
 
             #region "Create Execution"
@@ -98,7 +99,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
 
                         _ErrorMessage = "Lastname exceeded the max length(50)";
                     }
-                    if (!string.IsNullOrEmpty(contactPayload.lastname) && contactPayload.lastname.Length > 100)
+                    if (!string.IsNullOrEmpty(contactPayload.email) && contactPayload.email.Length > 100)
                     {
 
                         _ErrorMessage = "Email exceeded the max length(100)";
@@ -113,9 +114,20 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
                                              select new { ContactId = c.Id, UniqueReference = c["defra_uniquereference"] };
 
                         var contactRecordWithUPN = ContactWithUPN.FirstOrDefault() == null ? null : ContactWithUPN.FirstOrDefault();
+
+                        if (!string.IsNullOrEmpty(contactPayload.email))
+                        {
+                            var ContactWithEmail = from c in orgSvcContext.CreateQuery("contact")
+                                                   where ((string)c["emailaddress1"]).Equals((contactPayload.email.Trim()))
+                                                   select new { ContactId = c.Id, UniqueReference = c["defra_uniquereference"] };
+
+                            var contactRecordWithEmail = ContactWithEmail.FirstOrDefault() == null ? null : ContactWithEmail.FirstOrDefault();
+                            ContactRecordGuidWithEmail = contactRecordWithEmail == null ? Guid.Empty : contactRecordWithEmail.ContactId;
+                        }
+
                         Guid ContactRecordGuidWithUPN = contactRecordWithUPN == null ? Guid.Empty : contactRecordWithUPN.ContactId;
 
-                        if (ContactRecordGuidWithUPN == Guid.Empty)
+                        if (ContactRecordGuidWithUPN == Guid.Empty && ContactRecordGuidWithEmail == Guid.Empty)
                         {
                             objCommon.tracingService.Trace("CreateContact activity:ContactRecordGuidWithUPN is empty started, Creating Contact..");
 
@@ -157,7 +169,6 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
                                     contact["birthdate"] = resultDob;
                             }
 
-
                             if (contactPayload.gender != null)
                             {
 
@@ -166,28 +177,22 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
                             objCommon.tracingService.Trace("CreateContact activity:started..");
                             ContactId = objCommon.service.Create(contact);
                             objCommon.tracingService.Trace("CreateContact activity:ended. " + ContactId.ToString());
-                            //var CreatedContacts = from c in orgSvcContext.CreateQuery("contact")
-                            //                      where ((Guid)c["contactid"]).Equals((ContactId))
-                            //                      select new { ContactUID = c["defra_uniquereference"] };
-                            //var CreatedContact = CreatedContacts.FirstOrDefault() == null ? null : CreatedContacts.FirstOrDefault();
-                            //if (CreatedContact != null)
-                            //    UID.Set(executionContext, CreatedContact.ContactUID);
-                            this.CrmGuid.Set(executionContext, ContactId.ToString());
-                            // Entity ContactRecord = objCommon.service.Retrieve("contact", ContactId, new Microsoft.Xrm.Sdk.Query.ColumnSet("defra_uniquereference"));
-                            // this.UniqueReference.Set(executionContext, ContactRecord["defra_uniquereference"]);
 
-                            // _Contact = new EntityReference("contact", ContactId);                   
-                            // this.Individual.Set(executionContext, _Contact);
+                            this.CrmGuid.Set(executionContext, ContactId.ToString());
+
                             _IsRecordCreated = true;
                             if (contactPayload.address != null)
                             {
-                                //CreateAddress(contactPayload.address, ContactId);
+
                                 objCommon.CreateAddress(contactPayload.address, new EntityReference("contact", ContactId));
                             }
                         }
                         else
                         {
-                            this.CrmGuid.Set(executionContext, ContactRecordGuidWithUPN.ToString());
+                            if (ContactRecordGuidWithUPN != Guid.Empty)
+                                this.CrmGuid.Set(executionContext, ContactRecordGuidWithUPN.ToString());
+                            else if (ContactRecordGuidWithEmail != Guid.Empty)
+                                this.CrmGuid.Set(executionContext, ContactRecordGuidWithEmail.ToString());
                             objCommon.tracingService.Trace("CreateContact activity:ContactRecordGuidWithUPN is found/duplicate started..");
                             ErrorCode = 412;//Duplicate UPN
                             _ErrorMessage = "Duplicate Record";
@@ -201,18 +206,6 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
                     objCommon.tracingService.Trace("CreateContact activity:setting output params like error code etc.. ended");
                 }
             }
-            catch (FaultException<OrganizationServiceFault> ex)
-            {
-                ErrorCode = 500;//Internal Error
-                _ErrorMessage = "Error occured while processing request";
-                _ErrorMessageDetail = ex.Message;
-                //throw ex;
-                this.Code.Set(executionContext, ErrorCode.ToString());
-                this.Message.Set(executionContext, _ErrorMessage);
-                this.MessageDetail.Set(executionContext, _ErrorMessageDetail);
-                objCommon.tracingService.Trace(ex.Message);
-             
-            }
             catch (Exception ex)
             {
                 ErrorCode = 500;//Internal Error
@@ -224,50 +217,20 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
                 this.MessageDetail.Set(executionContext, _ErrorMessageDetail);
                 objCommon.tracingService.Trace(ex.Message);
             }
+            //catch (FaultException<OrganizationServiceFault> ex)
+            //{
+            //    ErrorCode = 500;//Internal Error
+            //    _ErrorMessage = "Error occured while processing request";
+            //    _ErrorMessageDetail = ex.Message;
+            //    //throw ex;
+            //    this.Code.Set(executionContext, ErrorCode.ToString());
+            //    this.Message.Set(executionContext, _ErrorMessage);
+            //    this.MessageDetail.Set(executionContext, _ErrorMessageDetail);
+            //    objCommon.tracingService.Trace(ex.Message);
+
+            //}
 
             #endregion
-
-        }
-
-        public void CreateAddress(Address addressDetails, Guid contactId)
-        {
-            objCommon.tracingService.Trace("CreateAddress activity:started..");
-            OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
-            Entity address = new Entity("defra_address");
-            address["defra_uprn"] = addressDetails.uprn;
-            address["defra_name"] = addressDetails.buildingname;
-            address["defra_premises"] = addressDetails.buildingnumber + "," + addressDetails.buildingname;
-            address["defra_street"] = addressDetails.street;
-            address["defra_locality"] = addressDetails.locality;
-            address["defra_towntext"] = addressDetails.town;
-            address["defra_postcode"] = addressDetails.postcode;
-            bool resultCompanyHouse;
-            if (Boolean.TryParse(addressDetails.fromcompanieshouse, out resultCompanyHouse))
-                address["defra_fromcompanieshouse"] = resultCompanyHouse;
-            var CountryRecord = from c in orgSvcContext.CreateQuery("defra_country")
-                                where ((string)c["defra_name"]).ToLower().Contains((addressDetails.county.Trim().ToLower()))
-                                select new { CountryId = c.Id };
-            Guid countryGuid = CountryRecord != null && CountryRecord.FirstOrDefault() != null ? CountryRecord.FirstOrDefault().CountryId : Guid.Empty;
-            if (countryGuid != Guid.Empty)
-                address["defra_country"] = new EntityReference("defra_country", countryGuid);
-            objCommon.tracingService.Trace("CreateAddress activity:creating address..");
-            Guid addressId = objCommon.service.Create(address);
-            objCommon.tracingService.Trace("CreateAddress activity:created address..");
-            if (addressId != Guid.Empty)
-            {
-                objCommon.tracingService.Trace("CreateAddressDetails activity:started..");
-                Entity contactDetails = new Entity("defra_addressdetails");
-                contactDetails["defra_address"] = new EntityReference("defra_address", addressId);
-                int resultAddressType;
-                if (int.TryParse(addressDetails.type, out resultAddressType))
-                {
-                    contactDetails["defra_addresstype"] = new OptionSetValue(resultAddressType);
-                }
-                contactDetails["defra_customer"] = new EntityReference("contact", contactId);
-                objCommon.tracingService.Trace("CreateAddressDetails activity:creating address details..");
-                Guid contactDetailId = objCommon.service.Create(contactDetails);
-                objCommon.tracingService.Trace("CreateAddressDetails activity:created address details..");
-            }
 
         }
 

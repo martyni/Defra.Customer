@@ -305,36 +305,54 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
 
         public void CreateAddress(Address addressDetails, EntityReference Customer)
         {
+            Guid addressId = Guid.Empty;
             OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(this.service);
-            Entity address = new Entity("defra_address");
             if (addressDetails.uprn != null)
-                address["defra_uprn"] = addressDetails.uprn;
-            if (addressDetails.buildingname != null)
-                address["defra_name"] = addressDetails.buildingname;
-            if (addressDetails.buildingnumber != null)
-                address["defra_premises"] = addressDetails.buildingnumber;// + "," + addressDetails.buildingname;
-            if (addressDetails.street != null)
-                address["defra_street"] = addressDetails.street;
-            if (addressDetails.locality != null)
-                address["defra_locality"] = addressDetails.locality;
-            if (addressDetails.town != null)
-                address["defra_towntext"] = addressDetails.town;
-            if (addressDetails.postcode != null)
-                address["defra_postcode"] = addressDetails.postcode;
-            bool resultCompanyHouse;
-            if (addressDetails.fromcompanieshouse != null)
-                if (Boolean.TryParse(addressDetails.fromcompanieshouse, out resultCompanyHouse))
-                    address["defra_fromcompanieshouse"] = resultCompanyHouse;
-            if (addressDetails.county != null)
             {
-                var CountryRecord = from c in orgSvcContext.CreateQuery("defra_country")
-                                    where ((string)c["defra_name"]).ToLower().Contains((addressDetails.county.Trim().ToLower()))
-                                    select new { CountryId = c.Id };
-                Guid countryGuid = CountryRecord != null && CountryRecord.FirstOrDefault() != null ? CountryRecord.FirstOrDefault().CountryId : Guid.Empty;
-                if (countryGuid != Guid.Empty)
-                    address["defra_country"] = new EntityReference("defra_country", countryGuid);
+                var propertyWithUPRN = from c in orgSvcContext.CreateQuery("defra_address")
+                                       where ((string)c["defra_uprn"]).Equals((addressDetails.uprn.Trim()))
+                                       select new { AddressId = c.Id };
+                addressId = propertyWithUPRN != null && propertyWithUPRN.FirstOrDefault() != null ? propertyWithUPRN.FirstOrDefault().AddressId : Guid.Empty;
             }
-            Guid addressId = this.service.Create(address);
+            if (addressDetails.street != null&&addressDetails.postcode!=null&&addressDetails.buildingnumber!=null)
+            {
+                var propertyWithDuplicate = from c in orgSvcContext.CreateQuery("defra_address")
+                                       where ((string)c["defra_street"]).Equals((addressDetails.street.Trim())) && ((string)c["defra_postcode"]).Equals((addressDetails.postcode.Trim())) && ((string)c["defra_premises"]).Equals((addressDetails.buildingnumber.Trim()))
+                                       select new { AddressId = c.Id };
+                addressId = propertyWithDuplicate != null && propertyWithDuplicate.FirstOrDefault() != null ? propertyWithDuplicate.FirstOrDefault().AddressId : Guid.Empty;
+            }
+            if (addressId == Guid.Empty)
+            {
+                Entity address = new Entity("defra_address");
+                if (addressDetails.uprn != null)
+                    address["defra_uprn"] = addressDetails.uprn;
+                if (addressDetails.buildingname != null)
+                    address["defra_name"] = addressDetails.buildingname;
+                if (addressDetails.buildingnumber != null)
+                    address["defra_premises"] = addressDetails.buildingnumber;// + "," + addressDetails.buildingname;
+                if (addressDetails.street != null)
+                    address["defra_street"] = addressDetails.street;
+                if (addressDetails.locality != null)
+                    address["defra_locality"] = addressDetails.locality;
+                if (addressDetails.town != null)
+                    address["defra_towntext"] = addressDetails.town;
+                if (addressDetails.postcode != null)
+                    address["defra_postcode"] = addressDetails.postcode;
+                bool resultCompanyHouse;
+                if (addressDetails.fromcompanieshouse != null)
+                    if (Boolean.TryParse(addressDetails.fromcompanieshouse, out resultCompanyHouse))
+                        address["defra_fromcompanieshouse"] = resultCompanyHouse;
+                if (addressDetails.county != null)
+                {
+                    var CountryRecord = from c in orgSvcContext.CreateQuery("defra_country")
+                                        where ((string)c["defra_name"]).ToLower().Contains((addressDetails.county.Trim().ToLower()))
+                                        select new { CountryId = c.Id };
+                    Guid countryGuid = CountryRecord != null && CountryRecord.FirstOrDefault() != null ? CountryRecord.FirstOrDefault().CountryId : Guid.Empty;
+                    if (countryGuid != Guid.Empty)
+                        address["defra_country"] = new EntityReference("defra_country", countryGuid);
+                }
+                 addressId = this.service.Create(address);
+            }
             if (addressId != Guid.Empty)
             {
                 Entity contactDetails = new Entity("defra_addressdetails");
