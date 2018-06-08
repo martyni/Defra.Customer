@@ -50,6 +50,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
             DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(Account));
             
             int? optionSetValue;
+            int? HiratchyType;
             Int64 ErrorCode = 400; //400 -- bad request
             String _ErrorMessage = string.Empty;
             String _ErrorMessageDetail = string.Empty;
@@ -126,10 +127,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
                         if (!String.IsNullOrEmpty(AccountPayload.hierarchylevel))
                         {
                             objCommon.tracingService.Trace("hierarchylevel level: {0}", AccountPayload.hierarchylevel);
-
-                            OptionSetValueCollection HirarchyLevel = new OptionSetValueCollection();
-                            HirarchyLevel.Add(new OptionSetValue(int.Parse(AccountPayload.hierarchylevel))); //
-                            Account["defra_hierarchylevel"] = HirarchyLevel;
+                            Account["defra_hierarchylevel"] = new OptionSetValue(int.Parse(AccountPayload.hierarchylevel));
                         }
                         objCommon.tracingService.Trace("after  setting other fields");
 
