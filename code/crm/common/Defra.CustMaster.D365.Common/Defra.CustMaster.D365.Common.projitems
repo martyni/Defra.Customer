@@ -9,10 +9,17 @@
     <Import_RootNamespace>Defra.CustMaster.D365.Common</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)ints\idm\Address.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ints\idm\Contact.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ints\idm\Organisation.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ints\idm\ParentOrganisation.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ints\idm\resp\CustomerMasterResponseBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Address.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Contact.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Organisation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\ParentOrganisation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\CustomerMasterResponseBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\Data.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\Error.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Schema\Account.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Schema\ExtEnums\Gender.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)schema\ExtEnums\" />
   </ItemGroup>
 </Project>
