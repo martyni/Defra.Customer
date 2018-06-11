@@ -359,10 +359,12 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
                 contactDetails["defra_address"] = new EntityReference("defra_address", addressId);
                 int resultAddressType;
                 if (addressDetails.type != null)
+                {
                     if (int.TryParse(addressDetails.type, out resultAddressType))
                     {
                         contactDetails["defra_addresstype"] = new OptionSetValue(resultAddressType);
                     }
+                }
 
                 contactDetails["defra_customer"] = Customer;
                 Guid contactDetailId = this.service.Create(contactDetails);
