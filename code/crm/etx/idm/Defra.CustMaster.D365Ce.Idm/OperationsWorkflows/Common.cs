@@ -314,7 +314,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
                                        select new { AddressId = c.Id };
                 addressId = propertyWithUPRN != null && propertyWithUPRN.FirstOrDefault() != null ? propertyWithUPRN.FirstOrDefault().AddressId : Guid.Empty;
             }
-            if (addressDetails.street != null&&addressDetails.postcode!=null&&addressDetails.buildingnumber!=null)
+            if (addressId == Guid.Empty && addressDetails.street != null&&addressDetails.postcode!=null&&addressDetails.buildingnumber!=null)
             {
                 var propertyWithDuplicate = from c in orgSvcContext.CreateQuery("defra_address")
                                        where ((string)c["defra_street"]).Equals((addressDetails.street.Trim())) && ((string)c["defra_postcode"]).Equals((addressDetails.postcode.Trim())) && ((string)c["defra_premises"]).Equals((addressDetails.buildingnumber.Trim()))

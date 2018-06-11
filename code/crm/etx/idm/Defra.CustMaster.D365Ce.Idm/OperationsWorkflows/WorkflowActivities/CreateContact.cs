@@ -15,7 +15,7 @@ using Defra.CustMaster.D365Ce.Idm.OperationsWorkflows;
 
 namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
 {
-    public class CreateContact : CodeActivity
+    public class CreateContact : WorkFlowActivityBase
     {
         #region "Parameter Definition"
 
@@ -43,7 +43,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
         #endregion
         Common objCommon;
 
-        protected override void Execute(CodeActivityContext executionContext)
+        public override void ExecuteCRMWorkFlowActivity(CodeActivityContext executionContext, LocalWorkflowContext crmWorkflowContext)
         {
             #region "Load CRM Service from context"
             objCommon = new Common(executionContext);
