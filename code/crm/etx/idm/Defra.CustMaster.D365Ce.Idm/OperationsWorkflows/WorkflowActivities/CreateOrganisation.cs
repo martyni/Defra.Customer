@@ -55,7 +55,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
             String _ErrorMessage = string.Empty;
             String _ErrorMessageDetail = string.Empty;
             Guid ContactId = Guid.Empty;
-            Guid CrmGuid;
+            Guid CrmGuid = Guid.Empty;
             #endregion
 
             #region "Load CRM Service from context"
