@@ -11,12 +11,16 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Address.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Contact.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Helper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Organisation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\ParentOrganisation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\ResponseCustomerMasterBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\ResponseDataBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\ResponseErrorBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Schema\Account.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)schema\Address.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)schema\AddressSchema.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)schema\ContactSchema.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Schema\ExtEnums\Gender.cs" />
   </ItemGroup>
   <ItemGroup>

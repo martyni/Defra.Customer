@@ -1,19 +1,18 @@
-﻿using Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.Model;
+﻿using Defra.CustMaster.D365.Common.Ints.Idm;
+using Defra.CustMaster.D365.Common.schema;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Workflow;
 using System;
 using System.Activities;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
 {
-  class CreateContacts : CodeActivity
+    class CreateContacts : CodeActivity
     {
         #region "Parameter Definition"
 
@@ -39,12 +38,12 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
         public OutArgument<string> MessageDetail { get; set; }
 
         #endregion
-        Common objCommon;
+        Helper objCommon;
 
         protected override void Execute(CodeActivityContext executionContext)
         {
             #region "Load CRM Service from context"
-            objCommon = new Common(executionContext);
+            objCommon = new Helper(executionContext);
 
             objCommon.tracingService.Trace("CreateContact activity:Load CRM Service from context --- OK");
             #endregion
@@ -75,24 +74,25 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
 
                     Contact contactPayload = (Contact)deserializer.ReadObject(ms);
                     objCommon.tracingService.Trace("deseriaized contact" + contactPayload.b2cobjectid);
-                    Entity contact = new Entity("contact");//,"defra_upn", _UPN);
+                    Entity contact = new Entity(ContactSchema.ENTITY);//,"defra_upn", _UPN);
                     _ErrorMessage = FieldValidation(contactPayload);
 
                     if (_ErrorMessage == string.Empty)
                     {
-                        //search contact record based on UPN
+                        //search contact record based on key named B2COBJECTID to prevent duplicate contact
                         OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
-                        var ContactWithUPN = from c in orgSvcContext.CreateQuery("contact")
-                                             where ((string)c["defra_b2cobjectid"]).Equals((contactPayload.b2cobjectid.Trim()))
-                                             select new { ContactId = c.Id, UniqueReference = c["defra_uniquereference"] };
+                        var ContactWithUPN = from c in orgSvcContext.CreateQuery(ContactSchema.ENTITY)
+                                             where ((string)c[ContactSchema.B2COBJECTID]).Equals((contactPayload.b2cobjectid.Trim()))
+                                             select new { ContactId = c.Id, UniqueReference = c[ContactSchema.UNIQUEREFERENCE] };
 
                         var contactRecordWithUPN = ContactWithUPN.FirstOrDefault() == null ? null : ContactWithUPN.FirstOrDefault();
 
+                        //Search contact record based on key named emailaddress to prevent duplicates
                         if (!string.IsNullOrEmpty(contactPayload.email))
                         {
-                            var ContactWithEmail = from c in orgSvcContext.CreateQuery("contact")
-                                                   where ((string)c["emailaddress1"]).Equals((contactPayload.email.Trim()))
-                                                   select new { ContactId = c.Id, UniqueReference = c["defra_uniquereference"] };
+                            var ContactWithEmail = from c in orgSvcContext.CreateQuery(ContactSchema.ENTITY)
+                                                   where ((string)c[ContactSchema.EMAILADDRESS1]).Equals((contactPayload.email.Trim()))
+                                                   select new { ContactId = c.Id, UniqueReference = c[ContactSchema.UNIQUEREFERENCE] };
 
                             var contactRecordWithEmail = ContactWithEmail.FirstOrDefault() == null ? null : ContactWithEmail.FirstOrDefault();
                             ContactRecordGuidWithEmail = contactRecordWithEmail == null ? Guid.Empty : contactRecordWithEmail.ContactId;
@@ -106,21 +106,26 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
 
                             ErrorCode = 200;//Success
                             if (contactPayload.title != null)
-                                contact["defra_title"] = new OptionSetValue((int)contactPayload.title);
+                            {
+                                if (Enum.GetValues(typeof(ContactTitles)).Equals(contactPayload.title))
+                                {
+                                    contact[ContactSchema.TITLE] = new OptionSetValue((int)contactPayload.title);
+                                }
+                            }
                             if (contactPayload.firstname != null)
-                                contact["firstname"] = contactPayload.firstname;
+                                contact[ContactSchema.FIRSTNAME] = contactPayload.firstname;
                             if (contactPayload.lastname != null)
-                                contact["lastname"] = contactPayload.lastname;
+                                contact[ContactSchema.LASTNAME] = contactPayload.lastname;
                             if (contactPayload.middlename != null)
-                                contact["middlename"] = contactPayload.middlename;
+                                contact[ContactSchema.MIDDLENAME] = contactPayload.middlename;
                             if (contactPayload.email != null)
-                                contact["emailaddress1"] = contactPayload.email;
+                                contact[ContactSchema.EMAILADDRESS1] = contactPayload.email;
                             if (contactPayload.b2cobjectid != null)
-                                contact["defra_b2cobjectid"] = contactPayload.b2cobjectid;
+                                contact[ContactSchema.B2COBJECTID] = contactPayload.b2cobjectid;
                             if (contactPayload.tacsacceptedversion != null)
-                                contact["defra_tacsacceptedversion"] = contactPayload.tacsacceptedversion;
+                                contact[ContactSchema.TACSACCEPTEDVERSION] = contactPayload.tacsacceptedversion;
                             if (contactPayload.telephone != null)
-                                contact["telephone1"] = contactPayload.telephone;
+                                contact[ContactSchema.TELEPHONE1] = contactPayload.telephone;
 
                             objCommon.tracingService.Trace("setting contact date params:started..");
                             if (!string.IsNullOrEmpty(contactPayload.tacsacceptedon) && !string.IsNullOrWhiteSpace(contactPayload.tacsacceptedon))
@@ -130,7 +135,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                                 if (DateTime.TryParse(contactPayload.tacsacceptedon, out resultDate))
                                 {
                                     objCommon.tracingService.Trace("date accepted on in dateformat" + resultDate);
-                                    contact["defra_tacsacceptedon"] = (resultDate);
+                                    contact[ContactSchema.TACSACCEPTEDON] = (resultDate);
                                 }
                             }
 
@@ -139,13 +144,15 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                             {
                                 DateTime resultDob;
                                 if (DateTime.TryParse(contactPayload.dob, out resultDob))
-                                    contact["birthdate"] = resultDob;
+                                    contact[ContactSchema.GENDERCODE] = resultDob;
                             }
 
                             if (contactPayload.gender != null)
                             {
-
-                                contact["gendercode"] = new OptionSetValue((int)contactPayload.gender);
+                                if (Enum.GetValues(typeof(ContactGenderCodes)).Equals(contactPayload.gender))
+                                {
+                                    contact[ContactSchema.GENDERCODE] = new OptionSetValue((int)contactPayload.gender);
+                                }
                             }
                             objCommon.tracingService.Trace("CreateContact activity:started..");
                             ContactId = objCommon.service.Create(contact);
@@ -157,7 +164,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                             if (contactPayload.address != null)
                             {
 
-                                objCommon.CreateAddress(contactPayload.address, new EntityReference("contact", ContactId));
+                                objCommon.CreateAddress(contactPayload.address, new EntityReference(ContactSchema.ENTITY, ContactId));
                             }
                         }
                         else
@@ -247,8 +254,8 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
             }
             if (ContactRequest.gender != null)
             {
-                bool genderFound=Enum.GetValues(typeof(ContactGenderCodes)).Equals(ContactRequest.gender);
-                if(!genderFound)
+                bool genderFound = Enum.GetValues(typeof(Contact)).Equals(ContactRequest.gender);
+                if (!genderFound)
                     _ErrorMessage = "Gender Code is not valid";
             }
             if (ContactRequest.title != null)
