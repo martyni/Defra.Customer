@@ -50,12 +50,12 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
             DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(Account));
             
             int? optionSetValue;
-            int? HiratchyType;
+            
             Int64 ErrorCode = 400; //400 -- bad request
             String _ErrorMessage = string.Empty;
             String _ErrorMessageDetail = string.Empty;
             Guid ContactId = Guid.Empty;
-            Guid CrmGuid;
+            Guid CrmGuid = Guid.Empty;
             #endregion
 
             #region "Load CRM Service from context"
