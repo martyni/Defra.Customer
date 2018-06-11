@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrmPackage", "CrmPackage\CrmPackage.csproj", "{AF285BEB-F7AB-41B0-95B4-8686C4FE7616}"
+Project("{88A30576-7583-4F75-8136-5EFD2C14ADFF}") = "CrmPackage", "CrmPackage\CrmPackage.csproj", "{AF285BEB-F7AB-41B0-95B4-8686C4FE7616}"
 	ProjectSection(ProjectDependencies) = postProject
 		{39C4EA60-9CAB-4B18-91BB-6ABB134945B8} = {39C4EA60-9CAB-4B18-91BB-6ABB134945B8}
 		{3380F985-1364-4881-8A71-E60824DB312D} = {3380F985-1364-4881-8A71-E60824DB312D}

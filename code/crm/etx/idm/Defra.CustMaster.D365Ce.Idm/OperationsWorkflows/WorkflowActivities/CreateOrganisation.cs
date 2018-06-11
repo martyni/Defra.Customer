@@ -18,7 +18,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
 {
 
 
-    public class CreateOrganisation : CodeActivity
+    public class CreateOrganisation : WorkFlowActivityBase
     {
         #region "Parameter Definition"
         [RequiredArgument]
@@ -40,7 +40,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
         Common objCommon;
 
 
-        protected override void Execute(CodeActivityContext executionContext)
+        public override void ExecuteCRMWorkFlowActivity(CodeActivityContext executionContext, LocalWorkflowContext crmWorkflowContext)
         {
             #region "Read Parameters"
 

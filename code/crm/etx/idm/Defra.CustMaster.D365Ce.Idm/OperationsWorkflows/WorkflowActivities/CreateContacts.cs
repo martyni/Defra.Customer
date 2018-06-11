@@ -1,21 +1,19 @@
-﻿using Microsoft.Xrm.Sdk;
+﻿using Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.Model;
+using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
-using Microsoft.Xrm.Sdk.Messages;
-using Microsoft.Xrm.Sdk.Metadata;
 using Microsoft.Xrm.Sdk.Workflow;
-using System.Runtime.Serialization.Json;
 using System;
 using System.Activities;
-using System.Linq;
-using System.ServiceModel;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Runtime.Serialization.Json;
 using System.Text;
-using Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.Model;
-using Defra.CustMaster.D365Ce.Idm.OperationsWorkflows;
+using System.Threading.Tasks;
 
-namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
+namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
 {
-    public class CreateContact : WorkFlowActivityBase
+  class CreateContacts : CodeActivity
     {
         #region "Parameter Definition"
 
@@ -43,7 +41,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
         #endregion
         Common objCommon;
 
-        public override void ExecuteCRMWorkFlowActivity(CodeActivityContext executionContext, LocalWorkflowContext crmWorkflowContext)
+        protected override void Execute(CodeActivityContext executionContext)
         {
             #region "Load CRM Service from context"
             objCommon = new Common(executionContext);
@@ -78,32 +76,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
                     Contact contactPayload = (Contact)deserializer.ReadObject(ms);
                     objCommon.tracingService.Trace("deseriaized contact" + contactPayload.b2cobjectid);
                     Entity contact = new Entity("contact");//,"defra_upn", _UPN);
-                    if (string.IsNullOrEmpty(contactPayload.b2cobjectid) || string.IsNullOrWhiteSpace(contactPayload.b2cobjectid))
-                        _ErrorMessage = "B2C Object Id can not be empty";
-                    if (string.IsNullOrEmpty(contactPayload.firstname) || string.IsNullOrWhiteSpace(contactPayload.firstname))
-                        _ErrorMessage = "First Name can not empty";
-                    if (string.IsNullOrEmpty(contactPayload.lastname) || string.IsNullOrWhiteSpace(contactPayload.lastname))
-                        _ErrorMessage = "Last Name can not empty";
-
-                    if (!string.IsNullOrEmpty(contactPayload.b2cobjectid) && !string.IsNullOrWhiteSpace(contactPayload.b2cobjectid) && contactPayload.b2cobjectid.Length > 50)
-                    {
-                        _ErrorMessage = "B2C Object Id is invalid/exceed the max length(50)";
-                    }
-                    if (!string.IsNullOrEmpty(contactPayload.firstname) && contactPayload.firstname.Length > 50)
-                    {
-
-                        _ErrorMessage = "Firstname exceeded the max length(50)";
-                    }
-                    if (!string.IsNullOrEmpty(contactPayload.lastname) && contactPayload.lastname.Length > 50)
-                    {
-
-                        _ErrorMessage = "Lastname exceeded the max length(50)";
-                    }
-                    if (!string.IsNullOrEmpty(contactPayload.email) && contactPayload.email.Length > 100)
-                    {
-
-                        _ErrorMessage = "Email exceeded the max length(100)";
-                    }
+                    _ErrorMessage = FieldValidation(contactPayload);
 
                     if (_ErrorMessage == string.Empty)
                     {
@@ -233,8 +206,47 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
             #endregion
 
         }
+        string FieldValidation(Contact ContactRequest)
+        {
+            string _ErrorMessage = string.Empty;
+            if (string.IsNullOrEmpty(ContactRequest.b2cobjectid) || string.IsNullOrWhiteSpace(ContactRequest.b2cobjectid))
+                _ErrorMessage = "B2C Object Id can not be empty";
+            if (string.IsNullOrEmpty(ContactRequest.firstname) || string.IsNullOrWhiteSpace(ContactRequest.firstname))
+                _ErrorMessage = "First Name can not empty";
+            if (string.IsNullOrEmpty(ContactRequest.lastname) || string.IsNullOrWhiteSpace(ContactRequest.lastname))
+                _ErrorMessage = "Last Name can not empty";
+
+            if (!string.IsNullOrEmpty(ContactRequest.b2cobjectid) && !string.IsNullOrWhiteSpace(ContactRequest.b2cobjectid) && ContactRequest.b2cobjectid.Length > 50)
+            {
+                _ErrorMessage = "B2C Object Id is invalid/exceed the max length(50)";
+            }
+            if (!string.IsNullOrEmpty(ContactRequest.firstname) && ContactRequest.firstname.Length > 50)
+            {
+
+                _ErrorMessage = "First name exceeded the max length(50)";
+            }
+            if (!string.IsNullOrEmpty(ContactRequest.lastname) && ContactRequest.lastname.Length > 50)
+            {
+
+                _ErrorMessage = "Last name exceeded the max length(50)";
+            }
+            if (!string.IsNullOrEmpty(ContactRequest.middlename) && ContactRequest.middlename.Length > 50)
+            {
+
+                _ErrorMessage = "Middle name exceeded the max length(50)";
+            }
+            if (!string.IsNullOrEmpty(ContactRequest.email) && ContactRequest.email.Length > 100)
+            {
+
+                _ErrorMessage = "Email exceeded the max length(100)";
+            }
+            if (!string.IsNullOrEmpty(ContactRequest.tacsacceptedversion) && ContactRequest.tacsacceptedversion.Length > 5)
+            {
+
+                _ErrorMessage = "Email exceeded the max length(100)";
+            }
+            return _ErrorMessage;
+        }
 
     }
 }
-
-

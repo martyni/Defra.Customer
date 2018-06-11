@@ -48,6 +48,12 @@
       <Private>True</Private>
       <SilverlightApplication>False</SilverlightApplication>
     </ProjectReference>
+    <ProjectReference Include="..\OperationsWorkflows\OperationsWorkflows.csproj">
+      <Name>OperationsWorkflows</Name>
+      <Project>{39c4ea60-9cab-4b18-91bb-6abb134945b8}</Project>
+      <Private>True</Private>
+      <SilverlightApplication>False</SilverlightApplication>
+    </ProjectReference>
     <ProjectReference Include="..\Plugins\Plugins.csproj">
       <Name>Plugins</Name>
       <Project>{3380f985-1364-4881-8a71-e60824db312d}</Project>

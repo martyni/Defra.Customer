@@ -2,9 +2,16 @@
 <Register xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.microsoft.com/crm/2011/tools/pluginregistration">
   <Solutions>
     <Solution Assembly="Defra.CustMaster.D365Ce.Idm.Plugins.dll" Id="00000000-0000-0000-0000-000000000000" IsolationMode="Sandbox" SourceType="Database" />
-    <Solution Assembly="Defra.CustMaster.D365Ce.Idm.OerationsWorkflows.dll" Id="00000000-0000-0000-0000-000000000000" IsolationMode="Sandbox" SourceType="Database" />
+    <Solution Assembly="Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.dll" Id="2ef2b6c1-354f-4bc8-9e70-82070d374e85" IsolationMode="Sandbox" SourceType="Database">
+      <WorkflowTypes>
+        <clear />
+        <WorkflowType Name="CustMaster" WorkflowActivityGroupName="Defra.CustMaster.D365Ce.Idm.OperationsWorkflows" WorkflowActivityProjectName="OperationsWorkflows" Id="00000000-0000-0000-0000-000000000000" TypeName="Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.CreateContact" />
+        <WorkflowType FriendlyName="Create Contact From Json" Name="CreateContactFromJson" Description="Creates a Contact record from the Payload JSON." WorkflowActivityGroupName="Defra.CustMaster.D365Ce.Idm" WorkflowActivityProjectName="OperationsWorkflows" Id="00000000-0000-0000-0000-000000000000" TypeName="Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.CreateContactFromJson" />
+      </WorkflowTypes>
+    </Solution>
   </Solutions>
   <XamlWorkflows>
-    <XamlWorkflowSolution Assembly="Defra.CustMaster.D365Ce.Idm.OerationsWorkflows.dll" />
+    <XamlWorkflowSolution Assembly="Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.dll" />
+    <XamlWorkflowSolution Assembly="Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.dll" />
   </XamlWorkflows>
 </Register>
