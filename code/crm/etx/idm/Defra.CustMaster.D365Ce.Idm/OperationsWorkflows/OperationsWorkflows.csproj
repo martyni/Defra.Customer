@@ -87,6 +87,7 @@
     <Compile Include="Model\ParentOrganisation.cs" />
     <Compile Include="TinyJsonParser.cs" />
     <Compile Include="WorkflowActivities\CreateContact.cs" />
+    <Compile Include="WorkflowActivities\CreateContacts.cs" />
     <Compile Include="WorkflowActivities\CreateOrganisation.cs" />
     <Compile Include="WorkFlowActivityBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

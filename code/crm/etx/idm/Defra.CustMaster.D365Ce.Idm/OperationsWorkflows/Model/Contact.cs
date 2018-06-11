@@ -35,4 +35,8 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.Model
         [DataMember]
         public Address address;
     }
+    public enum ContactGenderCodes
+    {
+        Male = 1, Female = 2
+    };
 }
