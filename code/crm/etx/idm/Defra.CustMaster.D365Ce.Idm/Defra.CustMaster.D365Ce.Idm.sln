@@ -13,7 +13,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plugins", "Plugins\Plugins.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OperationsWorkflows", "OperationsWorkflows\OperationsWorkflows.csproj", "{39C4EA60-9CAB-4B18-91BB-6ABB134945B8}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Defra.CustMaster.D365.Common", "..\..\..\common\Defra.CustMaster.D365.Common\Defra.CustMaster.D365.Common.shproj", "{0983A5D6-277F-4169-9575-EBE845148694}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\..\..\common\Defra.CustMaster.D365.Common\Defra.CustMaster.D365.Common.projitems*{0983a5d6-277f-4169-9575-ebe845148694}*SharedItemsImports = 13
+		..\..\..\common\Defra.CustMaster.D365.Common\Defra.CustMaster.D365.Common.projitems*{39c4ea60-9cab-4b18-91bb-6abb134945b8}*SharedItemsImports = 4
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU

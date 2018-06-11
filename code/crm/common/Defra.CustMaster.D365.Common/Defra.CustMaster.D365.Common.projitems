@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>0983a5d6-277f-4169-9575-ebe845148694</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Defra.CustMaster.D365.Common</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ints\idm\Address.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ints\idm\Contact.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ints\idm\Organisation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ints\idm\ParentOrganisation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ints\idm\resp\CustomerMasterResponseBase.cs" />
+  </ItemGroup>
+</Project>
