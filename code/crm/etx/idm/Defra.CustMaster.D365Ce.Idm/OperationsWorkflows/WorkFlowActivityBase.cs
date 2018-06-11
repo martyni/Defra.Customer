@@ -26,7 +26,6 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
 {
     public abstract class WorkFlowActivityBase : CodeActivity
     {
-
         public sealed class LocalWorkflowContext
         {
             internal IServiceProvider ServiceProvider
@@ -164,11 +163,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows
         {
             // Do nothing. 
         }
-
-
-
-
-
+        
         //public IWorkflowContext ParentContext
         //{
         //  get { throw new NotImplementedException(); }

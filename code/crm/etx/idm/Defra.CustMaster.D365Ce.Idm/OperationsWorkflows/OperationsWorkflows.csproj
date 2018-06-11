@@ -81,11 +81,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common.cs" />
+    <Compile Include="CreateContactFromJson.cs" />
+    <Compile Include="JsonParser\SimpleJSON.cs" />
     <Compile Include="Model\Account.cs" />
     <Compile Include="Model\Address.cs" />
     <Compile Include="Model\Contact.cs" />
     <Compile Include="Model\ParentOrganisation.cs" />
-    <Compile Include="TinyJsonParser.cs" />
     <Compile Include="WorkflowActivities\CreateContact.cs" />
     <Compile Include="WorkflowActivities\CreateOrganisation.cs" />
     <Compile Include="WorkFlowActivityBase.cs" />
