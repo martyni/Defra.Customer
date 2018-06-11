@@ -13,9 +13,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Contact.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Organisation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\ParentOrganisation.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\CustomerMasterResponseBase.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\Data.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\Error.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\ResponseCustomerMasterBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\ResponseDataBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\ResponseErrorBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Schema\Account.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Schema\ExtEnums\Gender.cs" />
   </ItemGroup>
