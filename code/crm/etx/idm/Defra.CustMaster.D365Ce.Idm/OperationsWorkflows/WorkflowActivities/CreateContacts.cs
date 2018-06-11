@@ -243,7 +243,19 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
             if (!string.IsNullOrEmpty(ContactRequest.tacsacceptedversion) && ContactRequest.tacsacceptedversion.Length > 5)
             {
 
-                _ErrorMessage = "Email exceeded the max length(100)";
+                _ErrorMessage = "T&Cs Accepted Version exceeded the max length(5)";
+            }
+            if (ContactRequest.gender != null)
+            {
+                bool genderFound=Enum.GetValues(typeof(ContactGenderCodes)).Equals(ContactRequest.gender);
+                if(!genderFound)
+                    _ErrorMessage = "Gender Code is not valid";
+            }
+            if (ContactRequest.title != null)
+            {
+                bool genderFound = Enum.GetValues(typeof(ContactTitles)).Equals(ContactRequest.title);
+                if (!genderFound)
+                    _ErrorMessage = "Title is not valid";
             }
             return _ErrorMessage;
         }
