@@ -18,8 +18,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\ResponseErrorBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Schema\Account.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Schema\ExtEnums\Gender.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)schema\ExtEnums\" />
+    <Compile Include="$(MSBuildThisFileDirectory)schema\ExtEnums\OptionSets.cs" />
   </ItemGroup>
 </Project>
