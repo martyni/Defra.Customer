@@ -1,4 +1,4 @@
-﻿using Defra.CustMaster.D365.Common.Ints.Idm.OptionSets;
+﻿using Defra.CustMaster.D365.Common.Schema.ExtEnums;
 using Defra.CustMaster.D365.Common.schema;
 using Defra.CustMaster.D365Ce.Idm.OperationsWorkflows;
 using Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.Model;
@@ -52,7 +52,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
             //Account AccountPayload = JsonConvert.DeserializeObject<Account>(PayLoad.Get(executionContext));
 
             String Payload = PayLoad.Get(executionContext);
-            DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(D365.Common.schema.Account));
+            DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(D365.Common.schema.AccountSchma));
 
             int? optionSetValue;
 
@@ -80,12 +80,12 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                     var isValid = Validator.TryValidateObject(AccountPayload, ValidationContext, ValidationResult);
 
 
-                    if(isValid)
-                    { 
+                    if (isValid)
+                    {
                         objCommon.tracingService.Trace("After completing validation 12" + AccountPayload.type);
 
                         optionSetValue = AccountPayload.type;
-                        Entity Account = new Entity(AccountSchema.ENTITY_NAME);
+                        //Entity Account = new Entity(AccountSchema.ENTITY_NAME);
                         objCommon.tracingService.Trace("before assigning type  " + AccountPayload.type);
                         objCommon.tracingService.Trace(optionSetValue.ToString());
                         objCommon.tracingService.Trace("after  setting up option set value");
@@ -93,15 +93,15 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
 
                         OptionSetValueCollection BusinessTypes = new OptionSetValueCollection();
                         BusinessTypes.Add(new OptionSetValue(optionSetValue.Value)); //
-                        Account[Defra.CustMaster.D365.Common.schema.Account.TYPE] = BusinessTypes;
-                        Account[Defra.CustMaster.D365.Common.schema.Account.NAME] = AccountPayload.name == null ? string.Empty : AccountPayload.name;
-                        Account[Defra.CustMaster.D365.Common.schema.Account.COMPANY_HOUSE_ID] = AccountPayload.crn == string.Empty ? null : AccountPayload.crn;
-                        Account[Defra.CustMaster.D365.Common.schema.Account.TELEPHONE1] = AccountPayload.telephone == null ? string.Empty : AccountPayload.telephone;
+                                                                                     // Account[Defra.CustMaster.D365.Common.schema.Account.TYPE] = BusinessTypes;
+                                                                                     // Account[Defra.CustMaster.D365.Common.schema.Account.NAME] = AccountPayload.name == null ? string.Empty : AccountPayload.name;
+                                                                                     // Account[Defra.CustMaster.D365.Common.schema.Account.COMPANY_HOUSE_ID] = AccountPayload.crn == string.Empty ? null : AccountPayload.crn;
+                                                                                     // Account[Defra.CustMaster.D365.Common.schema.Account.TELEPHONE1] = AccountPayload.telephone == null ? string.Empty : AccountPayload.telephone;
 
                         if (!String.IsNullOrEmpty(AccountPayload.hierarchylevel))
                         {
                             objCommon.tracingService.Trace("hierarchylevel level: {0}", AccountPayload.hierarchylevel);
-                            Account[Defra.CustMaster.D365.Common.schema.Account.HIERARCHYLEVEL] = new OptionSetValue(int.Parse(AccountPayload.hierarchylevel));
+                            // Account[Defra.CustMaster.D365.Common.schema.Account.HIERARCHYLEVEL] = new OptionSetValue(int.Parse(AccountPayload.hierarchylevel));
                         }
                         objCommon.tracingService.Trace("after  setting other fields");
 
@@ -112,48 +112,49 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                             IsValidGuid = Guid.TryParse(AccountPayload.parentorganisation.parentorganisationcrmid, out ParentAccountId);
                             if (IsValidGuid)
                             {
-                                Account[Defra.CustMaster.D365.Common.schema.Account.PARENTACCOUNTID] = ParentAccountId;
+                                // Account[Defra.CustMaster.D365.Common.schema.Account.PARENTACCOUNTID] = ParentAccountId;
                             }
                         }
                         objCommon.tracingService.Trace("after assigning");
 
                         if (AccountPayload.validatedwithcompanieshouse == "y")
                         {
-                            Account[Defra.CustMaster.D365.Common.schema.Account.VALIDATED_WITH_COMPANYHOUSE] = new OptionSetValue(0);
+                            //Account[Defra.CustMaster.D365.Common.schema.Account.VALIDATED_WITH_COMPANYHOUSE] = new OptionSetValue(0);
                         }
                         else if (AccountPayload.validatedwithcompanieshouse == "n")
                         {
-                            Account[Defra.CustMaster.D365.Common.schema.Account.VALIDATED_WITH_COMPANYHOUSE] = new OptionSetValue(1);
+                            //Account[Defra.CustMaster.D365.Common.schema.Account.VALIDATED_WITH_COMPANYHOUSE] = new OptionSetValue(1);
                         }
 
                         if (AccountPayload.email != null)
                         {
 
-                        Account[Defra.CustMaster.D365.Common.schema.Account.EMAILADDRESS1] = AccountPayload.email; }
-                        objCommon.tracingService.Trace("before createing guid:");
-                        CrmGuid = objCommon.service.Create(Account);
-                        objCommon.tracingService.Trace("after createing guid:{0}", CrmGuid.ToString());
-                        this.CrmGuid.Set(executionContext, CrmGuid.ToString());
-                        Entity AccountRecord = objCommon.service.Retrieve("account", CrmGuid, new Microsoft.Xrm.Sdk.Query.ColumnSet(Defra.CustMaster.D365.Common.schema.Account.UNIQUEREFERENCE));
-                        this.Code.Set(executionContext, ErrorCode.ToString());
-                        this.UniqueReference.Set(executionContext, AccountRecord[Defra.CustMaster.D365.Common.schema.Account.UNIQUEREFERENCE]);
-                        objCommon.CreateAddress(AccountPayload.address, new EntityReference(Defra.CustMaster.D365.Common.schema.Account.ENTITY_NAME, CrmGuid));
-                        objCommon.tracingService.Trace("after creating account");
-                        ErrorCode = 200; //success
-                    }
-
-                    else
-                    {
-                        ErrorMessage = new StringBuilder();
-                        //this will throw an error
-                        foreach (System.ComponentModel.DataAnnotations.ValidationResult vr in ValidationResult)
-                        {
-                            ErrorMessage.Append(vr.ErrorMessage + "\n");
+                            //Account[Defra.CustMaster.D365.Common.schema.Account.EMAILADDRESS1] = AccountPayload.email; }
+                            objCommon.tracingService.Trace("before createing guid:");
+                            //CrmGuid = objCommon.service.Create(Account);
+                            objCommon.tracingService.Trace("after createing guid:{0}", CrmGuid.ToString());
+                            this.CrmGuid.Set(executionContext, CrmGuid.ToString());
+                            Entity AccountRecord = objCommon.service.Retrieve("account", CrmGuid, new Microsoft.Xrm.Sdk.Query.ColumnSet(Defra.CustMaster.D365.Common.schema.AccountSchma.UNIQUEREFERENCE));
+                            this.Code.Set(executionContext, ErrorCode.ToString());
+                            this.UniqueReference.Set(executionContext, AccountRecord[Defra.CustMaster.D365.Common.schema.AccountSchma.UNIQUEREFERENCE]);
+                            objCommon.CreateAddress(AccountPayload.address, new EntityReference(Defra.CustMaster.D365.Common.schema.AccountSchma.ENTITY_NAME, CrmGuid));
+                            objCommon.tracingService.Trace("after creating account");
+                            ErrorCode = 200; //success
                         }
+
+                        else
+                        {
+                            ErrorMessage = new StringBuilder();
+                            //this will throw an error
+                            foreach (System.ComponentModel.DataAnnotations.ValidationResult vr in ValidationResult)
+                            {
+                                ErrorMessage.Append(vr.ErrorMessage + "\n");
+                            }
+                        }
+                        this.Code.Set(executionContext, ErrorCode.ToString());
+                        this.Message.Set(executionContext, _ErrorMessage);
+                        this.MessageDetail.Set(executionContext, _ErrorMessageDetail);
                     }
-                    this.Code.Set(executionContext, ErrorCode.ToString());
-                    this.Message.Set(executionContext, _ErrorMessage);
-                    this.MessageDetail.Set(executionContext, _ErrorMessageDetail);
                 }
             }
 
@@ -176,4 +177,4 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
         }
     }
 }
-}
+
