@@ -1,10 +1,11 @@
-﻿using Defra.CustMaster.D365.Common;
+﻿using System;
+using System.Collections.Generic;
+using Defra.CustMaster.D365.Common.Schema.ExtEnums;
 using Defra.CustMaster.D365.Common.Ints.Idm;
 using Defra.CustMaster.D365.Common.Ints.Idm.Resp;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Workflow;
-using System;
 using System.Activities;
 using System.IO;
 using System.Linq;
@@ -13,7 +14,7 @@ using System.Text;
 
 namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
 {
-    class CreateContacts : CodeActivity
+   public class CreateContactNew : CodeActivity
     {
         #region "Parameter Definition"
 
@@ -95,9 +96,17 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                             objCommon.tracingService.Trace("CreateContact activity:ContactRecordGuidWithUPN is empty started, Creating Contact..");
                             if (contactPayload.title != null)
                             {
-                                if (Enum.GetValues(typeof(ContactTitles)).Equals(contactPayload.title))
+                                //Check whether the gendercode is found in GenderEnum mapping
+                                if (Enum.IsDefined(typeof(ContactTitles), contactPayload.title))
                                 {
-                                    contact[D365.Common.schema.Contact.TITLE] = new OptionSetValue((int)contactPayload.title);
+                                    //Check whether gendercode is found in Dynamics GenderEnum mapping
+                                    string contactTitle = Enum.GetName(typeof(ContactTitles), contactPayload.title);
+                                    if (string.IsNullOrEmpty(contactTitle))
+                                    {
+                                        defra_Title dynamicsTitle = (defra_Title)Enum.Parse(typeof(defra_Title), contactTitle);
+                                        contact[D365.Common.schema.Contact.TITLE] = new OptionSetValue((int)dynamicsTitle);
+                                    }
+
                                 }
                             }
                             if (contactPayload.firstname != null)
@@ -141,9 +150,9 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                                 if (Enum.IsDefined(typeof(ContactGenderCodes), contactPayload.gender))
                                 {
                                     //Check whether gendercode is found in Dynamics GenderEnum mapping
-                                    string genderCode = Enum.GetName(typeof(ContactGenderCodes), contactPayload.gender);
+                                    string genderCode = Enum.GetName(typeof(Contact_GenderCode), contactPayload.gender);
                                     {
-                                        ContactGenderCodes dynamicsGenderCode = (ContactGenderCodes)Enum.Parse(typeof(ContactGenderCodes), genderCode);
+                                        Contact_GenderCode dynamicsGenderCode = (Contact_GenderCode)Enum.Parse(typeof(Contact_GenderCode), genderCode);
                                         contact[D365.Common.schema.Contact.GENDERCODE] = new OptionSetValue((int)dynamicsGenderCode);
                                     }
                                 }
@@ -167,7 +176,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                         }
                     }
                     objCommon.tracingService.Trace("CreateContact activity:setting output params like error code etc.. started");
-                    
+
                     objCommon.tracingService.Trace("CreateContact activity:setting output params like error code etc.. ended");
                 }
             }
@@ -181,6 +190,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
             }
             finally
             {
+                objCommon.tracingService.Trace("finally block start");
                 ContactResponse responsePayload = new ContactResponse()
                 {
                     code = _errorCode,
@@ -198,9 +208,14 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                 // Serializer the Response object to the stream.  
                 DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ContactResponse));
                 ser.WriteObject(ms, responsePayload);
-                byte[] json = ms.ToArray();
+
+                ms.Position = 0;
+                StreamReader sr = new StreamReader(ms);
+                string json = sr.ReadToEnd();
+                sr.Close();
                 ms.Close();
-                Response.Set(executionContext, Encoding.Unicode.GetString(json, 0, json.Length));
+                Response.Set(executionContext, json);
+                objCommon.tracingService.Trace("finally block end");
             }
             //catch (FaultException<OrganizationServiceFault> ex)
             //{
@@ -221,51 +236,51 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
         string FieldValidation(Contact ContactRequest)
         {
             string _ErrorMessage = string.Empty;
-            if (string.IsNullOrEmpty(ContactRequest.b2cobjectid) || string.IsNullOrWhiteSpace(ContactRequest.b2cobjectid))
-                _ErrorMessage = "B2C Object Id can not be empty";
-            if (string.IsNullOrEmpty(ContactRequest.firstname) || string.IsNullOrWhiteSpace(ContactRequest.firstname))
-                _ErrorMessage = "First Name can not empty";
-            if (string.IsNullOrEmpty(ContactRequest.lastname) || string.IsNullOrWhiteSpace(ContactRequest.lastname))
-                _ErrorMessage = "Last Name can not empty";
+            //if (string.IsNullOrEmpty(ContactRequest.b2cobjectid) || string.IsNullOrWhiteSpace(ContactRequest.b2cobjectid))
+            //    _ErrorMessage = "B2C Object Id can not be empty";
+            //if (string.IsNullOrEmpty(ContactRequest.firstname) || string.IsNullOrWhiteSpace(ContactRequest.firstname))
+            //    _ErrorMessage = "First Name can not empty";
+            //if (string.IsNullOrEmpty(ContactRequest.lastname) || string.IsNullOrWhiteSpace(ContactRequest.lastname))
+            //    _ErrorMessage = "Last Name can not empty";
 
-            if (!string.IsNullOrEmpty(ContactRequest.b2cobjectid) && !string.IsNullOrWhiteSpace(ContactRequest.b2cobjectid) && ContactRequest.b2cobjectid.Length > 50)
-            {
-                _ErrorMessage = "B2C Object Id is invalid/exceed the max length(50)";
-            }
-            if (!string.IsNullOrEmpty(ContactRequest.firstname) && ContactRequest.firstname.Length > 50)
-            {
+            //if (!string.IsNullOrEmpty(ContactRequest.b2cobjectid) && !string.IsNullOrWhiteSpace(ContactRequest.b2cobjectid) && ContactRequest.b2cobjectid.Length > 50)
+            //{
+            //    _ErrorMessage = "B2C Object Id is invalid/exceed the max length(50)";
+            //}
+            //if (!string.IsNullOrEmpty(ContactRequest.firstname) && ContactRequest.firstname.Length > 50)
+            //{
 
-                _ErrorMessage = "First name exceeded the max length(50)";
-            }
-            if (!string.IsNullOrEmpty(ContactRequest.lastname) && ContactRequest.lastname.Length > 50)
-            {
+            //    _ErrorMessage = "First name exceeded the max length(50)";
+            //}
+            //if (!string.IsNullOrEmpty(ContactRequest.lastname) && ContactRequest.lastname.Length > 50)
+            //{
 
-                _ErrorMessage = "Last name exceeded the max length(50)";
-            }
-            if (!string.IsNullOrEmpty(ContactRequest.middlename) && ContactRequest.middlename.Length > 50)
-            {
+            //    _ErrorMessage = "Last name exceeded the max length(50)";
+            //}
+            //if (!string.IsNullOrEmpty(ContactRequest.middlename) && ContactRequest.middlename.Length > 50)
+            //{
 
-                _ErrorMessage = "Middle name exceeded the max length(50)";
-            }
-            if (!string.IsNullOrEmpty(ContactRequest.email) && ContactRequest.email.Length > 100)
-            {
+            //    _ErrorMessage = "Middle name exceeded the max length(50)";
+            //}
+            //if (!string.IsNullOrEmpty(ContactRequest.email) && ContactRequest.email.Length > 100)
+            //{
 
-                _ErrorMessage = "Email exceeded the max length(100)";
-            }
-            if (!string.IsNullOrEmpty(ContactRequest.tacsacceptedversion) && ContactRequest.tacsacceptedversion.Length > 5)
-            {
+            //    _ErrorMessage = "Email exceeded the max length(100)";
+            //}
+            //if (!string.IsNullOrEmpty(ContactRequest.tacsacceptedversion) && ContactRequest.tacsacceptedversion.Length > 5)
+            //{
 
-                _ErrorMessage = "T&Cs Accepted Version exceeded the max length(5)";
-            }
+            //    _ErrorMessage = "T&Cs Accepted Version exceeded the max length(5)";
+            //}
             if (ContactRequest.gender != null)
             {
-                bool genderFound = Enum.GetValues(typeof(Contact)).Equals(ContactRequest.gender);
+                bool genderFound = Enum.IsDefined(typeof(ContactGenderCodes),ContactRequest.gender);
                 if (!genderFound)
                     _ErrorMessage = "Gender Code is not valid";
             }
             if (ContactRequest.title != null)
             {
-                bool genderFound = Enum.GetValues(typeof(ContactTitles)).Equals(ContactRequest.title);
+                bool genderFound = Enum.IsDefined(typeof(ContactTitles),ContactRequest.title);
                 if (!genderFound)
                     _ErrorMessage = "Title is not valid";
             }

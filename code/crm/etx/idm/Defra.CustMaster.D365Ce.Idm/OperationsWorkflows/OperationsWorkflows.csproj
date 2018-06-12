@@ -89,7 +89,7 @@
     <Compile Include="Model\Contact.cs" />
     <Compile Include="Model\ParentOrganisation.cs" />
     <Compile Include="WorkflowActivities\CreateContact.cs" />
-    <Compile Include="WorkflowActivities\CreateContacts.cs" />
+    <Compile Include="WorkflowActivities\CreateContactNew.cs" />
     <Compile Include="WorkflowActivities\CreateOrganisation.cs" />
     <Compile Include="WorkflowActivities\CreateOrganisationNew.cs" />
     <Compile Include="WorkFlowActivityBase.cs" />

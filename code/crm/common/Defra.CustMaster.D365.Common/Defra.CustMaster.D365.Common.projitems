@@ -21,7 +21,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\ResponseCustomerMasterBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\ResponseDataBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\ResponseErrorBase.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)schema\Account.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Schema\Account.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)schema\Address.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)schema\Contact.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)schema\ContactDetails.cs" />
