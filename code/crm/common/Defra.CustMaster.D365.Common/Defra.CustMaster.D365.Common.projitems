@@ -26,7 +26,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)schema\Address.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)schema\Contact.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)schema\ContactDetails.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Schema\ExtEnums\Gender.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)schema\ExtEnums\OptionSets.cs" />
   </ItemGroup>
 </Project>
