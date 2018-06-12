@@ -1,4 +1,5 @@
 ﻿using Defra.CustMaster.D365.Common;
+using Defra.CustMaster.D365.Common.Schema.ExtEnums;
 using Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.Model;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
@@ -28,8 +29,6 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
             serviceFactory = executionContext.GetExtension<IOrganizationServiceFactory>();
             service = serviceFactory.CreateOrganizationService(context.UserId);
         }
-
-
 
         public void CreateAddress(Address addressDetails, EntityReference Customer)
         {
