@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Defra.CustMaster.D365.Common.schema
 {
-    public class AccountSchma
+    public class AccountContants
     {
 
         public const string ENTITY_NAME = "account";
