@@ -1,4 +1,3 @@
-using Defra.CustMaster.D365.Common.Ints.Idm.OptionSets;
 using Defra.CustMaster.D365Ce.Idm.OperationsWorkflows;
 using Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.Model;
 using Microsoft.Xrm.Sdk;

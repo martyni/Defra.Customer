@@ -1,4 +1,4 @@
-﻿using Defra.CustMaster.D365.Common.schema;
+﻿using Defra.CustMaster.D365.Common;
 using Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.Model;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
@@ -37,64 +37,64 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
             OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(this.service);
             if (addressDetails.uprn != null)
             {
-                var propertyWithUPRN = from c in orgSvcContext.CreateQuery(AddressSchema.ENTITY)
-                                       where ((string)c[AddressSchema.UPRN]).Equals((addressDetails.uprn.Trim()))
+                var propertyWithUPRN = from c in orgSvcContext.CreateQuery(schema.Address.ENTITY)
+                                       where ((string)c[schema.Address.UPRN]).Equals((addressDetails.uprn.Trim()))
                                        select new { AddressId = c.Id };
                 addressId = propertyWithUPRN != null && propertyWithUPRN.FirstOrDefault() != null ? propertyWithUPRN.FirstOrDefault().AddressId : Guid.Empty;
             }
             if (addressId == Guid.Empty && addressDetails.street != null && addressDetails.postcode != null && addressDetails.buildingnumber != null)
             {
-                var propertyWithDuplicate = from c in orgSvcContext.CreateQuery(AddressSchema.ENTITY)
-                                            where ((string)c[AddressSchema.STREET]).Equals((addressDetails.street.Trim())) && ((string)c[AddressSchema.POSTCODE]).Equals((addressDetails.postcode.Trim())) && ((string)c[AddressSchema.PREMISES]).Equals((addressDetails.buildingnumber.Trim()))
+                var propertyWithDuplicate = from c in orgSvcContext.CreateQuery(schema.Address.ENTITY)
+                                            where ((string)c[schema.Address.STREET]).Equals((addressDetails.street.Trim())) && ((string)c[schema.Address.POSTCODE]).Equals((addressDetails.postcode.Trim())) && ((string)c[schema.Address.PREMISES]).Equals((addressDetails.buildingnumber.Trim()))
                                             select new { AddressId = c.Id };
                 addressId = propertyWithDuplicate != null && propertyWithDuplicate.FirstOrDefault() != null ? propertyWithDuplicate.FirstOrDefault().AddressId : Guid.Empty;
             }
             if (addressId == Guid.Empty)
             {
-                Entity address = new Entity(AddressSchema.ENTITY);
+                Entity address = new Entity(schema.Address.ENTITY);
                 if (addressDetails.uprn != null)
-                    address[AddressSchema.UPRN] = addressDetails.uprn;
+                    address[schema.Address.UPRN] = addressDetails.uprn;
                 if (addressDetails.buildingname != null)
-                    address[AddressSchema.NAME] = addressDetails.buildingname;
+                    address[schema.Address.NAME] = addressDetails.buildingname;
                 if (addressDetails.buildingnumber != null)
-                    address[AddressSchema.PREMISES] = addressDetails.buildingnumber;// + "," + addressDetails.buildingname;
+                    address[schema.Address.PREMISES] = addressDetails.buildingnumber;// + "," + addressDetails.buildingname;
                 if (addressDetails.street != null)
-                    address[AddressSchema.STREET] = addressDetails.street;
+                    address[schema.Address.STREET] = addressDetails.street;
                 if (addressDetails.locality != null)
-                    address[AddressSchema.LOCALITY] = addressDetails.locality;
+                    address[schema.Address.LOCALITY] = addressDetails.locality;
                 if (addressDetails.town != null)
-                    address[AddressSchema.TOWN] = addressDetails.town;
+                    address[schema.Address.TOWN] = addressDetails.town;
                 if (addressDetails.postcode != null)
-                    address[AddressSchema.POSTCODE] = addressDetails.postcode;
+                    address[schema.Address.POSTCODE] = addressDetails.postcode;
                 bool resultCompanyHouse;
                 if (addressDetails.fromcompanieshouse != null)
                     if (Boolean.TryParse(addressDetails.fromcompanieshouse, out resultCompanyHouse))
-                        address[AddressSchema.FROMCOMPANIESHOUSE] = resultCompanyHouse;
+                        address[schema.Address.FROMCOMPANIESHOUSE] = resultCompanyHouse;
                 if (addressDetails.country != null)
                 {
-                    var CountryRecord = from c in orgSvcContext.CreateQuery(AddressSchema.ENTITY)
-                                        where ((string)c[AddressSchema.NAME]).ToLower().Contains((addressDetails.country.Trim().ToLower()))
+                    var CountryRecord = from c in orgSvcContext.CreateQuery(schema.Address.ENTITY)
+                                        where ((string)c[schema.Address.NAME]).ToLower().Contains((addressDetails.country.Trim().ToLower()))
                                         select new { CountryId = c.Id };
                     Guid countryGuid = CountryRecord != null && CountryRecord.FirstOrDefault() != null ? CountryRecord.FirstOrDefault().CountryId : Guid.Empty;
                     if (countryGuid != Guid.Empty)
-                        address[AddressSchema.COUNTRY] = new EntityReference(AddressSchema.COUNTRY, countryGuid);
+                        address[schema.Address.COUNTRY] = new EntityReference(schema.Address.COUNTRY, countryGuid);
                 }
                 addressId = this.service.Create(address);
             }
             if (addressId != Guid.Empty)
             {
-                Entity contactDetails = new Entity(ContactDetails.ENTITY);
-                contactDetails[AddressSchema.ENTITY] = new EntityReference(AddressSchema.ENTITY, addressId);
+                Entity contactDetails = new Entity(schema.ContactDetails.ENTITY);
+                contactDetails[schema.Address.ENTITY] = new EntityReference(schema.Address.ENTITY, addressId);
 
                 if (addressDetails.type != null)
                 {
                     if (Enum.GetValues(typeof(AddressTypes)).Equals(addressDetails.type))
                     {
-                        contactDetails[ContactDetails.ADDRESSTYPE] = new OptionSetValue((int)addressDetails.type);
+                        contactDetails[schema.ContactDetails.ADDRESSTYPE] = new OptionSetValue((int)addressDetails.type);
                     }
                 }
 
-                contactDetails[ContactDetails.CUSTOMER] = Customer;
+                contactDetails[schema.ContactDetails.CUSTOMER] = Customer;
                 Guid contactDetailId = this.service.Create(contactDetails);
             }
 

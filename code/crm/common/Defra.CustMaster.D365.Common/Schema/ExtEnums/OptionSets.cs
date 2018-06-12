@@ -8,7 +8,7 @@
 // Created via this command line: "C:\Users\Aparns\AppData\Roaming\MscrmTools\XrmToolBox\Plugins\CrmSvcUtil Ref\crmsvcutil.exe" /url:"https://defra-custmstr-dev.api.crm4.dynamics.com/XRMServices/2011/Organization.svc" /namespace:"Defra.CustMaster.D365.Common.Ints.Idm" /out:"C:\Users\Aparns\AppData\Roaming\MscrmTools\XrmToolBox\Settings\CrmSvcUtil Ref\OptionSets.cs" /codecustomization:"DLaB.CrmSvcUtilExtensions.OptionSet.CreateOptionSetEnums,DLaB.CrmSvcUtilExtensions" /codegenerationservice:"DLaB.CrmSvcUtilExtensions.OptionSet.CustomCodeGenerationService,DLaB.CrmSvcUtilExtensions" /codewriterfilter:"DLaB.CrmSvcUtilExtensions.OptionSet.CodeWriterFilterService,DLaB.CrmSvcUtilExtensions" /namingservice:"DLaB.CrmSvcUtilExtensions.NamingService,DLaB.CrmSvcUtilExtensions" /metadataproviderservice:"DLaB.CrmSvcUtilExtensions.BaseMetadataProviderService,DLaB.CrmSvcUtilExtensions" /username:"suyog.parwadi@defradev.onmicrosoft.com" /password:"**********" 
 //------------------------------------------------------------------------------
 
-namespace Defra.CustMaster.D365.Common.Ints.Idm.OptionSets
+namespace Defra.CustMaster.D365.Common.Schema.ExtEnums
 {
 	
 	

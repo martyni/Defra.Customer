@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Defra.CustMaster.D365.Common.schema
 {
-    public class ContactSchema
+    public partial class Contact
     {
         public const string ENTITY = "contact";
         public const string NAME = "name";
@@ -20,6 +20,5 @@ namespace Defra.CustMaster.D365.Common.schema
         public const string TACSACCEPTEDON = "defra_tacsacceptedon";
         public const string BIRTHDATE = "birthdate";
         public const string GENDERCODE = "gendercode";
-        
     }
 }
