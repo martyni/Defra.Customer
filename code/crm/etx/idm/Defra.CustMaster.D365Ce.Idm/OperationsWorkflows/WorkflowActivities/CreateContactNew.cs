@@ -1,11 +1,11 @@
-﻿using Defra.CustMaster.D365.Common;
+﻿using System;
+using System.Collections.Generic;
 using Defra.CustMaster.D365.Common.Schema.ExtEnums;
 using Defra.CustMaster.D365.Common.Ints.Idm;
 using Defra.CustMaster.D365.Common.Ints.Idm.Resp;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Workflow;
-using System;
 using System.Activities;
 using System.IO;
 using System.Linq;
@@ -14,7 +14,7 @@ using System.Text;
 
 namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
 {
-    class CreateContacts : CodeActivity
+   public class CreateContactNew : CodeActivity
     {
         #region "Parameter Definition"
 
@@ -107,7 +107,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                                         contact[D365.Common.schema.Contact.TITLE] = new OptionSetValue((int)dynamicsTitle);
                                     }
 
-                                }                                
+                                }
                             }
                             if (contactPayload.firstname != null)
                                 contact[D365.Common.schema.Contact.FIRSTNAME] = contactPayload.firstname;
@@ -190,6 +190,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
             }
             finally
             {
+                objCommon.tracingService.Trace("finally block start");
                 ContactResponse responsePayload = new ContactResponse()
                 {
                     code = _errorCode,
@@ -207,9 +208,14 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                 // Serializer the Response object to the stream.  
                 DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ContactResponse));
                 ser.WriteObject(ms, responsePayload);
-                byte[] json = ms.ToArray();
+
+                ms.Position = 0;
+                StreamReader sr = new StreamReader(ms);
+                string json = sr.ReadToEnd();
+                sr.Close();
                 ms.Close();
-                Response.Set(executionContext, Encoding.Unicode.GetString(json, 0, json.Length));
+                Response.Set(executionContext, json);
+                objCommon.tracingService.Trace("finally block end");
             }
             //catch (FaultException<OrganizationServiceFault> ex)
             //{
@@ -268,13 +274,13 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
             //}
             if (ContactRequest.gender != null)
             {
-                bool genderFound = Enum.GetValues(typeof(Contact)).Equals(ContactRequest.gender);
+                bool genderFound = Enum.IsDefined(typeof(ContactGenderCodes),ContactRequest.gender);
                 if (!genderFound)
                     _ErrorMessage = "Gender Code is not valid";
             }
             if (ContactRequest.title != null)
             {
-                bool genderFound = Enum.GetValues(typeof(ContactTitles)).Equals(ContactRequest.title);
+                bool genderFound = Enum.IsDefined(typeof(ContactTitles),ContactRequest.title);
                 if (!genderFound)
                     _ErrorMessage = "Title is not valid";
             }
