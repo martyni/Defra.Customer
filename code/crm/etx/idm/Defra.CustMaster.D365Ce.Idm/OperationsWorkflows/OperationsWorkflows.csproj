@@ -91,6 +91,7 @@
     <Compile Include="WorkflowActivities\CreateContact.cs" />
     <Compile Include="WorkflowActivities\CreateContacts.cs" />
     <Compile Include="WorkflowActivities\CreateOrganisation.cs" />
+    <Compile Include="WorkflowActivities\CreateOrganisationNew.cs" />
     <Compile Include="WorkFlowActivityBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
