@@ -4,9 +4,11 @@ using System.Runtime.Serialization;
 
 namespace Defra.CustMaster.D365.Common.Ints.Idm
 {
+    [DataContract]
     public partial class Contact
     {
         [DataMember]
+        [Required(ErrorMessage ="B2cObject is required and can not be empty.")]
         public string b2cobjectid;
 
         [DataMember]

@@ -197,9 +197,9 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                     message = _errorMessage,
                     contactData = new ContactData()
                     {
-                        contactid = _contactId,
-                        uniquereference = _uniqueReference,
-                        error = new ResponseErrorBase() { details = _errorMessageDetail },
+                        contactid = _contactId==Guid.Empty?null:_contactId.ToString(),
+                        uniquereference = _uniqueReference==string.Empty?null:_uniqueReference,
+                        error = new ResponseErrorBase() { details = _errorMessageDetail==string.Empty?_errorMessage:_errorMessageDetail },
                     }
 
                 };
@@ -236,49 +236,51 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
         string FieldValidation(Contact ContactRequest)
         {
             string _ErrorMessage = string.Empty;
-            //if (string.IsNullOrEmpty(ContactRequest.b2cobjectid) || string.IsNullOrWhiteSpace(ContactRequest.b2cobjectid))
-            //    _ErrorMessage = "B2C Object Id can not be empty";
-            //if (string.IsNullOrEmpty(ContactRequest.firstname) || string.IsNullOrWhiteSpace(ContactRequest.firstname))
-            //    _ErrorMessage = "First Name can not empty";
-            //if (string.IsNullOrEmpty(ContactRequest.lastname) || string.IsNullOrWhiteSpace(ContactRequest.lastname))
-            //    _ErrorMessage = "Last Name can not empty";
+            if (string.IsNullOrEmpty(ContactRequest.b2cobjectid) || string.IsNullOrWhiteSpace(ContactRequest.b2cobjectid))
+            {
+                _ErrorMessage = "B2C Object Id can not be empty";
+            }
+            else if (string.IsNullOrEmpty(ContactRequest.firstname) || string.IsNullOrWhiteSpace(ContactRequest.firstname))
+                _ErrorMessage = "First Name can not empty";
+            else if(string.IsNullOrEmpty(ContactRequest.lastname) || string.IsNullOrWhiteSpace(ContactRequest.lastname))
+                _ErrorMessage = "Last Name can not empty";
 
-            //if (!string.IsNullOrEmpty(ContactRequest.b2cobjectid) && !string.IsNullOrWhiteSpace(ContactRequest.b2cobjectid) && ContactRequest.b2cobjectid.Length > 50)
-            //{
-            //    _ErrorMessage = "B2C Object Id is invalid/exceed the max length(50)";
-            //}
-            //if (!string.IsNullOrEmpty(ContactRequest.firstname) && ContactRequest.firstname.Length > 50)
-            //{
+            else if (!string.IsNullOrEmpty(ContactRequest.b2cobjectid) && !string.IsNullOrWhiteSpace(ContactRequest.b2cobjectid) && ContactRequest.b2cobjectid.Length > 50)
+            {
+                _ErrorMessage = "B2C Object Id is invalid/exceed the max length(50)";
+            }
+            else if (!string.IsNullOrEmpty(ContactRequest.firstname) && ContactRequest.firstname.Length > 50)
+            {
 
-            //    _ErrorMessage = "First name exceeded the max length(50)";
-            //}
-            //if (!string.IsNullOrEmpty(ContactRequest.lastname) && ContactRequest.lastname.Length > 50)
-            //{
+                _ErrorMessage = "First name exceeded the max length(50)";
+            }
+           else if (!string.IsNullOrEmpty(ContactRequest.lastname) && ContactRequest.lastname.Length > 50)
+            {
 
-            //    _ErrorMessage = "Last name exceeded the max length(50)";
-            //}
-            //if (!string.IsNullOrEmpty(ContactRequest.middlename) && ContactRequest.middlename.Length > 50)
-            //{
+                _ErrorMessage = "Last name exceeded the max length(50)";
+            }
+            else if (!string.IsNullOrEmpty(ContactRequest.middlename) && ContactRequest.middlename.Length > 50)
+            {
 
-            //    _ErrorMessage = "Middle name exceeded the max length(50)";
-            //}
-            //if (!string.IsNullOrEmpty(ContactRequest.email) && ContactRequest.email.Length > 100)
-            //{
+                _ErrorMessage = "Middle name exceeded the max length(50)";
+            }
+            else if (!string.IsNullOrEmpty(ContactRequest.email) && ContactRequest.email.Length > 100)
+            {
 
-            //    _ErrorMessage = "Email exceeded the max length(100)";
-            //}
-            //if (!string.IsNullOrEmpty(ContactRequest.tacsacceptedversion) && ContactRequest.tacsacceptedversion.Length > 5)
-            //{
+                _ErrorMessage = "Email exceeded the max length(100)";
+            }
+            else if (!string.IsNullOrEmpty(ContactRequest.tacsacceptedversion) && ContactRequest.tacsacceptedversion.Length > 5)
+            {
 
-            //    _ErrorMessage = "T&Cs Accepted Version exceeded the max length(5)";
-            //}
-            if (ContactRequest.gender != null)
+                _ErrorMessage = "T&Cs Accepted Version exceeded the max length(5)";
+            }
+            else if (ContactRequest.gender != null)
             {
                 bool genderFound = Enum.IsDefined(typeof(ContactGenderCodes),ContactRequest.gender);
                 if (!genderFound)
                     _ErrorMessage = "Gender Code is not valid";
             }
-            if (ContactRequest.title != null)
+            else if (ContactRequest.title != null)
             {
                 bool genderFound = Enum.IsDefined(typeof(ContactTitles),ContactRequest.title);
                 if (!genderFound)
