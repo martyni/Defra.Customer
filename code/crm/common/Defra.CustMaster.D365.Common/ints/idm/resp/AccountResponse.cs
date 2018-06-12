@@ -7,6 +7,6 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm.Resp
     public class AccountResponse: ResponseCustomerMasterBase
     {
 
-
+        public AccountData AccountData;
     }
 }
