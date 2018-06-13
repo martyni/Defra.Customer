@@ -4,6 +4,8 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm.Resp
 {
     public abstract class ResponseCustomerMasterBase
     {
+        
+
         public string program { get; set; }
         public string version { get; set; }
         public string release { get; set; }
