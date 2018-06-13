@@ -19,7 +19,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
 
         [RegularExpression(@"^y|n",
          ErrorMessage = "Validated with company house can either be y or n.")]
-        public bool validatedwithcompanieshouse { get; set; }
+        public string validatedwithcompanieshouse { get; set; }
         public Address address { get; set; }
         public string telephone { get; set; }
 
