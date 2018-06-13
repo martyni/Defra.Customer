@@ -221,10 +221,17 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                     code = _errorCode,
                     message = _errorMessage,
                     datetime = DateTime.UtcNow,
-                    version = "1.0.0.2", 
-                  
-                    status = _errorCode == 200||_errorCode==412?"success":"failure",
-                    contactData=new ContactData()
+                    version = "1.0.0.2",
+                    program = "CreateContact",
+                    status = _errorCode == 200 || _errorCode == 412 ? "success" : "failure",
+                    //data = new ContactData()
+                    //{
+                    //    contactid = _contactId == Guid.Empty ? null : _contactId.ToString(),
+                    //    uniquereference = _uniqueReference == string.Empty ? null : _uniqueReference,
+                    //    error = new ResponseErrorBase() { details = _errorMessageDetail == string.Empty ? _errorMessage : _errorMessageDetail }
+                    //}
+
+                    contactData = new ContactData()
                     {
                         contactid = _contactId == Guid.Empty ? null : _contactId.ToString(),
                         uniquereference = _uniqueReference == string.Empty ? null : _uniqueReference,
