@@ -71,13 +71,14 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
                 if (addressDetails.fromcompanieshouse != null)
                     if (Boolean.TryParse(addressDetails.fromcompanieshouse, out resultCompanyHouse))
                         address[schema.Address.FROMCOMPANIESHOUSE] = resultCompanyHouse;
-                if (string.IsNullOrEmpty(addressDetails.country))
+                if (!string.IsNullOrEmpty(addressDetails.country))
                 {
-                    tracingService.Trace("Country search started");
+                    tracingService.Trace("Country search started" + addressDetails.country);
                     var CountryRecord = from c in orgSvcContext.CreateQuery(schema.Address.COUNTRY)
-                                        where (((string)c[schema.Address.NAME]).ToLower()).Equals((addressDetails.country.Trim().ToLower()))
+                                        where (((string)c["defra_isocodealpha3"]).ToLower().Trim()).Equals((addressDetails.country.ToLower().Trim()))
                                         select new { CountryId = c.Id };
                     Guid countryGuid = CountryRecord != null && CountryRecord.FirstOrDefault() != null ? CountryRecord.FirstOrDefault().CountryId : Guid.Empty;
+                    tracingService.Trace("country found" + countryGuid);
                     if (countryGuid != Guid.Empty)
                         address[schema.Address.COUNTRY] = new EntityReference(schema.Address.COUNTRY, countryGuid);
                 }
@@ -89,13 +90,12 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
                 Entity contactDetails = new Entity(schema.ContactDetails.ENTITY);
                 contactDetails[schema.Address.ENTITY] = new EntityReference(schema.Address.ENTITY, addressId);
 
-                if (addressDetails.type != null)
-                {
-                    if (Enum.GetValues(typeof(AddressTypes)).Equals(addressDetails.type))
-                    {
-                        contactDetails[schema.ContactDetails.ADDRESSTYPE] = new OptionSetValue((int)addressDetails.type);
-                    }
-                }
+
+                //Check whether addressType is found in Dynamics defra_addresstypeEnum mapping
+                string addressType = Enum.GetName(typeof(AddressTypes), addressDetails.type);
+
+                defra_AddressType dynamicsAddressType = (defra_AddressType)Enum.Parse(typeof(defra_AddressType), addressType);
+                contactDetails[schema.ContactDetails.ADDRESSTYPE] = new OptionSetValue((int)dynamicsAddressType);
 
                 contactDetails[schema.ContactDetails.CUSTOMER] = Customer;
                 Guid contactDetailId = this.service.Create(contactDetails);

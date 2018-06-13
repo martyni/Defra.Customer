@@ -183,14 +183,17 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                                 }
                                 objCommon.tracingService.Trace("CreateContact activity:started..");
                                 _contactId = objCommon.service.Create(contact);
+                                Entity contactRecord = objCommon.service.Retrieve(D365.Common.schema.Contact.ENTITY, _contactId, new Microsoft.Xrm.Sdk.Query.ColumnSet(true));//Defra.CustMaster.D365.Common.schema.Contact.UNIQUEREFERENCE));
+                                objCommon.tracingService.Trace((string)contactRecord[Defra.CustMaster.D365.Common.schema.Contact.UNIQUEREFERENCE]);
+                                _uniqueReference = (string)contactRecord[Defra.CustMaster.D365.Common.schema.Contact.UNIQUEREFERENCE];
                                 _errorCode = 200;//Success
                                 objCommon.tracingService.Trace("CreateContact activity:ended. " + _contactId.ToString());
 
                                 //create contact address and contact details
-                                if (contactPayload.address != null)
-                                {
-                                    objCommon.CreateAddress(contactPayload.address, new EntityReference(D365.Common.schema.Contact.ENTITY, _contactId));
-                                }
+                                //if (contactPayload.address != null)
+                                //{
+                                //    objCommon.CreateAddress(contactPayload.address, new EntityReference(D365.Common.schema.Contact.ENTITY, _contactId));
+                                //}
                             }
                             else
                             {
@@ -210,8 +213,9 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                 _errorCode = 500;//Internal Error
                 _errorMessage = "Error occured while processing request";
                 _errorMessageDetail = ex.Message;
-                //throw ex;                
                 objCommon.tracingService.Trace(ex.Message);
+                //throw ex;                
+                
             }
             finally
             {
@@ -322,6 +326,13 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                 bool genderFound = Enum.IsDefined(typeof(ContactTitles), ContactRequest.title);
                 if (!genderFound)
                     _ErrorMessage = "Title is not valid";
+            }
+            if (ContactRequest.address!=null&& ContactRequest.address.type != null)
+            {
+                if (!Enum.IsDefined(typeof(defra_AddressType), ContactRequest.address.type))
+                {
+                    _ErrorMessage = "AddressType is not valid";
+                }
             }
             return _ErrorMessage;
         }

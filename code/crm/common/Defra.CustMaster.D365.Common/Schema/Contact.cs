@@ -10,7 +10,7 @@ namespace Defra.CustMaster.D365.Common.schema
         public const string NAME = "name";
         public const string B2COBJECTID = "defra_b2cobjectid";
         public const string EMAILADDRESS1 = "emailaddress1";
-        public const string UNIQUEREFERENCE = "defra_uniquereference";
+        public const string UNIQUEREFERENCE = "defra_uniquereference"; 
         public const string TITLE = "defra_title";
         public const string FIRSTNAME = "firstname";
         public const string LASTNAME = "lastname";
