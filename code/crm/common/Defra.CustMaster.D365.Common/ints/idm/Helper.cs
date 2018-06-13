@@ -73,10 +73,12 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
                         address[schema.Address.FROMCOMPANIESHOUSE] = resultCompanyHouse;
                 if (!string.IsNullOrEmpty(addressDetails.country))
                 {
+                    string countryValue = addressDetails.country.ToUpper();
                     tracingService.Trace("Country search started" + addressDetails.country);
+
                     var CountryRecord = from c in orgSvcContext.CreateQuery(schema.Address.COUNTRY)
-                                        where (((string)c["defra_isocodealpha3"]).ToLower().Trim()).Equals((addressDetails.country.ToLower().Trim()))
-                                        select new { CountryId = c.Id };
+                                        where (((string)c["defra_isocodealpha3"]) == countryValue)
+                                      select new { CountryId = c.Id };
                     Guid countryGuid = CountryRecord != null && CountryRecord.FirstOrDefault() != null ? CountryRecord.FirstOrDefault().CountryId : Guid.Empty;
                     tracingService.Trace("country found" + countryGuid);
                     if (countryGuid != Guid.Empty)

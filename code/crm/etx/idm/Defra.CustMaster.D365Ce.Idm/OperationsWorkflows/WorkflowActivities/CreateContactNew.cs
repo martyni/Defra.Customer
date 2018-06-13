@@ -190,10 +190,10 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                                 objCommon.tracingService.Trace("CreateContact activity:ended. " + _contactId.ToString());
 
                                 //create contact address and contact details
-                                //if (contactPayload.address != null)
-                                //{
-                                //    objCommon.CreateAddress(contactPayload.address, new EntityReference(D365.Common.schema.Contact.ENTITY, _contactId));
-                                //}
+                                if (contactPayload.address != null)
+                                {
+                                    objCommon.CreateAddress(contactPayload.address, new EntityReference(D365.Common.schema.Contact.ENTITY, _contactId));
+                                }
                             }
                             else
                             {

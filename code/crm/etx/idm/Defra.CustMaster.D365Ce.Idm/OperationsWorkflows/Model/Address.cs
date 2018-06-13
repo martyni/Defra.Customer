@@ -33,6 +33,6 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.Model
     }
     public enum AddressTypes
     {
-        Registered_Address = 1, Business_Activity_Address = 2, Correspondence_Address = 3, Billing_or_Payment_Address = 4 
+        RegisteredAddress = 1, BusinessActivityAddress = 2, CorrespondenceAddress = 3, BillingorPaymentAddress = 4 
     };
 }
