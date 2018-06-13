@@ -13,7 +13,6 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm.Resp
         public long timestamp { get; set; }
         public string status { get; set; }
         public int code { get; set; }
-        public string message { get; set; }
-        public ResponseDataBase data { get; set; }
+        public string message { get; set; }       
     }
 }
