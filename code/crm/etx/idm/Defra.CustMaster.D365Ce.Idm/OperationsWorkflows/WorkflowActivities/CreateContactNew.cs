@@ -25,10 +25,11 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
         [Output("responsepayload")]
         public OutArgument<String> Response { get; set; }
 
-        [Input("code")]
-        public InArgument<int> Code { get; set; }
+        [Input("inputerrorcode")]
+        public InArgument<int> InputCode { get; set; }
 
-
+        [Output("outputerrorcode")]
+        public OutArgument<int> OutputCode { get; set; }
 
         #endregion
         #region Local Properties
@@ -54,7 +55,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
             try
             {
                 string jsonPayload = Payload.Get(executionContext);
-                int inputCode = Code.Get(executionContext);
+                int inputCode = InputCode.Get(executionContext);
                 using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonPayload)))
                 {
                     DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(Contact));
@@ -78,6 +79,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                             _contactId = contactRecordWithUPN.ContactId;
                             _uniqueReference = contactRecordWithUPN.UniqueReference.ToString();
                         }
+                        _errorCode = inputCode;
 
                     }
                     else
@@ -218,11 +220,15 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                 {
                     code = _errorCode,
                     message = _errorMessage,
-                    contactData = new ContactData()
+                    datetime = DateTime.UtcNow,
+                    version = "1.0.0.2", 
+                  
+                    status = _errorCode == 200||_errorCode==412?"success":"failure",
+                    contactData=new ContactData()
                     {
                         contactid = _contactId == Guid.Empty ? null : _contactId.ToString(),
                         uniquereference = _uniqueReference == string.Empty ? null : _uniqueReference,
-                        error = new ResponseErrorBase() { details = _errorMessageDetail == string.Empty ? _errorMessage : _errorMessageDetail },
+                        error = new ResponseErrorBase() { details = _errorMessageDetail == string.Empty ? _errorMessage : _errorMessageDetail }
                     }
 
                 };
@@ -238,6 +244,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                 sr.Close();
                 ms.Close();
                 Response.Set(executionContext, json);
+                OutputCode.Set(executionContext, _errorCode);
                 objCommon.tracingService.Trace("finally block end");
             }
             //catch (FaultException<OrganizationServiceFault> ex)
