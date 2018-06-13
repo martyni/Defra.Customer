@@ -20,6 +20,7 @@ using Microsoft.Crm.Sdk.Messages;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Defra.CustMaster.D365.Common.Ints.Idm.Resp;
+using Defra.CustMaster.D365.Common.Ints.Idm;
 
 namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
 {
@@ -30,13 +31,12 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
         [RequiredArgument]
         [Input("PayLoad")]
         public InArgument<String> PayLoad { get; set; }
-
         [Output("OutPutJson")]
         public OutArgument<string> ReturnMessageDetails { get; set; }
 
         #endregion
 
-        Common objCommon;
+        Helper objCommon;
 
 
         public override void ExecuteCRMWorkFlowActivity(CodeActivityContext executionContext, LocalWorkflowContext crmWorkflowContext)
@@ -52,12 +52,12 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
             Guid ContactId = Guid.Empty;
             Guid CrmGuid = Guid.Empty;
             StringBuilder ErrorMessage = new StringBuilder();
-            AccountResponse AccountDataResponse = new AccountResponse();
+            String UniqueReference = string.Empty;
 
        
             try
             {
-                objCommon = new Common(executionContext);
+                objCommon = new Helper(executionContext);
                 objCommon.tracingService.Trace("Load CRM Service from context --- OK");
                 Entity AccountObject = new Entity(Defra.CustMaster.D365.Common.schema.AccountContants.ENTITY_NAME);
 
@@ -65,23 +65,23 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                 {
                     objCommon.tracingService.Trace("attempt to seriallised");
 
-                    Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.Model.Account AccountPayload = (Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.Model.Account)deserializer.ReadObject(ms);
+                    Defra.CustMaster.D365.Common.Ints.Idm.Organisation AccountPayload = (Defra.CustMaster.D365.Common.Ints.Idm.Organisation)deserializer.ReadObject(ms);
                     objCommon.tracingService.Trace("seriallised object working");
                     var ValidationContext = new ValidationContext(AccountPayload, serviceProvider: null, items: null);
                     var ValidationResult = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
                     var isValid = Validator.TryValidateObject(AccountPayload, ValidationContext, ValidationResult);
                     if (isValid)
                     {
-                        if (!String.IsNullOrEmpty(AccountPayload.hierarchylevel))
+                        if (AccountPayload.hierarchylevel != 0)
                         {
                             objCommon.tracingService.Trace("hierarchylevel level: {0}", AccountPayload.hierarchylevel);
 
-                            if (!String.IsNullOrEmpty(Enum.GetName(typeof(defra_OrganisationHierarchyLevel), int.Parse( AccountPayload.hierarchylevel))))
+                            if (!String.IsNullOrEmpty(Enum.GetName(typeof(defra_OrganisationHierarchyLevel), AccountPayload.hierarchylevel)))
                             {
 
                                 objCommon.tracingService.Trace("before assinging value");
 
-                                AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.HIERARCHYLEVEL] = new OptionSetValue(int.Parse(AccountPayload.hierarchylevel));
+                                AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.HIERARCHYLEVEL] = new OptionSetValue(AccountPayload.hierarchylevel);
                                 objCommon.tracingService.Trace("after assinging value");
 
 
@@ -115,11 +115,10 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                                     objCommon.tracingService.Trace("before createing guid:");
                                     CrmGuid = objCommon.service.Create(AccountObject);
                                     objCommon.tracingService.Trace("after createing guid:{0}", CrmGuid.ToString());
-                                    AccountDataResponse.AccountData.accountid = CrmGuid;
                                     Entity AccountRecord = objCommon.service.Retrieve("account", CrmGuid, new Microsoft.Xrm.Sdk.Query.ColumnSet(Defra.CustMaster.D365.Common.schema.AccountContants.UNIQUEREFERENCE));
-                                    AccountDataResponse.AccountData.uniquerefere = (string)AccountRecord[Defra.CustMaster.D365.Common.schema.AccountContants.UNIQUEREFERENCE];
+                                    UniqueReference = (string)AccountRecord[Defra.CustMaster.D365.Common.schema.AccountContants.UNIQUEREFERENCE];
                                     objCommon.CreateAddress(AccountPayload.address, new EntityReference(Defra.CustMaster.D365.Common.schema.AccountContants.ENTITY_NAME, CrmGuid));
-                                    AccountDataResponse.code = 200;
+                                    ErrorCode  = 200;
                                 }
                             }
                             else
@@ -159,7 +158,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                 ErrorCode = 500;
                 _ErrorMessage = "Error occured while processing request";
                 _ErrorMessageDetail = ex.Message;
-                AccountDataResponse.code = 400;
+                ErrorCode = 400;
                 this.ReturnMessageDetails.Set(executionContext, _ErrorMessageDetail);
                 objCommon.tracingService.Trace(ex.Message);
 
@@ -167,26 +166,37 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
             finally
             {
 
+                AccountResponse response = new AccountResponse()
+                {
+                    code = ErrorCode,
+                    message = _ErrorMessage,
+                    AccountData = new AccountData()
+                    {
+                        accountid = CrmGuid,
+                        uniquerefere = UniqueReference,
+                        error = new ResponseErrorBase() { details = _ErrorMessage + "\n" + _ErrorMessageDetail },
+                    }
+                };
                 objCommon.tracingService.Trace("inside finally");
-
-                AccountDataResponse.datetime = DateTime.UtcNow;
-                AccountDataResponse.version = "1.0.0.2";
-                AccountDataResponse.data.error.details = _ErrorMessage;
-                AccountDataResponse.message = "message";
-                AccountDataResponse.status = "status";
-                AccountDataResponse.code = ErrorCode;
-
-                objCommon.tracingService.Trace("inside finally 2");
-
                 MemoryStream ms = new MemoryStream();
-                // Serializer the Response object to the stream.  
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ContactResponse));
-                ser.WriteObject(ms, AccountDataResponse);
-                byte[] json = ms.ToArray();
-                ms.Close();
-                objCommon.tracingService.Trace("inside finally 3");
 
-                ReturnMessageDetails.Set(executionContext, Encoding.Unicode.GetString(json, 0, json.Length));
+                // Serializer the Response object to the stream.  
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(AccountResponse));
+                ser.WriteObject(ms, response);
+                objCommon.tracingService.Trace("after deser");
+
+                ms.Position = 0;
+                StreamReader sr = new StreamReader(ms);
+                string json = sr.ReadToEnd();
+                sr.Close();
+                ms.Close();
+
+                ReturnMessageDetails.Set(executionContext, json);
+                objCommon.tracingService.Trace("json" + json);
+
+
+               
+
             }
 
         }
