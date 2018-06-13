@@ -92,10 +92,10 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
 
                                     OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
                                     var checkCRNExistis = from c in orgSvcContext.CreateQuery("account")
-                                                                where (string)c.Attributes[Defra.CustMaster.D365.Common.schema.AccountContants.COMPANY_HOUSE_ID] == AccountPayload.crn
+                                                                where (string)c[Defra.CustMaster.D365.Common.schema.AccountContants.COMPANY_HOUSE_ID] == AccountPayload.crn
                                                                 select new { organisationid = c.Id };
 
-                                    if (checkCRNExistis.FirstOrDefault() != null)
+                                    if (checkCRNExistis.FirstOrDefault() == null)
                                     {
                                         objCommon.tracingService.Trace("After completing validation 12" + AccountPayload.type);
                                         optionSetValue = AccountPayload.type;
@@ -127,7 +127,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                                         objCommon.tracingService.Trace("after createing guid:{0}", CrmGuid.ToString());
                                         Entity AccountRecord = objCommon.service.Retrieve("account", CrmGuid, new Microsoft.Xrm.Sdk.Query.ColumnSet(Defra.CustMaster.D365.Common.schema.AccountContants.UNIQUEREFERENCE));
                                         UniqueReference = (string)AccountRecord[Defra.CustMaster.D365.Common.schema.AccountContants.UNIQUEREFERENCE];
-                                        //objCommon.CreateAddress(AccountPayload.address, new EntityReference(Defra.CustMaster.D365.Common.schema.AccountContants.ENTITY_NAME, CrmGuid));
+                                        objCommon.CreateAddress(AccountPayload.address, new EntityReference(Defra.CustMaster.D365.Common.schema.AccountContants.ENTITY_NAME, CrmGuid));
                                         ErrorCode = 200;
 
                                     }
