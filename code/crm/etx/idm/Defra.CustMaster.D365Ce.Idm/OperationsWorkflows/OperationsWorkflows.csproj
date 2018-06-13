@@ -102,6 +102,9 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Defra\CustMaster\D365\Common\schema\" />
+  </ItemGroup>
   <Import Project="..\..\..\..\common\Defra.CustMaster.D365.Common\Defra.CustMaster.D365.Common.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
