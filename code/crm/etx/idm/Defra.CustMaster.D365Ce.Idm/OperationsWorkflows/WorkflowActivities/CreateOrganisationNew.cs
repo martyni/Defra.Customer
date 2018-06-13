@@ -44,7 +44,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
 
             String Payload = PayLoad.Get(executionContext);
 
-            DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(Account));
+            DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(Defra.CustMaster.D365.Common.Ints.Idm.Organisation));
             int? optionSetValue;
             int ErrorCode = 400; //400 -- bad request
             String _ErrorMessage = string.Empty;
@@ -57,6 +57,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
        
             try
             {
+                
                 objCommon = new Helper(executionContext);
                 objCommon.tracingService.Trace("Load CRM Service from context --- OK");
                 Entity AccountObject = new Entity(Defra.CustMaster.D365.Common.schema.AccountContants.ENTITY_NAME);
@@ -87,38 +88,55 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
 
                                 if (!String.IsNullOrEmpty(Enum.GetName(typeof(defra_OrganisationType), AccountPayload.type)))
                                 {
-                                    objCommon.tracingService.Trace("After completing validation 12" + AccountPayload.type);
-                                    optionSetValue = AccountPayload.type;
-                                    objCommon.tracingService.Trace("before assigning type  " + AccountPayload.type);
-                                    objCommon.tracingService.Trace(optionSetValue.ToString());
-                                    objCommon.tracingService.Trace("after  setting up option set value");
-                                    OptionSetValueCollection BusinessTypes = new OptionSetValueCollection();
-                                    BusinessTypes.Add(new OptionSetValue(optionSetValue.Value));
-                                    AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.TYPE] = BusinessTypes;
-                                    AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.NAME] = AccountPayload.name == null ? string.Empty : AccountPayload.name;
-                                    AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.COMPANY_HOUSE_ID] = AccountPayload.crn == string.Empty ? null : AccountPayload.crn;
-                                    AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.TELEPHONE1] = AccountPayload.telephone == null ? string.Empty : AccountPayload.telephone;
-                                    objCommon.tracingService.Trace("after  setting other fields");
+                                    //check if crn exists
 
-                                    bool IsValidGuid;
-                                    Guid ParentAccountId;
-                                    if (AccountPayload.parentorganisation != null && String.IsNullOrEmpty(AccountPayload.parentorganisation.parentorganisationcrmid))
+                                    OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
+                                    var checkCRNExistis = from c in orgSvcContext.CreateQuery("account")
+                                                                where (string)c.Attributes[Defra.CustMaster.D365.Common.schema.AccountContants.COMPANY_HOUSE_ID] == AccountPayload.crn
+                                                                select new { organisationid = c.Id };
+
+                                    if (checkCRNExistis.FirstOrDefault() != null)
                                     {
-                                        IsValidGuid = Guid.TryParse(AccountPayload.parentorganisation.parentorganisationcrmid, out ParentAccountId);
-                                        if (IsValidGuid)
+                                        objCommon.tracingService.Trace("After completing validation 12" + AccountPayload.type);
+                                        optionSetValue = AccountPayload.type;
+                                        objCommon.tracingService.Trace("before assigning type  " + AccountPayload.type);
+                                        objCommon.tracingService.Trace(optionSetValue.ToString());
+                                        objCommon.tracingService.Trace("after  setting up option set value");
+                                        OptionSetValueCollection BusinessTypes = new OptionSetValueCollection();
+                                        BusinessTypes.Add(new OptionSetValue(optionSetValue.Value));
+                                        AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.TYPE] = BusinessTypes;
+                                        AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.NAME] = AccountPayload.name == null ? string.Empty : AccountPayload.name;
+                                        AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.COMPANY_HOUSE_ID] = AccountPayload.crn == string.Empty ? null : AccountPayload.crn;
+                                        AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.TELEPHONE1] = AccountPayload.telephone == null ? string.Empty : AccountPayload.telephone;
+                                        objCommon.tracingService.Trace("after  setting other fields");
+
+                                        bool IsValidGuid;
+                                        Guid ParentAccountId;
+                                        if (AccountPayload.parentorganisation != null && String.IsNullOrEmpty(AccountPayload.parentorganisation.parentorganisationcrmid))
                                         {
-                                            AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.PARENTACCOUNTID] = ParentAccountId;
+                                            IsValidGuid = Guid.TryParse(AccountPayload.parentorganisation.parentorganisationcrmid, out ParentAccountId);
+                                            if (IsValidGuid)
+                                            {
+                                                AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.PARENTACCOUNTID] = ParentAccountId;
+                                            }
                                         }
+
+                                        AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.EMAILADDRESS1] = AccountPayload.email;
+                                        objCommon.tracingService.Trace("before createing guid:");
+                                        CrmGuid = objCommon.service.Create(AccountObject);
+                                        objCommon.tracingService.Trace("after createing guid:{0}", CrmGuid.ToString());
+                                        Entity AccountRecord = objCommon.service.Retrieve("account", CrmGuid, new Microsoft.Xrm.Sdk.Query.ColumnSet(Defra.CustMaster.D365.Common.schema.AccountContants.UNIQUEREFERENCE));
+                                        UniqueReference = (string)AccountRecord[Defra.CustMaster.D365.Common.schema.AccountContants.UNIQUEREFERENCE];
+                                        //objCommon.CreateAddress(AccountPayload.address, new EntityReference(Defra.CustMaster.D365.Common.schema.AccountContants.ENTITY_NAME, CrmGuid));
+                                        ErrorCode = 200;
+
+                                    }
+                                    else
+                                    {
+                                        ErrorCode = 400;
+                                        ErrorMessage = ErrorMessage.Append(String.Format("Company house id already exists."));
                                     }
 
-                                    AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.EMAILADDRESS1] = AccountPayload.email;
-                                    objCommon.tracingService.Trace("before createing guid:");
-                                    CrmGuid = objCommon.service.Create(AccountObject);
-                                    objCommon.tracingService.Trace("after createing guid:{0}", CrmGuid.ToString());
-                                    Entity AccountRecord = objCommon.service.Retrieve("account", CrmGuid, new Microsoft.Xrm.Sdk.Query.ColumnSet(Defra.CustMaster.D365.Common.schema.AccountContants.UNIQUEREFERENCE));
-                                    UniqueReference = (string)AccountRecord[Defra.CustMaster.D365.Common.schema.AccountContants.UNIQUEREFERENCE];
-                                    objCommon.CreateAddress(AccountPayload.address, new EntityReference(Defra.CustMaster.D365.Common.schema.AccountContants.ENTITY_NAME, CrmGuid));
-                                    ErrorCode  = 200;
                                 }
                             }
                             else
@@ -166,36 +184,41 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
             finally
             {
 
-                AccountResponse response = new AccountResponse()
+
+                objCommon.tracingService.Trace("finally block start");
+                AccountResponse responsePayload = new AccountResponse()
                 {
                     code = ErrorCode,
-                    message = _ErrorMessage,
+                    message = ErrorMessage.ToString(),
+                    datetime = DateTime.UtcNow,
+                    version = "1.0.0.2",
+
+                    status = ErrorCode == 200 ? "success" : "failure",
                     AccountData = new AccountData()
                     {
-                        accountid = CrmGuid,
+                        accountid = CrmGuid ,
                         uniquerefere = UniqueReference,
-                        error = new ResponseErrorBase() { details = _ErrorMessage + "\n" + _ErrorMessageDetail },
+                        error = new ResponseErrorBase() { details = _ErrorMessageDetail  }
                     }
+
                 };
-                objCommon.tracingService.Trace("inside finally");
                 MemoryStream ms = new MemoryStream();
 
                 // Serializer the Response object to the stream.  
                 DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(AccountResponse));
-                ser.WriteObject(ms, response);
-                objCommon.tracingService.Trace("after deser");
+                ser.WriteObject(ms, responsePayload);
 
                 ms.Position = 0;
                 StreamReader sr = new StreamReader(ms);
                 string json = sr.ReadToEnd();
                 sr.Close();
                 ms.Close();
-
                 ReturnMessageDetails.Set(executionContext, json);
-                objCommon.tracingService.Trace("json" + json);
+                // OutputCode.Set(executionContext, _errorCode);
 
+                objCommon.tracingService.Trace("json {0}" ,json);
+                objCommon.tracingService.Trace("finally block end");
 
-               
 
             }
 
