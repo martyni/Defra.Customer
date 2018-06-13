@@ -69,10 +69,12 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                     Defra.CustMaster.D365.Common.Ints.Idm.Organisation AccountPayload = (Defra.CustMaster.D365.Common.Ints.Idm.Organisation)deserializer.ReadObject(ms);
                     objCommon.tracingService.Trace("seriallised object working");
                     var ValidationContext = new ValidationContext(AccountPayload, serviceProvider: null, items: null);
-                    var ValidationResult = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
-                    var isValid = Validator.TryValidateObject(AccountPayload, ValidationContext, ValidationResult);
+                    ICollection<System.ComponentModel.DataAnnotations.ValidationResult> ValidationResults = null;
+                    var isValid  = objCommon.Validate(AccountPayload, out ValidationResults);
                     if (isValid)
                     {
+
+                        objCommon.tracingService.Trace("length{0}" ,  AccountPayload.name.Length);
                         if (AccountPayload.hierarchylevel != 0)
                         {
                             objCommon.tracingService.Trace("hierarchylevel level: {0}", AccountPayload.hierarchylevel);
@@ -158,9 +160,12 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                     }
                     else
                     {
+                        objCommon.tracingService.Trace("inside validation result");
+
+
                         ErrorMessage = new StringBuilder();
                         //this will throw an error
-                        foreach (System.ComponentModel.DataAnnotations.ValidationResult vr in ValidationResult)
+                        foreach (System.ComponentModel.DataAnnotations.ValidationResult vr in ValidationResults)
                         {
                             ErrorMessage.Append(vr.ErrorMessage + "\n");
                         }

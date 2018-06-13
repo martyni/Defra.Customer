@@ -11,6 +11,7 @@ using Microsoft.Xrm.Sdk.Workflow;
 using System;
 using System.Activities;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
 namespace Defra.CustMaster.D365.Common.Ints.Idm
@@ -103,6 +104,13 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
                 Guid contactDetailId = this.service.Create(contactDetails);
             }
 
+        }
+
+        public  bool Validate<T>(T obj, out ICollection<ValidationResult> results)
+        {
+            results = new List<ValidationResult>();
+
+            return Validator.TryValidateObject(obj, new ValidationContext(obj), results, true);
         }
 
     }
