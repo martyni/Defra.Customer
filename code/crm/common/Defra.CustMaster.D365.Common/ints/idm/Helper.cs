@@ -36,6 +36,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
             OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(this.service);
             if (addressDetails.uprn != null)
             {
+                tracingService.Trace("UPRN search:started..");
                 var propertyWithUPRN = from c in orgSvcContext.CreateQuery(schema.Address.ENTITY)
                                        where ((string)c[schema.Address.UPRN]).Equals((addressDetails.uprn.Trim()))
                                        select new { AddressId = c.Id };
@@ -43,6 +44,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
             }
             if (addressId == Guid.Empty && addressDetails.street != null && addressDetails.postcode != null && addressDetails.buildingnumber != null)
             {
+                tracingService.Trace("postcode and street search:started");
                 var propertyWithDuplicate = from c in orgSvcContext.CreateQuery(schema.Address.ENTITY)
                                             where ((string)c[schema.Address.STREET]).Equals((addressDetails.street.Trim())) && ((string)c[schema.Address.POSTCODE]).Equals((addressDetails.postcode.Trim())) && ((string)c[schema.Address.PREMISES]).Equals((addressDetails.buildingnumber.Trim()))
                                             select new { AddressId = c.Id };
@@ -69,15 +71,17 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
                 if (addressDetails.fromcompanieshouse != null)
                     if (Boolean.TryParse(addressDetails.fromcompanieshouse, out resultCompanyHouse))
                         address[schema.Address.FROMCOMPANIESHOUSE] = resultCompanyHouse;
-                if (addressDetails.country != null)
+                if (string.IsNullOrEmpty(addressDetails.country))
                 {
-                    var CountryRecord = from c in orgSvcContext.CreateQuery(schema.Address.ENTITY)
-                                        where ((string)c[schema.Address.NAME]).ToLower().Contains((addressDetails.country.Trim().ToLower()))
+                    tracingService.Trace("Country search started");
+                    var CountryRecord = from c in orgSvcContext.CreateQuery(schema.Address.COUNTRY)
+                                        where (((string)c[schema.Address.NAME]).ToLower()).Equals((addressDetails.country.Trim().ToLower()))
                                         select new { CountryId = c.Id };
                     Guid countryGuid = CountryRecord != null && CountryRecord.FirstOrDefault() != null ? CountryRecord.FirstOrDefault().CountryId : Guid.Empty;
                     if (countryGuid != Guid.Empty)
                         address[schema.Address.COUNTRY] = new EntityReference(schema.Address.COUNTRY, countryGuid);
                 }
+                tracingService.Trace("creating address started");
                 addressId = this.service.Create(address);
             }
             if (addressId != Guid.Empty)
