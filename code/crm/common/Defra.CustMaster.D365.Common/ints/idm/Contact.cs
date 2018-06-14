@@ -8,20 +8,20 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
     public partial class Contact
     {
         [DataMember]
-        [Required(AllowEmptyStrings = false, ErrorMessage = "B2cObject is required and can not be empty.")]
-        [MaxLength(50, ErrorMessage = "B2C Object Id is invalid/exceed the max length(50)")]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "B2cObject is required and can not be empty;")]
+        [MaxLength(50, ErrorMessage = "B2C Object Id is invalid/exceed the max length(50);")]
         public string b2cobjectid { get; set; }
 
         [DataMember]
         public int? title { get; set; }
 
         [DataMember]
-        [MaxLength(50, ErrorMessage = "First Name cannot be greater than 50")]
-        [Required(ErrorMessage = "Firstname is required")]
+        [MaxLength(50, ErrorMessage = "First Name cannot be greater than 50;")]
+        [Required(ErrorMessage = "Firstname is required;")]
         public string firstname { get; set; }
 
         [DataMember]
-        [MaxLength(50, ErrorMessage = "Middle Name cannot be greater than 50")]
+        [MaxLength(50, ErrorMessage = "Middle Name cannot be greater than 50;")]
 
         public string middlename { get; set; }
 
@@ -31,7 +31,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         public string lastname { get; set; }
 
         [DataMember]
-        [MaxLength(100, ErrorMessage = "Email cannot be greater than 100")]
+        [MaxLength(100, ErrorMessage = "Email cannot be greater than 100;")]
         [EmailAddress]
         public string email { get; set; }
 
@@ -42,11 +42,11 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         public int? gender { get; set; }
 
         [DataMember]
-        [MaxLength(50, ErrorMessage = "Telephone cannot be greater than 50")]
+        [MaxLength(50, ErrorMessage = "Telephone cannot be greater than 50;")]
         public string telephone { get; set; }
 
         [DataMember]
-        [MaxLength(5, ErrorMessage = "T&C Accepted Version cannot be greater than 5")]
+        [MaxLength(5, ErrorMessage = "T&C Accepted Version cannot be greater than 5;")]
         public string tacsacceptedversion { get; set; }
 
         [DataMember]
