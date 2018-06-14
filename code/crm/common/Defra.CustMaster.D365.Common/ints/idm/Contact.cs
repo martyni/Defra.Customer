@@ -31,6 +31,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
 
         [DataMember]
         [MaxLength(100, ErrorMessage = "Email cannot be greater than 100")]
+        [EmailAddress]
         public string email { get; set; }
 
         [DataMember]

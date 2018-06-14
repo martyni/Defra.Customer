@@ -9,6 +9,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
 
         [DataMember]
         [MaxLength(20, ErrorMessage = "UPRN cannot be greater than 20")]
+        [DataType(DataType.Text)]
         public string uprn { get; set; }
 
         [DataMember]
