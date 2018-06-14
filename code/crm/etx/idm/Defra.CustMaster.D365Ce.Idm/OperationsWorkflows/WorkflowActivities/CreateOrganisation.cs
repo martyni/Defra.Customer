@@ -140,7 +140,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                                     }
                                     else
                                     {
-                                        ErrorCode = 400;
+                                        ErrorCode = 412;
                                         ErrorMessage = ErrorMessage.Append(String.Format("Company house id already exists."));
                                     }
 
