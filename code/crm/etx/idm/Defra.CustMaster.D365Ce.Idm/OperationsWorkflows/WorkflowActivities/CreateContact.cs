@@ -67,11 +67,18 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                     var ValidationContext = new ValidationContext(contactPayload, serviceProvider: null, items: null);
 
                     ICollection<System.ComponentModel.DataAnnotations.ValidationResult> ValidationResults = null;
+                    ICollection<System.ComponentModel.DataAnnotations.ValidationResult> ValidationResultsAddress = null;
+
                     var isValid = objCommon.Validate(contactPayload, out ValidationResults);
+
+                    
+                    Boolean isValidAddress = contactPayload.address == null ? true :
+                        
+                        objCommon.Validate(contactPayload.address, out ValidationResultsAddress);
 
                     objCommon.tracingService.Trace("just after validation");
 
-                    if (isValid)
+                    if (isValid && isValidAddress)
                     {
                         if (_errorMessage == string.Empty)
                         {
@@ -199,7 +206,12 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                         //this will throw an error
                         foreach (System.ComponentModel.DataAnnotations.ValidationResult vr in ValidationResults)
                         {
-                            ErrorMessage.Append(vr.ErrorMessage + "\n");
+                            ErrorMessage.Append(vr.ErrorMessage + " ");
+                        }
+
+                        foreach (System.ComponentModel.DataAnnotations.ValidationResult vr in ValidationResultsAddress)
+                        {
+                            ErrorMessage.Append(vr.ErrorMessage + " ");
                         }
                         _errorCode = 400;
                         _errorMessage = ErrorMessage.ToString();

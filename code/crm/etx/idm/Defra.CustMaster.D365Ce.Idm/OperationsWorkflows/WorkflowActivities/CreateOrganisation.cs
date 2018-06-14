@@ -70,8 +70,13 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                     objCommon.tracingService.Trace("seriallised object working");
                     var ValidationContext = new ValidationContext(AccountPayload, serviceProvider: null, items: null);
                     ICollection<System.ComponentModel.DataAnnotations.ValidationResult> ValidationResults = null;
+                    ICollection<System.ComponentModel.DataAnnotations.ValidationResult> ValidationResultsAddress= null;
+
                     var isValid  = objCommon.Validate(AccountPayload, out ValidationResults);
-                    if (isValid)
+                    Boolean isValidAddress = AccountPayload.address == null ? true :
+                        objCommon.Validate(AccountPayload.address, out ValidationResultsAddress);
+
+                    if (isValid & isValidAddress)
                     {
 
                         objCommon.tracingService.Trace("length{0}" ,  AccountPayload.name.Length);
@@ -161,13 +166,15 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                     else
                     {
                         objCommon.tracingService.Trace("inside validation result");
-
-
                         ErrorMessage = new StringBuilder();
                         //this will throw an error
                         foreach (System.ComponentModel.DataAnnotations.ValidationResult vr in ValidationResults)
                         {
-                            ErrorMessage.Append(vr.ErrorMessage + "\n");
+                            ErrorMessage.Append(vr.ErrorMessage + " ");
+                        }
+                        foreach (System.ComponentModel.DataAnnotations.ValidationResult vr in ValidationResultsAddress)
+                        {
+                            ErrorMessage.Append(vr.ErrorMessage + " ");
                         }
                         ErrorCode = 400;
 
