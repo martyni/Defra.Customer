@@ -9,6 +9,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
     {
         [DataMember]
         [Required(AllowEmptyStrings = false, ErrorMessage = "B2cObject is required and can not be empty.")]
+        [MaxLength(50, ErrorMessage = "B2C Object Id is invalid/exceed the max length(50)")]
         public string b2cobjectid { get; set; }
 
         [DataMember]
