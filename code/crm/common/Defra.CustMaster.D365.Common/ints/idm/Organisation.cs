@@ -7,9 +7,9 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         [DataType(DataType.Text)]
         [MaxLength(160,ErrorMessage = "Organiation name is more than 160 characters.")]
         public string name { get; set; }
-        [Required(ErrorMessage = "Business cannot be empty.")]
+        [Required(ErrorMessage = "Business type cannot be empty.")]
         [DataType(DataType.Text)]
-        public int type { get; set; }
+        public int? type { get; set; }
         [MaxLength(8,ErrorMessage = "Company House Id cannot be more than 8 characters.")]
         public string crn { get; set; }
         [MaxLength(100, ErrorMessage = "Email address cannot be more than 100 characters long.")]
