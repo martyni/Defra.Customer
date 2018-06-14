@@ -12,11 +12,11 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         public int? type { get; set; }
         [MaxLength(8,ErrorMessage = "Company House Id cannot be more than 8 characters.")]
         public string crn { get; set; }
-        [MaxLength(100, ErrorMessage = "Email address cannot be more than 100 characters long.")]
         [DataType(DataType.EmailAddress)]
+        [EmailAddress]
+        [MaxLength(100, ErrorMessage = "Email address cannot be more than 100 characters long.")]
         public string email { get; set; }
         [MaxLength(100, ErrorMessage = "Validated with company house should have y or n")]
-
         [RegularExpression(@"^y|n",
          ErrorMessage = "Validated with company house can either be y or n.")]
         public string validatedwithcompanieshouse { get; set; }

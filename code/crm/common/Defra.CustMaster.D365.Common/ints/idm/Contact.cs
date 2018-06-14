@@ -8,47 +8,50 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
     public partial class Contact
     {
         [DataMember]
-        [Required(ErrorMessage ="B2cObject is required and can not be empty.")]
-        public string b2cobjectid;
+        [Required(AllowEmptyStrings = false, ErrorMessage = "B2cObject is required and can not be empty.")]
+        public string b2cobjectid { get; set; }
 
         [DataMember]
-        public int? title;
+        public int? title { get; set; }
 
         [DataMember]
         [MaxLength(50, ErrorMessage = "First Name cannot be greater than 50")]
-        public string firstname;
+        [Required(ErrorMessage = "Firstname is required")]
+        public string firstname { get; set; }
 
         [DataMember]
         [MaxLength(50, ErrorMessage = "Middle Name cannot be greater than 50")]
-        public string middlename;
+
+        public string middlename { get; set; }
 
         [DataMember]
+        [Required(ErrorMessage = "Lastname is required")]
         [MaxLength(50, ErrorMessage = "Last Name cannot be greater than 50")]
-        public string lastname;
+        public string lastname { get; set; }
 
         [DataMember]
         [MaxLength(100, ErrorMessage = "Email cannot be greater than 100")]
-        public string email;
+        public string email { get; set; }
 
         [DataMember]
-        public string dob;
+        public string dob { get; set; }
 
         [DataMember]
-        public int? gender;
+        public int? gender { get; set; }
 
         [DataMember]
         [MaxLength(50, ErrorMessage = "Telephone cannot be greater than 50")]
-        public string telephone;
+        public string telephone { get; set; }
 
         [DataMember]
         [MaxLength(5, ErrorMessage = "T&C Accepted Version cannot be greater than 5")]
-        public string tacsacceptedversion;
+        public string tacsacceptedversion { get; set; }
 
         [DataMember]
-        public string tacsacceptedon;
+        public string tacsacceptedon { get; set; }
 
         [DataMember]
-        public Address address;
+        public Address address { get; set; }
     }
     public enum ContactGenderCodes
     {
