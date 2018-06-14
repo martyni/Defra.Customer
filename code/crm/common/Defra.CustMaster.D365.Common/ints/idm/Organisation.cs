@@ -6,6 +6,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
     {
         [DataType(DataType.Text)]
         [MaxLength(160,ErrorMessage = "Organiation name is more than 160 characters.")]
+        [Required(ErrorMessage = "Organisation name is mandatory.")]
         public string name { get; set; }
         [Required(ErrorMessage = "Business type cannot be empty.")]
         [DataType(DataType.Text)]
