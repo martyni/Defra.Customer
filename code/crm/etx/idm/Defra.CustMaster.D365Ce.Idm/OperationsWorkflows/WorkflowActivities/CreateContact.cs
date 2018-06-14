@@ -21,10 +21,10 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
         #region "Parameter Definition"
 
         [RequiredArgument]
-        [Input("requestpayload")]
+        [Input("request")]
         public InArgument<String> Payload { get; set; }
 
-        [Output("responsepayload")]
+        [Output("response")]
         public OutArgument<String> Response { get; set; }
 
         #endregion
