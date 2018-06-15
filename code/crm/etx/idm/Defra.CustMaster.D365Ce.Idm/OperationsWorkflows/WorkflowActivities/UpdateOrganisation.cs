@@ -37,6 +37,8 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
         string _errorMessageDetail = string.Empty;
         Guid orgId = Guid.Empty;
         string _uniqueReference = string.Empty;
+
+
         #endregion
 
         #region Execute
@@ -47,11 +49,12 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
 
             DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(Organisation));
             int? optionSetValue;
-
             Guid orgId = Guid.Empty;
-
+            Entity existingAccountRecord = new Entity();
             StringBuilder ErrorMessage = new StringBuilder();
-            String UniqueReference = string.Empty;
+            string _uniqueReference = string.Empty;
+            string _crn = string.Empty;
+            bool isOrgExists = false;
             Entity AccountObject = new Entity(CommonSchema.AccountContants.ENTITY_NAME);
 
             try
@@ -65,34 +68,36 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                 string jsonPayload = ReqPayload.Get(executionContext);
                 Organisation accountPayload = JsonConvert.DeserializeObject<Organisation>(jsonPayload);
                 objCommon.tracingService.Trace("seriallised object working");
-                bool isOrgExists = false;
-                //check organisation id exists
-                if (!string.IsNullOrEmpty(accountPayload.organisationid) && !string.IsNullOrWhiteSpace(accountPayload.organisationid))
-                {
 
-                    if (Guid.TryParse(accountPayload.organisationid, out orgId))
+                var ValidationContext = new ValidationContext(accountPayload, serviceProvider: null, items: null);
+                ICollection<ValidationResult> ValidationResults = null;
+
+                var isValid = objCommon.Validate(accountPayload, out ValidationResults);
+
+
+                if (isValid)
+                {
+                    //check organisation id exists
+                    if (!string.IsNullOrEmpty(accountPayload.organisationid) && !string.IsNullOrWhiteSpace(accountPayload.organisationid))
                     {
-                        Entity accountRecord = objCommon.service.Retrieve("account", orgId, new Microsoft.Xrm.Sdk.Query.ColumnSet(CommonSchema.AccountContants.UNIQUEREFERENCE));
-                        if (accountRecord != null && accountRecord.Id != null)
+
+                        if (Guid.TryParse(accountPayload.organisationid, out orgId))
                         {
-                            AccountObject.Id = accountRecord.Id;
-                            UniqueReference = (string)accountRecord[CommonSchema.AccountContants.UNIQUEREFERENCE];
-                            isOrgExists = true;
+                            existingAccountRecord = objCommon.service.Retrieve("account", orgId, new Microsoft.Xrm.Sdk.Query.ColumnSet(CommonSchema.AccountContants.UNIQUEREFERENCE, CommonSchema.AccountContants.COMPANY_HOUSE_ID, CommonSchema.AccountContants.PARENTACCOUNTID));
+                            if (existingAccountRecord != null && existingAccountRecord.Id != null)
+                            {
+                                AccountObject.Id = existingAccountRecord.Id;
+                                _uniqueReference = (string)existingAccountRecord[CommonSchema.AccountContants.UNIQUEREFERENCE];
+                                _crn = (string)existingAccountRecord[CommonSchema.AccountContants.COMPANY_HOUSE_ID];
+                                isOrgExists = true;
+                            }
+
                         }
-
                     }
-                }
-                // if org exists then go on to update the organisation
-                if (isOrgExists)
-                {
-                    var ValidationContext = new ValidationContext(accountPayload, serviceProvider: null, items: null);
-                    ICollection<ValidationResult> ValidationResults = null;
-
-                    var isValid = objCommon.Validate(accountPayload, out ValidationResults);
-
-
-                    if (isValid)
+                    // if org exists then go on to update the organisation
+                    if (isOrgExists)
                     {
+
 
                         objCommon.tracingService.Trace("length{0}", accountPayload.name.Length);
                         if (accountPayload.hierarchylevel != 0)
@@ -106,98 +111,105 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
 
                                 AccountObject[CommonSchema.AccountContants.HIERARCHYLEVEL] = new OptionSetValue(accountPayload.hierarchylevel);
                                 objCommon.tracingService.Trace("after assinging value");
-
-
-                                if (!String.IsNullOrEmpty(Enum.GetName(typeof(defra_OrganisationType), accountPayload.type)))
-                                {
-                                    //check if crn exists
-
-                                    OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
-                                    var checkCRNExistis = from c in orgSvcContext.CreateQuery("account")
-                                                          where (string)c[CommonSchema.AccountContants.COMPANY_HOUSE_ID] == accountPayload.crn
-                                                          select new { organisationid = c.Id };
-
-                                    if (checkCRNExistis.FirstOrDefault() == null)
-                                    {
-                                        objCommon.tracingService.Trace("After completing validation 12" + accountPayload.type);
-                                        optionSetValue = accountPayload.type;
-                                        objCommon.tracingService.Trace("before assigning type  " + accountPayload.type);
-                                        objCommon.tracingService.Trace(optionSetValue.ToString());
-                                        objCommon.tracingService.Trace("after  setting up option set value");
-                                        OptionSetValueCollection BusinessTypes = new OptionSetValueCollection();
-                                        BusinessTypes.Add(new OptionSetValue(optionSetValue.Value));
-                                        AccountObject[CommonSchema.AccountContants.TYPE] = BusinessTypes;
-                                        AccountObject[CommonSchema.AccountContants.NAME] = accountPayload.name == null ? string.Empty : accountPayload.name;
-                                        AccountObject[CommonSchema.AccountContants.COMPANY_HOUSE_ID] = accountPayload.crn == string.Empty ? null : accountPayload.crn;
-                                        AccountObject[CommonSchema.AccountContants.TELEPHONE1] = accountPayload.telephone == null ? string.Empty : accountPayload.telephone;
-                                        objCommon.tracingService.Trace("after  setting other fields");
-
-                                        bool IsValidGuid;
-                                        Guid ParentAccountId;
-                                        if (accountPayload.parentorganisation != null && String.IsNullOrEmpty(accountPayload.parentorganisation.parentorganisationcrmid))
-                                        {
-                                            IsValidGuid = Guid.TryParse(accountPayload.parentorganisation.parentorganisationcrmid, out ParentAccountId);
-                                            if (IsValidGuid)
-                                            {
-                                                AccountObject[CommonSchema.AccountContants.PARENTACCOUNTID] = ParentAccountId;
-                                            }
-                                        }
-
-                                        AccountObject[CommonSchema.AccountContants.EMAILADDRESS1] = accountPayload.email;
-                                        objCommon.tracingService.Trace("before updating guid:" + AccountObject.Id.ToString());
-                                        objCommon.service.Update(AccountObject);
-                                        objCommon.tracingService.Trace("after updating guid:{0}", AccountObject.Id.ToString());
-
-                                        _errorCode = 200;
-
-                                    }
-                                    else
-                                    {
-                                        _errorCode = 412;
-                                        ErrorMessage = ErrorMessage.Append(String.Format("Company house id already exists."));
-                                    }
-
-                                }
                             }
                             else
                             {
-                                _errorCode = 400;
+
                                 ErrorMessage = ErrorMessage.Append(String.Format("Option set value {0} for orgnisation hirarchy level not found.",
-                                CommonSchema.AccountContants.HIERARCHYLEVEL.ToString()));
+                                accountPayload.hierarchylevel));
                             }
                         }
 
+                        if (!String.IsNullOrEmpty(Enum.GetName(typeof(defra_OrganisationType), accountPayload.type)))
+                        {
+                            objCommon.tracingService.Trace("After completing validation 12" + accountPayload.type);
+                            optionSetValue = accountPayload.type;
+                            objCommon.tracingService.Trace("before assigning type  " + accountPayload.type);
+                            objCommon.tracingService.Trace(optionSetValue.ToString());
+                            objCommon.tracingService.Trace("after  setting up option set value");
+                            OptionSetValueCollection BusinessTypes = new OptionSetValueCollection();
+                            BusinessTypes.Add(new OptionSetValue(optionSetValue.Value));
+                            AccountObject[CommonSchema.AccountContants.TYPE] = BusinessTypes;
+                        }
                         else
                         {
-                            _errorCode = 400;
                             ErrorMessage = ErrorMessage.Append(String.Format("Option set value {0} for orgnisation type does not exists.",
                             accountPayload.type));
                         }
 
+                        //check if crn exists
+                        if (accountPayload.crn != null && _crn != accountPayload.crn)
+                        {
+                            OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
+                            var checkCRNExistis = from c in orgSvcContext.CreateQuery("account")
+                                                  where (string)c[CommonSchema.AccountContants.COMPANY_HOUSE_ID] == accountPayload.crn
+                                                  select new { organisationid = c.Id };
+
+
+                            if (checkCRNExistis.FirstOrDefault() == null)
+                            {
+                                AccountObject[CommonSchema.AccountContants.COMPANY_HOUSE_ID] = accountPayload.crn;
+                            }
+                            else
+                            {
+                                _errorCode = 412;
+                                ErrorMessage = ErrorMessage.Append(String.Format("Company house id already exists."));
+                            }
+                        }
+                        if (accountPayload.name != null)
+                            AccountObject[CommonSchema.AccountContants.NAME] = accountPayload.name;
+                        if (accountPayload.telephone != null)
+                            AccountObject[CommonSchema.AccountContants.TELEPHONE1] = accountPayload.telephone;
+                        objCommon.tracingService.Trace("after  setting other fields");
+
+                        bool IsValidGuid;
+                        Guid ParentAccountId;
+                        if (accountPayload.parentorganisation != null && !String.IsNullOrEmpty(accountPayload.parentorganisation.parentorganisationcrmid))
+                        {
+                            if ((string)existingAccountRecord[CommonSchema.AccountContants.PARENTACCOUNTID] != accountPayload.parentorganisation.parentorganisationcrmid)
+                            {
+                                IsValidGuid = Guid.TryParse(accountPayload.parentorganisation.parentorganisationcrmid, out ParentAccountId);
+                                if (IsValidGuid)
+                                {
+                                    AccountObject[CommonSchema.AccountContants.PARENTACCOUNTID] = ParentAccountId;
+                                }
+                                else
+                                {
+                                    ErrorMessage = ErrorMessage.Append(String.Format("parentorganisationcrmid: {0} is not valid guid",
+                             accountPayload.parentorganisation.parentorganisationcrmid));
+                                }
+                            }
+                        }
+                        if (accountPayload.email != null)
+                            AccountObject[CommonSchema.AccountContants.EMAILADDRESS1] = accountPayload.email;
+                        objCommon.tracingService.Trace("before updating guid:" + AccountObject.Id.ToString());
+                        objCommon.service.Update(AccountObject);
+                        objCommon.tracingService.Trace("after updating guid:{0}", AccountObject.Id.ToString());
+
+                        _errorCode = 200;
 
                     }
+                    //if the organisation does not exists
                     else
                     {
-                        objCommon.tracingService.Trace("inside validation result");
-                        ErrorMessage = new StringBuilder();
-                        //this will throw an error
-                        foreach (ValidationResult vr in ValidationResults)
-                        {
-                            ErrorMessage.Append(vr.ErrorMessage + " ");
-                        }
-
-                        _errorCode = 400;
-
+                        _errorCode = 417;
+                        ErrorMessage = ErrorMessage.Append(String.Format("Oranisation with id {0} does not exists.",
+                        accountPayload.organisationid));
                     }
                 }
-                //if the organisation does not exists
                 else
                 {
-                    _errorCode = 400;
-                    ErrorMessage = ErrorMessage.Append(String.Format("Oranisation with id {0} does not exists.",
-                    accountPayload.organisationid));
-                }
+                    objCommon.tracingService.Trace("inside validation result");
+                    ErrorMessage = new StringBuilder();
+                    //this will throw an error
+                    foreach (ValidationResult vr in ValidationResults)
+                    {
+                        ErrorMessage.Append(vr.ErrorMessage + " ");
+                    }
 
+                    _errorCode = 400;
+
+                }
 
             }
 
@@ -228,7 +240,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                     data = new AccountData()
                     {
                         accountid = AccountObject.Id,
-                        uniquerefere = UniqueReference,
+                        uniquerefere = _uniqueReference,
                         error = new ResponseErrorBase() { details = _errorMessageDetail }
                     }
 
