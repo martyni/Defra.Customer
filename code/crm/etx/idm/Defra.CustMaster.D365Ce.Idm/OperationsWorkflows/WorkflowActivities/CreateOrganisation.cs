@@ -206,7 +206,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                     version = "1.0.0.2",
 
                     status = ErrorCode == 200 ? "success" : "failure",
-                    AccountData = new AccountData()
+                    data = new AccountData()
                     {
                         accountid = CrmGuid,
                         uniquerefere = UniqueReference,

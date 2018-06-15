@@ -8,8 +8,8 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm.Resp
     {
         public AccountResponse()
         {
-            this.AccountData = new AccountData();
+            this.data = new AccountData();
         }
-        public AccountData AccountData;
+        public AccountData data;
     }
 }

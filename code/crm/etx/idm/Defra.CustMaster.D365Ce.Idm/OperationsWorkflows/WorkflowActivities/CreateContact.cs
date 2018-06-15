@@ -12,20 +12,21 @@ using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.ComponentModel.DataAnnotations;
-
+using CommonSchema = Defra.CustMaster.D365.Common.schema;
+using Newtonsoft.Json;
 
 namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
 {
-    public class CreateContact : CodeActivity
+    public class CreateContact : WorkFlowActivityBase
     {
         #region "Parameter Definition"
 
         [RequiredArgument]
         [Input("request")]
-        public InArgument<String> Payload { get; set; }
+        public InArgument<String> ReqPayload { get; set; }
 
         [Output("response")]
-        public OutArgument<String> Response { get; set; }
+        public OutArgument<String> ResPayload { get; set; }
 
         #endregion
         #region Local Properties
@@ -38,7 +39,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
         string _uniqueReference = string.Empty;
 
         #endregion
-        protected override void Execute(CodeActivityContext executionContext)
+        public override void ExecuteCRMWorkFlowActivity(CodeActivityContext executionContext, LocalWorkflowContext crmWorkflowContext)
         {
             #region "Load CRM Service from context"
             objCommon = new Helper(executionContext);
@@ -50,176 +51,166 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
 
             try
             {
-                string jsonPayload = Payload.Get(executionContext);
+                string jsonPayload = ReqPayload.Get(executionContext);
+                Contact contactPayload = JsonConvert.DeserializeObject<Contact>(jsonPayload);
 
-                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonPayload)))
+                Entity contact = new Entity(CommonSchema.Contact.ENTITY);//,"defra_upn", _UPN);
+
+                _errorMessage = FieldValidation(contactPayload);
+                var ValidationContext = new ValidationContext(contactPayload, serviceProvider: null, items: null);
+
+                ICollection<ValidationResult> ValidationResults = null;
+                ICollection<ValidationResult> ValidationResultsAddress = null;
+
+                var isValid = objCommon.Validate(contactPayload, out ValidationResults);
+
+
+                Boolean isValidAddress = contactPayload.address == null ? true :
+
+                    objCommon.Validate(contactPayload.address, out ValidationResultsAddress);
+
+                objCommon.tracingService.Trace("just after validation");
+
+                if (isValid && isValidAddress)
                 {
-                    DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(Contact));
-                    //Contact contactPayload = JsonConvert.DeserializeObject<Contact>(jsonPayload);
-                    //Contact contactPayload = jsonPayload.FromJson<Contact>();
-
-                    Contact contactPayload = (Contact)deserializer.ReadObject(ms);
-                    objCommon.tracingService.Trace("deseriaized contact" + contactPayload.b2cobjectid);
-
-                    Entity contact = new Entity(D365.Common.schema.Contact.ENTITY);//,"defra_upn", _UPN);
-
-                    _errorMessage = FieldValidation(contactPayload);
-                    var ValidationContext = new ValidationContext(contactPayload, serviceProvider: null, items: null);
-
-                    ICollection<System.ComponentModel.DataAnnotations.ValidationResult> ValidationResults = null;
-                    ICollection<System.ComponentModel.DataAnnotations.ValidationResult> ValidationResultsAddress = null;
-
-                    var isValid = objCommon.Validate(contactPayload, out ValidationResults);
-
-                    
-                    Boolean isValidAddress = contactPayload.address == null ? true :
-                        
-                        objCommon.Validate(contactPayload.address, out ValidationResultsAddress);
-
-                    objCommon.tracingService.Trace("just after validation");
-
-                    if (isValid && isValidAddress)
+                    if (_errorMessage == string.Empty)
                     {
-                        if (_errorMessage == string.Empty)
+                        //search contact record based on key named B2COBJECTID to prevent duplicate contact
+                        OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
+                        var ContactWithUPN = from c in orgSvcContext.CreateQuery(CommonSchema.Contact.ENTITY)
+                                             where ((string)c[CommonSchema.Contact.B2COBJECTID]).Equals((contactPayload.b2cobjectid.Trim()))
+                                             select new { ContactId = c.Id, UniqueReference = c[CommonSchema.Contact.UNIQUEREFERENCE] };
+
+                        var contactRecordWithUPN = ContactWithUPN.FirstOrDefault() == null ? null : ContactWithUPN.FirstOrDefault();
+                        if (contactRecordWithUPN != null)
                         {
-                            //search contact record based on key named B2COBJECTID to prevent duplicate contact
-                            OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
-                            var ContactWithUPN = from c in orgSvcContext.CreateQuery(D365.Common.schema.Contact.ENTITY)
-                                                 where ((string)c[D365.Common.schema.Contact.B2COBJECTID]).Equals((contactPayload.b2cobjectid.Trim()))
-                                                 select new { ContactId = c.Id, UniqueReference = c[D365.Common.schema.Contact.UNIQUEREFERENCE] };
+                            _contactId = contactRecordWithUPN.ContactId;
+                            _uniqueReference = contactRecordWithUPN.UniqueReference.ToString();
+                        }
 
-                            var contactRecordWithUPN = ContactWithUPN.FirstOrDefault() == null ? null : ContactWithUPN.FirstOrDefault();
-                            if (contactRecordWithUPN != null)
+                        //Search contact record based on key named emailaddress to prevent duplicates
+                        if (!string.IsNullOrEmpty(contactPayload.email))
+                        {
+                            var ContactWithEmail = from c in orgSvcContext.CreateQuery(CommonSchema.Contact.ENTITY)
+                                                   where ((string)c[CommonSchema.Contact.EMAILADDRESS1]).Equals((contactPayload.email.Trim()))
+                                                   select new { ContactId = c.Id, UniqueReference = c[CommonSchema.Contact.UNIQUEREFERENCE] };
+
+                            var contactRecordWithEmail = ContactWithEmail.FirstOrDefault() == null ? null : ContactWithEmail.FirstOrDefault();
+                            if (contactRecordWithEmail != null)
                             {
-                                _contactId = contactRecordWithUPN.ContactId;
-                                _uniqueReference = contactRecordWithUPN.UniqueReference.ToString();
+                                _contactId = contactRecordWithEmail.ContactId;
+                                _uniqueReference = contactRecordWithEmail.UniqueReference.ToString();
                             }
-
-                            //Search contact record based on key named emailaddress to prevent duplicates
-                            if (!string.IsNullOrEmpty(contactPayload.email))
+                        }
+                        if (_contactId == Guid.Empty)
+                        {
+                            objCommon.tracingService.Trace("CreateContact activity:ContactRecordGuidWithUPN is empty started, Creating Contact..");
+                            if (contactPayload.title != null)
                             {
-                                var ContactWithEmail = from c in orgSvcContext.CreateQuery(D365.Common.schema.Contact.ENTITY)
-                                                       where ((string)c[D365.Common.schema.Contact.EMAILADDRESS1]).Equals((contactPayload.email.Trim()))
-                                                       select new { ContactId = c.Id, UniqueReference = c[D365.Common.schema.Contact.UNIQUEREFERENCE] };
-
-                                var contactRecordWithEmail = ContactWithEmail.FirstOrDefault() == null ? null : ContactWithEmail.FirstOrDefault();
-                                if (contactRecordWithEmail != null)
+                                //Check whether the gendercode is found in GenderEnum mapping
+                                if (Enum.IsDefined(typeof(ContactTitles), contactPayload.title))
                                 {
-                                    _contactId = contactRecordWithEmail.ContactId;
-                                    _uniqueReference = contactRecordWithEmail.UniqueReference.ToString();
+                                    //Check whether gendercode is found in Dynamics GenderEnum mapping
+                                    string contactTitle = Enum.GetName(typeof(ContactTitles), contactPayload.title);
+                                    if (string.IsNullOrEmpty(contactTitle))
+                                    {
+                                        defra_Title dynamicsTitle = (defra_Title)Enum.Parse(typeof(defra_Title), contactTitle);
+                                        contact[CommonSchema.Contact.TITLE] = new OptionSetValue((int)dynamicsTitle);
+                                    }
+
                                 }
                             }
-                            if (_contactId == Guid.Empty)
-                            {
-                                objCommon.tracingService.Trace("CreateContact activity:ContactRecordGuidWithUPN is empty started, Creating Contact..");
-                                if (contactPayload.title != null)
-                                {
-                                    //Check whether the gendercode is found in GenderEnum mapping
-                                    if (Enum.IsDefined(typeof(ContactTitles), contactPayload.title))
-                                    {
-                                        //Check whether gendercode is found in Dynamics GenderEnum mapping
-                                        string contactTitle = Enum.GetName(typeof(ContactTitles), contactPayload.title);
-                                        if (string.IsNullOrEmpty(contactTitle))
-                                        {
-                                            defra_Title dynamicsTitle = (defra_Title)Enum.Parse(typeof(defra_Title), contactTitle);
-                                            contact[D365.Common.schema.Contact.TITLE] = new OptionSetValue((int)dynamicsTitle);
-                                        }
+                            if (contactPayload.firstname != null)
+                                contact[CommonSchema.Contact.FIRSTNAME] = contactPayload.firstname;
+                            if (contactPayload.lastname != null)
+                                contact[CommonSchema.Contact.LASTNAME] = contactPayload.lastname;
+                            if (contactPayload.middlename != null)
+                                contact[CommonSchema.Contact.MIDDLENAME] = contactPayload.middlename;
+                            if (contactPayload.email != null)
+                                contact[CommonSchema.Contact.EMAILADDRESS1] = contactPayload.email;
+                            if (contactPayload.b2cobjectid != null)
+                                contact[CommonSchema.Contact.B2COBJECTID] = contactPayload.b2cobjectid;
+                            if (contactPayload.tacsacceptedversion != null)
+                                contact[CommonSchema.Contact.TACSACCEPTEDVERSION] = contactPayload.tacsacceptedversion;
+                            if (contactPayload.telephone != null)
+                                contact[CommonSchema.Contact.TELEPHONE1] = contactPayload.telephone;
 
+                            objCommon.tracingService.Trace("setting contact date params:started..");
+                            if (!string.IsNullOrEmpty(contactPayload.tacsacceptedon) && !string.IsNullOrWhiteSpace(contactPayload.tacsacceptedon))
+                            {
+                                objCommon.tracingService.Trace("date accepted on in string" + contactPayload.tacsacceptedon);
+                                DateTime resultDate;
+                                if (DateTime.TryParse(contactPayload.tacsacceptedon, out resultDate))
+                                {
+                                    objCommon.tracingService.Trace("date accepted on in dateformat" + resultDate);
+                                    contact[CommonSchema.Contact.TACSACCEPTEDON] = (resultDate);
+                                }
+                            }
+
+                            //set birthdate
+                            if (!string.IsNullOrEmpty(contactPayload.dob) && !string.IsNullOrWhiteSpace(contactPayload.dob))
+                            {
+                                DateTime resultDob;
+                                if (DateTime.TryParse(contactPayload.dob, out resultDob))
+                                    contact[CommonSchema.Contact.GENDERCODE] = resultDob;
+                            }
+
+                            if (contactPayload.gender != null)
+                            {
+                                //Check whether the gendercode is found in GenderEnum mapping
+                                if (Enum.IsDefined(typeof(ContactGenderCodes), contactPayload.gender))
+                                {
+                                    //Check whether gendercode is found in Dynamics GenderEnum mapping
+                                    string genderCode = Enum.GetName(typeof(Contact_GenderCode), contactPayload.gender);
+                                    {
+                                        Contact_GenderCode dynamicsGenderCode = (Contact_GenderCode)Enum.Parse(typeof(Contact_GenderCode), genderCode);
+                                        contact[CommonSchema.Contact.GENDERCODE] = new OptionSetValue((int)dynamicsGenderCode);
                                     }
                                 }
-                                if (contactPayload.firstname != null)
-                                    contact[D365.Common.schema.Contact.FIRSTNAME] = contactPayload.firstname;
-                                if (contactPayload.lastname != null)
-                                    contact[D365.Common.schema.Contact.LASTNAME] = contactPayload.lastname;
-                                if (contactPayload.middlename != null)
-                                    contact[D365.Common.schema.Contact.MIDDLENAME] = contactPayload.middlename;
-                                if (contactPayload.email != null)
-                                    contact[D365.Common.schema.Contact.EMAILADDRESS1] = contactPayload.email;
-                                if (contactPayload.b2cobjectid != null)
-                                    contact[D365.Common.schema.Contact.B2COBJECTID] = contactPayload.b2cobjectid;
-                                if (contactPayload.tacsacceptedversion != null)
-                                    contact[D365.Common.schema.Contact.TACSACCEPTEDVERSION] = contactPayload.tacsacceptedversion;
-                                if (contactPayload.telephone != null)
-                                    contact[D365.Common.schema.Contact.TELEPHONE1] = contactPayload.telephone;
-
-                                objCommon.tracingService.Trace("setting contact date params:started..");
-                                if (!string.IsNullOrEmpty(contactPayload.tacsacceptedon) && !string.IsNullOrWhiteSpace(contactPayload.tacsacceptedon))
-                                {
-                                    objCommon.tracingService.Trace("date accepted on in string" + contactPayload.tacsacceptedon);
-                                    DateTime resultDate;
-                                    if (DateTime.TryParse(contactPayload.tacsacceptedon, out resultDate))
-                                    {
-                                        objCommon.tracingService.Trace("date accepted on in dateformat" + resultDate);
-                                        contact[D365.Common.schema.Contact.TACSACCEPTEDON] = (resultDate);
-                                    }
-                                }
-
-                                //set birthdate
-                                if (!string.IsNullOrEmpty(contactPayload.dob) && !string.IsNullOrWhiteSpace(contactPayload.dob))
-                                {
-                                    DateTime resultDob;
-                                    if (DateTime.TryParse(contactPayload.dob, out resultDob))
-                                        contact[D365.Common.schema.Contact.GENDERCODE] = resultDob;
-                                }
-
-                                if (contactPayload.gender != null)
-                                {
-                                    //Check whether the gendercode is found in GenderEnum mapping
-                                    if (Enum.IsDefined(typeof(ContactGenderCodes), contactPayload.gender))
-                                    {
-                                        //Check whether gendercode is found in Dynamics GenderEnum mapping
-                                        string genderCode = Enum.GetName(typeof(Contact_GenderCode), contactPayload.gender);
-                                        {
-                                            Contact_GenderCode dynamicsGenderCode = (Contact_GenderCode)Enum.Parse(typeof(Contact_GenderCode), genderCode);
-                                            contact[D365.Common.schema.Contact.GENDERCODE] = new OptionSetValue((int)dynamicsGenderCode);
-                                        }
-                                    }
-                                }
-                                objCommon.tracingService.Trace("CreateContact activity:started..");
-                                _contactId = objCommon.service.Create(contact);
-                                Entity contactRecord = objCommon.service.Retrieve(D365.Common.schema.Contact.ENTITY, _contactId, new Microsoft.Xrm.Sdk.Query.ColumnSet(true));//Defra.CustMaster.D365.Common.schema.Contact.UNIQUEREFERENCE));
-                                objCommon.tracingService.Trace((string)contactRecord[Defra.CustMaster.D365.Common.schema.Contact.UNIQUEREFERENCE]);
-                                _uniqueReference = (string)contactRecord[Defra.CustMaster.D365.Common.schema.Contact.UNIQUEREFERENCE];
-                                _errorCode = 200;//Success
-                                objCommon.tracingService.Trace("CreateContact activity:ended. " + _contactId.ToString());
-
-                                //create contact address and contact details
-                                if (contactPayload.address != null)
-                                {
-                                    objCommon.CreateAddress(contactPayload.address, new EntityReference(D365.Common.schema.Contact.ENTITY, _contactId));
-                                }
                             }
-                            else
+                            objCommon.tracingService.Trace("CreateContact activity:started..");
+                            _contactId = objCommon.service.Create(contact);
+                            Entity contactRecord = objCommon.service.Retrieve(CommonSchema.Contact.ENTITY, _contactId, new Microsoft.Xrm.Sdk.Query.ColumnSet(true));//Defra.CustMaster.D365.Common.schema.Contact.UNIQUEREFERENCE));
+                            objCommon.tracingService.Trace((string)contactRecord[CommonSchema.Contact.UNIQUEREFERENCE]);
+                            _uniqueReference = (string)contactRecord[CommonSchema.Contact.UNIQUEREFERENCE];
+                            _errorCode = 200;//Success
+                            objCommon.tracingService.Trace("CreateContact activity:ended. " + _contactId.ToString());
+
+                            //create contact address and contact details
+                            if (contactPayload.address != null)
                             {
-                                objCommon.tracingService.Trace("CreateContact activity:ContactRecordGuidWithB2C/Email is found/duplicate.");
-                                _errorCode = 412;//Duplicate UPN
-                                _errorMessage = "Duplicate Record";
+                                objCommon.CreateAddress(contactPayload.address, new EntityReference(D365.Common.schema.Contact.ENTITY, _contactId));
                             }
+                        }
+                        else
+                        {
+                            objCommon.tracingService.Trace("CreateContact activity:ContactRecordGuidWithB2C/Email is found/duplicate.");
+                            _errorCode = 412;//Duplicate UPN
+                            _errorMessage = "Duplicate Record";
                         }
                     }
-                    else
-                    {
-                        objCommon.tracingService.Trace("inside validation result");
-
-
-                        StringBuilder ErrorMessage = new StringBuilder();
-                        //this will throw an error
-                        foreach (System.ComponentModel.DataAnnotations.ValidationResult vr in ValidationResults)
-                        {
-                            ErrorMessage.Append(vr.ErrorMessage + " ");
-                        }
-
-                        foreach (System.ComponentModel.DataAnnotations.ValidationResult vr in ValidationResultsAddress)
-                        {
-                            ErrorMessage.Append(vr.ErrorMessage + " ");
-                        }
-                        _errorCode = 400;
-                        _errorMessage = ErrorMessage.ToString();
-                    }
-                    objCommon.tracingService.Trace("CreateContact activity:setting output params like error code etc.. started");
-
-                    objCommon.tracingService.Trace("CreateContact activity:setting output params like error code etc.. ended");
                 }
+                else
+                {
+                    objCommon.tracingService.Trace("inside validation result");
+
+
+                    StringBuilder ErrorMessage = new StringBuilder();
+                    //this will throw an error
+                    foreach (ValidationResult vr in ValidationResults)
+                    {
+                        ErrorMessage.Append(vr.ErrorMessage + " ");
+                    }
+                    if (contactPayload.address != null)
+                        foreach (ValidationResult vr in ValidationResultsAddress)
+                        {
+                            ErrorMessage.Append(vr.ErrorMessage + " ");
+                        }
+                    _errorCode = 400;
+                    _errorMessage = ErrorMessage.ToString();
+                }
+                objCommon.tracingService.Trace("CreateContact activity:setting output params like error code etc.. started");
+                objCommon.tracingService.Trace("CreateContact activity:setting output params like error code etc.. ended");
 
             }
             catch (Exception ex)
@@ -249,40 +240,12 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                         error = new ResponseErrorBase() { details = _errorMessageDetail == string.Empty ? _errorMessage : _errorMessageDetail }
                     }
 
-                    //contactData = new ContactData()
-                    //{
-                    //    contactid = _contactId == Guid.Empty ? null : _contactId.ToString(),
-                    //    uniquereference = _uniqueReference == string.Empty ? null : _uniqueReference,
-                    //    error = new ResponseErrorBase() { details = _errorMessageDetail == string.Empty ? _errorMessage : _errorMessageDetail }
-                    //}
-
                 };
-                MemoryStream ms = new MemoryStream();
 
-                // Serializer the Response object to the stream.  
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ContactResponse));
-                ser.WriteObject(ms, responsePayload);
-
-                ms.Position = 0;
-                StreamReader sr = new StreamReader(ms);
-                string json = sr.ReadToEnd();
-                sr.Close();
-                ms.Close();
-                Response.Set(executionContext, json);
+                string resPayload = JsonConvert.SerializeObject(responsePayload);
+                ResPayload.Set(executionContext, resPayload);
                 objCommon.tracingService.Trace("finally block end");
             }
-            //catch (FaultException<OrganizationServiceFault> ex)
-            //{
-            //    ErrorCode = 500;//Internal Error
-            //    _ErrorMessage = "Error occured while processing request";
-            //    _ErrorMessageDetail = ex.Message;
-            //    //throw ex;
-            //    this.Code.Set(executionContext, ErrorCode.ToString());
-            //    this.Message.Set(executionContext, _ErrorMessage);
-            //    this.MessageDetail.Set(executionContext, _ErrorMessageDetail);
-            //    objCommon.tracingService.Trace(ex.Message);
-
-            //}
 
             #endregion
 
