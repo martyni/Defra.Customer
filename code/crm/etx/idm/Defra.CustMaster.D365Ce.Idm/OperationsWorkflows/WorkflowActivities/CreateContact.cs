@@ -23,10 +23,10 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
 
         [RequiredArgument]
         [Input("request")]
-        public InArgument<String> ReqPayload { get; set; }
+        public InArgument<String> Payload { get; set; }
 
         [Output("response")]
-        public OutArgument<String> ResPayload { get; set; }
+        public OutArgument<String> Response { get; set; }
 
         #endregion
         #region Local Properties
@@ -51,7 +51,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
 
             try
             {
-                string jsonPayload = ReqPayload.Get(executionContext);
+                string jsonPayload = Payload.Get(executionContext);
                 Contact contactPayload = JsonConvert.DeserializeObject<Contact>(jsonPayload);
 
                 Entity contact = new Entity(CommonSchema.Contact.ENTITY);//,"defra_upn", _UPN);
@@ -243,7 +243,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                 };
 
                 string resPayload = JsonConvert.SerializeObject(responsePayload);
-                ResPayload.Set(executionContext, resPayload);
+                Response.Set(executionContext, resPayload);
                 objCommon.tracingService.Trace("finally block end");
             }
 
