@@ -56,8 +56,8 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
             {
                 string jsonPayload = this.PayLoad.Get(context);
                 Contact contactPayload = JsonConvert.DeserializeObject<Contact>(jsonPayload);
-
-                Entity contact = new Entity(CommonSchema.Contact.ENTITY);
+                Boolean duplicateRecordExist = false;
+                Entity contact;
                 var ValidationContext = new ValidationContext(contactPayload, serviceProvider: null, items: null);
                 ICollection<ValidationResult> ValidationResults = null;
                 ICollection<ValidationResult> ValidationResultsAddress = null;
@@ -82,7 +82,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                         {
                             _contactId = contactRecordWithUPN.ContactId;
                             _uniqueReference = contactRecordWithUPN.UniqueReference.ToString();
-
+                             
 
                             //Search contact record based on key named emailaddress to prevent duplicates
                             if (!string.IsNullOrEmpty(contactPayload.email))
@@ -92,17 +92,16 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                                 //compare with record ignoring current record
                                 var ContactWithEmail = from c in orgSvcContext.CreateQuery(CommonSchema.Contact.ENTITY)
                                                        where ((string)c[CommonSchema.Contact.EMAILADDRESS1]) == contactPayload.email.Trim()
-                                                       && c[CommonSchema.Contact.UNIQUEREFERENCE] != contactRecordWithUPN.UniqueReference
+                                                       && (string)c[CommonSchema.Contact.UNIQUEREFERENCE] != _uniqueReference
                                                        select new { ContactId = c.Id, UniqueReference = c[CommonSchema.Contact.UNIQUEREFERENCE] };
                                 var contactRecordWithEmail = ContactWithEmail.FirstOrDefault() == null ? null : ContactWithEmail.FirstOrDefault();
-                                if (contactRecordWithEmail != null)
-                                {
-                                    _contactId = contactRecordWithEmail.ContactId;
-                                    _uniqueReference = contactRecordWithEmail.UniqueReference.ToString();
-                                }
+                                duplicateRecordExist = contactRecordWithEmail == null ? false : true;
+                                localcontext.Trace("duplicate check: " + duplicateRecordExist);
+
                             }
-                            if (_contactId == Guid.Empty)
+                            if (!duplicateRecordExist)
                             {
+                                contact = new Entity(CommonSchema.Contact.ENTITY, _contactId);
                                 localcontext.Trace("update activity:ContactRecordGuidWithUPN is empty started, update Contact..");
                                     //Check whether the gendercode is found in GenderEnum mapping
                                     if (Enum.IsDefined(typeof(ContactTitles), contactPayload.title))
@@ -148,11 +147,8 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                                         }
                                     }
                                 }
-                                localcontext.Trace("CreateContact activity:started..");
+                                localcontext.Trace("contactid: " + _contactId);
                                 objCommon.service.Update(contact);
-                                Entity contactRecord = objCommon.service.Retrieve(CommonSchema.Contact.ENTITY, _contactId, new Microsoft.Xrm.Sdk.Query.ColumnSet(true));//Defra.CustMaster.D365.Common.schema.Contact.UNIQUEREFERENCE));
-                                localcontext.Trace((string)contactRecord[CommonSchema.Contact.UNIQUEREFERENCE]);
-                                _uniqueReference = (string)contactRecord[CommonSchema.Contact.UNIQUEREFERENCE];
                                 _errorCode = 200;//Success
                                 localcontext.Trace("CreateContact activity:ended. " + _contactId.ToString());
                             }
@@ -168,7 +164,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                         {
                             {
                                 localcontext.Trace("record does not exists");
-                                _errorCode = 415;//record does not exists
+                                _errorCode = 417;//record does not exists
                                 _errorMessage = "record does not exists.";
                             }
                         }
@@ -215,7 +211,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                     message = _errorMessage,
                     datetime = DateTime.UtcNow,
                     version = "1.0.0.2",
-                    program = "CreateContact",
+                    program = "UpdateContact",
                     status = _errorCode == 200 || _errorCode == 412 ? "success" : "failure",
                     data = new ContactData()
                     {

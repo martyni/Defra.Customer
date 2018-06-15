@@ -20,5 +20,7 @@ namespace Defra.CustMaster.D365.Common.schema
         public const string TACSACCEPTEDON = "defra_tacsacceptedon";
         public const string BIRTHDATE = "birthdate";
         public const string GENDERCODE = "gendercode";
+        public const string Id = "id";
+
     }
 }
