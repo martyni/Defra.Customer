@@ -59,7 +59,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                 Entity AccountObject = new Entity(Defra.CustMaster.D365.Common.schema.AccountContants.ENTITY_NAME);
 
                 objCommon.tracingService.Trace("attempt to seriallised new");
-                IdmNs.Organisation AccountPayload = JsonConvert.DeserializeObject<IdmNs.Organisation>(PayLoad.ToString());
+                IdmNs.Organisation AccountPayload = JsonConvert.DeserializeObject<IdmNs.Organisation>(PayloadDetails);
                 objCommon.tracingService.Trace("seriallised object working");
                 var ValidationContext = new ValidationContext(AccountPayload, serviceProvider: null, items: null);
                 ICollection<System.ComponentModel.DataAnnotations.ValidationResult> ValidationResults = null;
