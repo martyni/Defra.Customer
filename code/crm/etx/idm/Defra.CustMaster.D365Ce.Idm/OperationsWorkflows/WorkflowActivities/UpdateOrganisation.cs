@@ -140,6 +140,7 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                         //check if crn exists
                         if (accountPayload.crn != null && _crn != accountPayload.crn)
                         {
+                            objCommon.tracingService.Trace("account crn:" + _crn + "request crn:" + accountPayload.crn);
                             OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
                             var checkCRNExistis = from c in orgSvcContext.CreateQuery("account")
                                                   where (string)c[CommonSchema.AccountContants.COMPANY_HOUSE_ID] == accountPayload.crn
@@ -162,16 +163,16 @@ namespace Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.WorkflowActivities
                             AccountObject[CommonSchema.AccountContants.TELEPHONE1] = accountPayload.telephone;
                         objCommon.tracingService.Trace("after  setting other fields");
 
-                        bool IsValidGuid;
-                        Guid ParentAccountId;
+                        bool isValidGuid;
+                        Guid parentAccountId;
                         if (accountPayload.parentorganisation != null && !String.IsNullOrEmpty(accountPayload.parentorganisation.parentorganisationcrmid))
                         {
-                            if ((string)existingAccountRecord[CommonSchema.AccountContants.PARENTACCOUNTID] != accountPayload.parentorganisation.parentorganisationcrmid)
+                            if (((EntityReference)existingAccountRecord[CommonSchema.AccountContants.PARENTACCOUNTID]).Id.ToString()!= accountPayload.parentorganisation.parentorganisationcrmid)
                             {
-                                IsValidGuid = Guid.TryParse(accountPayload.parentorganisation.parentorganisationcrmid, out ParentAccountId);
-                                if (IsValidGuid)
+                                isValidGuid = Guid.TryParse(accountPayload.parentorganisation.parentorganisationcrmid, out parentAccountId);
+                                if (isValidGuid)
                                 {
-                                    AccountObject[CommonSchema.AccountContants.PARENTACCOUNTID] = ParentAccountId;
+                                    AccountObject[CommonSchema.AccountContants.PARENTACCOUNTID] = new EntityReference("account", parentAccountId);
                                 }
                                 else
                                 {
