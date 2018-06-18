@@ -100,18 +100,12 @@ namespace Defra.CustMaster.Identity.WfActivities
                             {
                                 contact = new Entity(SCS.Contact.ENTITY, _contactId);
                                 localcontext.Trace("update activity:ContactRecordGuidWithUPN is empty started, update ReqContact..");
-                                    //Check whether the gendercode is found in GenderEnum mapping
-                                    if (Enum.IsDefined(typeof(SCII.ContactTitles), contactPayload.title))
-                                    {
-                                        //Check whether gendercode is found in Dynamics GenderEnum mapping
-                                        string contactTitle = Enum.GetName(typeof(SCII.ContactTitles), contactPayload.title);
-                                        if (string.IsNullOrEmpty(contactTitle))
-                                        {
-                                            SCSE.defra_Title dynamicsTitle = (SCSE.defra_Title)Enum.Parse(typeof(SCSE.defra_Title), contactTitle);
-                                            contact[SCS.Contact.TITLE] = new OptionSetValue((int)dynamicsTitle);
-                                        }
-                                    }
-                                localcontext.Trace("setting contact date params:started..");
+
+                                if (contactPayload.title.HasValue && !String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.defra_Title), contactPayload.title)))
+                                { 
+                                    contact[SCS.Contact.TITLE] = new OptionSetValue(contactPayload.title.Value);
+                                }
+                                    localcontext.Trace("setting contact date params:started..");
                                 if (!string.IsNullOrEmpty(contactPayload.tacsacceptedon) && !string.IsNullOrWhiteSpace(contactPayload.tacsacceptedon))
                                 {
                                     localcontext.Trace("date accepted on in string" + contactPayload.tacsacceptedon);
@@ -130,6 +124,12 @@ namespace Defra.CustMaster.Identity.WfActivities
                                     if (DateTime.TryParse(contactPayload.dob, out resultDob))
                                         contact[SCS.Contact.GENDERCODE] = resultDob;
                                 }
+
+                                if (contactPayload.gender.HasValue && !String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.Contact_GenderCode), contactPayload.gender)))
+                                {
+                                    contact[SCS.Contact.GENDERCODE] = new OptionSetValue(contactPayload.gender.Value);
+                                }
+
 
                                 if (contactPayload.gender != null)
                                 {
