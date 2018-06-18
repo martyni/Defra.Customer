@@ -52,7 +52,7 @@ namespace Defra.CustMaster.Identity.WfActivities
             try
             {
                 string jsonPayload = this.PayLoad.Get(context);
-                SCII.Contact contactPayload = JsonConvert.DeserializeObject<SCII.Contact>(jsonPayload);
+                SCII.ContactUpdate contactPayload = JsonConvert.DeserializeObject<SCII.ContactUpdate>(jsonPayload);
                 Boolean duplicateRecordExist = false;
                 Entity contact;
                 var ValidationContext = new ValidationContext(contactPayload, serviceProvider: null, items: null);
@@ -60,11 +60,11 @@ namespace Defra.CustMaster.Identity.WfActivities
                 ICollection<ValidationResult> ValidationResultsAddress = null;
 
                 var isValid = objCommon.Validate(contactPayload, out ValidationResults);
-                Boolean isValidAddress = contactPayload.address == null ? true :
-                objCommon.Validate(contactPayload.address, out ValidationResultsAddress);
+                //Boolean isValidAddress = contactPayload.address == null ? true :
+                //objCommon.Validate(contactPayload.address, out ValidationResultsAddress);
                 localcontext.Trace("just after validation");
 
-                if (isValid && isValidAddress)
+                if (isValid )//&& isValidAddress)
                 {
                     if (_errorMessage == string.Empty)
                     {

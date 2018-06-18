@@ -12,7 +12,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Account\Organisation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Account\UpdateOrganisation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Address.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Contact.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Contact\Contact.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Contact\ContactUpdate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Helper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\ParentOrganisation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\AccountData.cs" />
