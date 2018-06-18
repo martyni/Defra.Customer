@@ -124,8 +124,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                         }
 
                         if (!String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.defra_OrganisationType), accountPayload.type)))
-                        {
-                            objCommon.tracingService.Trace("After completing validation 12" + accountPayload.type);
+                        {                           
                             optionSetValue = accountPayload.type;
                             objCommon.tracingService.Trace("before assigning type  " + accountPayload.type);
                             objCommon.tracingService.Trace(optionSetValue.ToString());

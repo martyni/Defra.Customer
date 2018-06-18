@@ -286,19 +286,19 @@ namespace Defra.CustMaster.Identity.WfActivities
             {
                 bool genderFound = Enum.IsDefined(typeof(SCSE.Contact_GenderCode), ContactRequest.gender);
                 if (!genderFound)
-                    _ErrorMessage = "Gender Code is not valid";
+                    _ErrorMessage = String.Format("Option set value {0} for gender  not found;", ContactRequest.gender);
             }
             if (ContactRequest.title != null)
             {
                 bool titleFound = Enum.IsDefined(typeof(SCSE.defra_Title), ContactRequest.title);
                 if (!titleFound)
-                    _ErrorMessage = "Title is not valid";
+                    _ErrorMessage = String.Format("Option set value {0} for title not found;", ContactRequest.title);
             }
             if (ContactRequest.address != null && ContactRequest.address.type != null)
             {
                 if (!Enum.IsDefined(typeof(SCSE.defra_AddressType), ContactRequest.address.type))
                 {
-                    _ErrorMessage = "AddressType is not valid";
+                    _ErrorMessage = String.Format("Option set value for address of type {0} not found;", ContactRequest.address.type);
                 }
             }
             return _ErrorMessage;
