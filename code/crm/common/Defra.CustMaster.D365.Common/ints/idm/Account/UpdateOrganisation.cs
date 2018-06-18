@@ -8,11 +8,15 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         [Required(ErrorMessage = "Organisationid is mandatory.")]
         public string organisationid { get; set; }
 
+       public UpdateOrgDetails updates { get; set; }
+    }
+    public class UpdateOrgDetails
+    {
         [DataType(DataType.Text)]
-        [MaxLength(160, ErrorMessage = "Organiation name is more than 160 characters.")]       
+        [MaxLength(160, ErrorMessage = "Organiation name is more than 160 characters.")]
         public string name { get; set; }
 
-        
+
         [DataType(DataType.Text)]
         public int? type { get; set; }
 
