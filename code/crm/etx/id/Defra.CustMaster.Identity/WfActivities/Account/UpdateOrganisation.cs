@@ -69,7 +69,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                 objCommon.tracingService.Trace("attempt to seriallised");
 
                 string jsonPayload = ReqPayload.Get(executionContext);
-                SCII.Organisation accountPayload = JsonConvert.DeserializeObject<SCII.Organisation>(jsonPayload);
+                SCII.UpdateOrganisation accountPayload = JsonConvert.DeserializeObject<SCII.UpdateOrganisation>(jsonPayload);
                 objCommon.tracingService.Trace("seriallised object working");
 
                 var ValidationContext = new ValidationContext(accountPayload, serviceProvider: null, items: null);

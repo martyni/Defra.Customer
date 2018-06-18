@@ -4,8 +4,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
 {
     public partial class Organisation
     {
-        public string organisationid { get; set; }
-
+        
         [DataType(DataType.Text)]
         [MaxLength(160,ErrorMessage = "Organiation name is more than 160 characters.")]
         [Required(ErrorMessage = "Organisation name is mandatory.")]
