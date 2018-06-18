@@ -117,6 +117,22 @@ namespace Defra.CustMaster.Identity.WfActivities
                                     }
                                 }
 
+                                if (contactPayload.firstname != null)
+                                    contact[SCS.Contact.FIRSTNAME] = contactPayload.firstname;
+                                if (contactPayload.lastname != null)
+                                    contact[SCS.Contact.LASTNAME] = contactPayload.lastname;
+                                if (contactPayload.middlename != null)
+                                    contact[SCS.Contact.MIDDLENAME] = contactPayload.middlename;
+                                if (contactPayload.email != null)
+                                    contact[SCS.Contact.EMAILADDRESS1] = contactPayload.email;
+                                if (contactPayload.b2cobjectid != null)
+                                    contact[SCS.Contact.B2COBJECTID] = contactPayload.b2cobjectid;
+                                if (contactPayload.tacsacceptedversion != null)
+                                    contact[SCS.Contact.TACSACCEPTEDVERSION] = contactPayload.tacsacceptedversion;
+                                if (contactPayload.telephone != null)
+                                    contact[SCS.Contact.TELEPHONE1] = contactPayload.telephone;
+
+
                                 //set birthdate
                                 if (!string.IsNullOrEmpty(contactPayload.dob) && !string.IsNullOrWhiteSpace(contactPayload.dob))
                                 {
