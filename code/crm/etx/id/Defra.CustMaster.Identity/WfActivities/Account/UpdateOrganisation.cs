@@ -17,6 +17,9 @@ using SCIIR = Defra.CustMaster.D365.Common.Ints.Idm.Resp;
 
 namespace Defra.CustMaster.Identity.WfActivities
 {
+    /// <summary>
+    /// {\"organisationid\": \"D1B35E7C-D072-E811-A83B-000D3AB4F7AF\",\"name\": \"Update Create Limited\", \"type\" : \"910400000\", \"crn\": \"18062018\",\"email\": \"acme@acme.com\",   \"address\": { \"type\": \"3\", \"uprn\": \"20841245914\", \"buildingname\": \"Horizon House\", \"buildingnumber\": \"123\", \"street\": \"Deanery Road\", \"locality\": \"\", \"town\": \"\", \"postcode\": \"\", \"country\": \"\", \"fromcompanieshouse\": \"true\" },\"telephone\": \"004412345678\", \"hierarchylevel\": \"910400000\" , \"parentorganisation\": {\"parentorganisationcrmid\": \"89EF9173-016F-E811-A83A-000D3AB4F534\"}}
+    /// </summary>
     public class UpdateOrganisation : WorkFlowActivityBase
     {
         #region "Parameter Definition"
@@ -121,8 +124,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                         }
 
                         if (!String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.defra_OrganisationType), accountPayload.type)))
-                        {
-                            objCommon.tracingService.Trace("After completing validation 12" + accountPayload.type);
+                        {                           
                             optionSetValue = accountPayload.type;
                             objCommon.tracingService.Trace("before assigning type  " + accountPayload.type);
                             objCommon.tracingService.Trace(optionSetValue.ToString());
