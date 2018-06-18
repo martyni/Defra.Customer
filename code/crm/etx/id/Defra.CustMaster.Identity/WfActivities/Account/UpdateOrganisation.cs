@@ -166,19 +166,29 @@ namespace Defra.CustMaster.Identity.WfActivities
                         Guid ParentAccountId;
                         if (accountPayload.parentorganisation != null && !String.IsNullOrEmpty(accountPayload.parentorganisation.parentorganisationcrmid))
                         {
-                            if ((string)existingAccountRecord[SCS.AccountContants.PARENTACCOUNTID] != accountPayload.parentorganisation.parentorganisationcrmid)
+                            IsValidGuid = Guid.TryParse(accountPayload.parentorganisation.parentorganisationcrmid, out ParentAccountId);
+                            if (IsValidGuid)
                             {
-                                IsValidGuid = Guid.TryParse(accountPayload.parentorganisation.parentorganisationcrmid, out ParentAccountId);
-                                if (IsValidGuid)
+                                if (existingAccountRecord.Contains(SCS.AccountContants.PARENTACCOUNTID))
                                 {
-                                    AccountObject[SCS.AccountContants.PARENTACCOUNTID] = ParentAccountId;
+                                    objCommon.tracingService.Trace("inside parent update:" + ParentAccountId);
+                                    if ((string)existingAccountRecord[SCS.AccountContants.PARENTACCOUNTID] != accountPayload.parentorganisation.parentorganisationcrmid)
+                                    {                                       
+
+                                        AccountObject[SCS.AccountContants.PARENTACCOUNTID] = new EntityReference(SCS.AccountContants.ENTITY_NAME, ParentAccountId);
+                                    }
                                 }
                                 else
                                 {
-                                    ErrorMessage = ErrorMessage.Append(String.Format("parentorganisationcrmid: {0} is not valid guid",
-                             accountPayload.parentorganisation.parentorganisationcrmid));
+                                    AccountObject[SCS.AccountContants.PARENTACCOUNTID] = new EntityReference(SCS.AccountContants.ENTITY_NAME, ParentAccountId);
                                 }
                             }
+                            else
+                            {
+                                ErrorMessage = ErrorMessage.Append(String.Format("parentorganisationcrmid: {0} is not valid guid",
+                         accountPayload.parentorganisation.parentorganisationcrmid));
+                            }
+
                         }
                         if (accountPayload.email != null)
                             AccountObject[SCS.AccountContants.EMAILADDRESS1] = accountPayload.email;
