@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrmPackage", "CrmPackage\CrmPackage.csproj", "{93E1A5CF-6572-4939-AB08-B7570399E022}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FC905F68-7E0B-44A9-B6E7-5A8960B2CFCC} = {FC905F68-7E0B-44A9-B6E7-5A8960B2CFCC}
+		{E3060785-2F1A-42D3-9C2C-254A9DAF187A} = {E3060785-2F1A-42D3-9C2C-254A9DAF187A}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plugins", "Plugins\Plugins.csproj", "{E3060785-2F1A-42D3-9C2C-254A9DAF187A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WfActivities", "WfActivities\WfActivities.csproj", "{FC905F68-7E0B-44A9-B6E7-5A8960B2CFCC}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Defra.CustMaster.D365.Common", "..\..\..\common\Defra.CustMaster.D365.Common\Defra.CustMaster.D365.Common.shproj", "{0983A5D6-277F-4169-9575-EBE845148694}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\..\..\common\Defra.CustMaster.D365.Common\Defra.CustMaster.D365.Common.projitems*{0983a5d6-277f-4169-9575-ebe845148694}*SharedItemsImports = 13
+		..\..\..\common\Defra.CustMaster.D365.Common\Defra.CustMaster.D365.Common.projitems*{fc905f68-7e0b-44a9-b6e7-5a8960b2cfcc}*SharedItemsImports = 4
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{93E1A5CF-6572-4939-AB08-B7570399E022}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93E1A5CF-6572-4939-AB08-B7570399E022}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93E1A5CF-6572-4939-AB08-B7570399E022}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{93E1A5CF-6572-4939-AB08-B7570399E022}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93E1A5CF-6572-4939-AB08-B7570399E022}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93E1A5CF-6572-4939-AB08-B7570399E022}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{E3060785-2F1A-42D3-9C2C-254A9DAF187A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3060785-2F1A-42D3-9C2C-254A9DAF187A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3060785-2F1A-42D3-9C2C-254A9DAF187A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3060785-2F1A-42D3-9C2C-254A9DAF187A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC905F68-7E0B-44A9-B6E7-5A8960B2CFCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC905F68-7E0B-44A9-B6E7-5A8960B2CFCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC905F68-7E0B-44A9-B6E7-5A8960B2CFCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC905F68-7E0B-44A9-B6E7-5A8960B2CFCC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(CRMSolutionProperties) = preSolution
+		SolutionIsBoundToCRM = True
+	EndGlobalSection
+EndGlobal

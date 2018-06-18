@@ -42,4 +42,9 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         [DataMember]   
         public string fromcompanieshouse { get; set; }
     }
+
+    public enum AddressTypes
+    {
+        RegisteredAddress = 1, BusinessActivityAddress = 2, CorrespondenceAddress = 3, BillingorPaymentAddress = 4
+    }
 }

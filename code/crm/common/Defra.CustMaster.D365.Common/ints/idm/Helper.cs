@@ -1,12 +1,6 @@
-﻿using Defra.CustMaster.D365.Common;
-using Defra.CustMaster.D365.Common.Schema.ExtEnums;
-using Defra.CustMaster.D365Ce.Idm.OperationsWorkflows.Model;
+﻿using Defra.CustMaster.D365.Common.Schema.ExtEnums;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
-using Microsoft.Xrm.Sdk.Messages;
-using Microsoft.Xrm.Sdk.Metadata;
-using Microsoft.Xrm.Sdk.Metadata.Query;
-using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Sdk.Workflow;
 using System;
 using System.Activities;
