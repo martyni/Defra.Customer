@@ -15,6 +15,9 @@ using SCIIR = Defra.CustMaster.D365.Common.Ints.Idm.Resp;
 
 namespace Defra.CustMaster.Identity.WfActivities
 {
+    /// <summary>
+    /// {'b2cobjectid':'b2c12062018-cd20180618','title':1,'firstname':'idm.frist.cd20180618','lastname':'idm.last.cd20180618','email':'idm.cd20180618@customer.com','dob':'06/07/2018','gender':2,'telephone':'004412345678','tacsacceptedversion':'12345','tacsacceptedon':'10/09/2018 06:06:06','address':{'type':1,'uprn':20180618,'buildingname':'Horizon','buildingnumber':'3','street':'deanary','locality':'','town':'','postcode':'hp98tj','country':'gbr','fromcompanieshouse':''}}
+    /// </summary>
     public class CreateContact : WorkFlowActivityBase
     {
         #region "Parameter Definition"
@@ -105,19 +108,9 @@ namespace Defra.CustMaster.Identity.WfActivities
                             objCommon.tracingService.Trace("CreateContact activity:ContactRecordGuidWithUPN is empty started, Creating ReqContact..");
                             if (contactPayload.title != null)
                             {
-                                //Check whether the gendercode is found in GenderEnum mapping
-                                if (Enum.IsDefined(typeof(SCII.ContactTitles), contactPayload.title))
-                                {
-                                    //Check whether gendercode is found in Dynamics GenderEnum mapping
-                                    string contactTitle = Enum.GetName(typeof(SCII.ContactTitles), contactPayload.title);
-                                    if (string.IsNullOrEmpty(contactTitle))
-                                    {
-                                        SCSE.defra_Title dynamicsTitle = (SCSE.defra_Title)Enum.Parse(typeof(SCSE.defra_Title), contactTitle);
-                                        contact[SCS.Contact.TITLE] = new OptionSetValue((int)dynamicsTitle);
-                                    }
-
-                                }
+                                contact[SCS.Contact.TITLE] = new OptionSetValue((int)contactPayload.title);
                             }
+
                             if (contactPayload.firstname != null)
                                 contact[SCS.Contact.FIRSTNAME] = contactPayload.firstname;
                             if (contactPayload.lastname != null)
@@ -134,6 +127,8 @@ namespace Defra.CustMaster.Identity.WfActivities
                                 contact[SCS.Contact.TELEPHONE1] = contactPayload.telephone;
 
                             objCommon.tracingService.Trace("setting contact date params:started..");
+
+                            //set tcsaccepteddate 
                             if (!string.IsNullOrEmpty(contactPayload.tacsacceptedon) && !string.IsNullOrWhiteSpace(contactPayload.tacsacceptedon))
                             {
                                 objCommon.tracingService.Trace("date accepted on in string" + contactPayload.tacsacceptedon);
@@ -150,22 +145,14 @@ namespace Defra.CustMaster.Identity.WfActivities
                             {
                                 DateTime resultDob;
                                 if (DateTime.TryParse(contactPayload.dob, out resultDob))
-                                    contact[SCS.Contact.GENDERCODE] = resultDob;
+                                    contact[SCS.Contact.BIRTHDATE] = resultDob;
                             }
 
                             if (contactPayload.gender != null)
                             {
-                                //Check whether the gendercode is found in GenderEnum mapping
-                                if (Enum.IsDefined(typeof(SCII.ContactGenderCodes), contactPayload.gender))
-                                {
-                                    //Check whether gendercode is found in Dynamics GenderEnum mapping
-                                    string genderCode = Enum.GetName(typeof(SCSE.Contact_GenderCode), contactPayload.gender);
-                                    {
-                                        SCSE.Contact_GenderCode dynamicsGenderCode = (SCSE.Contact_GenderCode)Enum.Parse(typeof(SCSE.Contact_GenderCode), genderCode);
-                                        contact[SCS.Contact.GENDERCODE] = new OptionSetValue((int)dynamicsGenderCode);
-                                    }
-                                }
+                                contact[SCS.Contact.GENDERCODE] = new OptionSetValue((int)contactPayload.gender);
                             }
+
                             objCommon.tracingService.Trace("CreateContact activity:started..");
                             _contactId = objCommon.service.Create(contact);
                             Entity contactRecord = objCommon.service.Retrieve(SCS.Contact.ENTITY, _contactId, new Microsoft.Xrm.Sdk.Query.ColumnSet(true));//Defra.CustMaster.D365.Common.schema.ReqContact.UNIQUEREFERENCE));
@@ -244,10 +231,14 @@ namespace Defra.CustMaster.Identity.WfActivities
                 Response.Set(executionContext, resPayload);
                 objCommon.tracingService.Trace("finally block end");
             }
-
             #endregion
-
         }
+
+        /// <summary>
+        /// FieldValidation
+        /// </summary>
+        /// <param name="ContactRequest"></param>
+        /// <returns></returns>
         string FieldValidation(SCII.Contact ContactRequest)
         {
             string _ErrorMessage = string.Empty;
@@ -293,14 +284,14 @@ namespace Defra.CustMaster.Identity.WfActivities
             //else 
             if (ContactRequest.gender != null)
             {
-                bool genderFound = Enum.IsDefined(typeof(SCII.ContactGenderCodes), ContactRequest.gender);
+                bool genderFound = Enum.IsDefined(typeof(SCSE.Contact_GenderCode), ContactRequest.gender);
                 if (!genderFound)
                     _ErrorMessage = "Gender Code is not valid";
             }
-            else if (ContactRequest.title != null)
+            if (ContactRequest.title != null)
             {
-                bool genderFound = Enum.IsDefined(typeof(SCII.ContactTitles), ContactRequest.title);
-                if (!genderFound)
+                bool titleFound = Enum.IsDefined(typeof(SCSE.defra_Title), ContactRequest.title);
+                if (!titleFound)
                     _ErrorMessage = "Title is not valid";
             }
             if (ContactRequest.address != null && ContactRequest.address.type != null)

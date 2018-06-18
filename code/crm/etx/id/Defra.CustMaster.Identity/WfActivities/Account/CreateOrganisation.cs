@@ -11,6 +11,7 @@ using System.ComponentModel.DataAnnotations;
 using SCII = Defra.CustMaster.D365.Common.Ints.Idm;
 using SCIIR = Defra.CustMaster.D365.Common.Ints.Idm.Resp;
 using SCSE = Defra.CustMaster.D365.Common.Schema.ExtEnums;
+using SCS = Defra.CustMaster.D365.Common.schema;
 
 namespace Defra.CustMaster.Identity.WfActivities
 {
@@ -107,7 +108,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                                         IsValidGuid = Guid.TryParse(AccountPayload.parentorganisation.parentorganisationcrmid, out ParentAccountId);
                                         if (IsValidGuid)
                                         {
-                                            AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.PARENTACCOUNTID] = ParentAccountId;
+                                            AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.PARENTACCOUNTID] = new EntityReference(SCS.AccountContants.ENTITY_NAME, ParentAccountId); ;
                                         }
                                     }
 
