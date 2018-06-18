@@ -84,13 +84,6 @@
     <Compile Include="Account\CreateOrganisation.cs" />
     <Compile Include="Contact\UpdateContact.cs" />
     <Compile Include="Account\UpdateOrganisation.cs" />
-    <Compile Include="Requests\ReqAddressTypes.cs" />
-    <Compile Include="Requests\ReqAccount.cs" />
-    <Compile Include="Requests\ReqAddress.cs" />
-    <Compile Include="Requests\ReqContact.cs" />
-    <Compile Include="Requests\ReqContactGenderCodes.cs" />
-    <Compile Include="Requests\ReqContactTitles.cs" />
-    <Compile Include="Requests\ReqParentOrganisation.cs" />
     <Compile Include="WorkFlowActivityBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
