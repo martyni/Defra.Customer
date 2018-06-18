@@ -169,15 +169,15 @@ namespace Defra.CustMaster.Identity.WfActivities
 
                         bool IsValidGuid;
                         Guid ParentAccountId;
-                        if (accountPayload.updates.parentorganisation != null && !String.IsNullOrEmpty(accountPayload.updates.parentorganisation.parentorganisationcrmid))
+                        if (!String.IsNullOrEmpty(accountPayload.updates.parentorganisationcrmid))
                         {
-                            IsValidGuid = Guid.TryParse(accountPayload.updates.parentorganisation.parentorganisationcrmid, out ParentAccountId);
+                            IsValidGuid = Guid.TryParse(accountPayload.updates.parentorganisationcrmid, out ParentAccountId);
                             if (IsValidGuid)
                             {
                                 if (existingAccountRecord.Contains(SCS.AccountContants.PARENTACCOUNTID))
                                 {
                                     objCommon.tracingService.Trace("inside parent update:" + ParentAccountId);
-                                    if (((EntityReference)existingAccountRecord[SCS.AccountContants.PARENTACCOUNTID]).Id.ToString() != accountPayload.updates.parentorganisation.parentorganisationcrmid)
+                                    if (((EntityReference)existingAccountRecord[SCS.AccountContants.PARENTACCOUNTID]).Id.ToString() != accountPayload.updates.parentorganisationcrmid)
                                     {
 
                                         AccountObject[SCS.AccountContants.PARENTACCOUNTID] = new EntityReference(SCS.AccountContants.ENTITY_NAME, ParentAccountId);
@@ -191,7 +191,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                             else
                             {
                                 ErrorMessage = ErrorMessage.Append(String.Format("parentorganisationcrmid: {0} is not valid guid",
-                         accountPayload.updates.parentorganisation.parentorganisationcrmid));
+                         accountPayload.updates.parentorganisationcrmid));
                             }
 
                         }

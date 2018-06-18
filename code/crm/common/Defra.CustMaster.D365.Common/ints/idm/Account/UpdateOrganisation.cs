@@ -38,7 +38,8 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         public string telephone { get; set; }
 
         public int hierarchylevel { get; set; }
-        public ParentOrganisation parentorganisation { get; set; }
+        public string parentorganisationcrmid { get; set; }
+       
     }
 
 }
