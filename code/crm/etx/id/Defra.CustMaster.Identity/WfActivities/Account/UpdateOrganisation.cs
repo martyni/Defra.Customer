@@ -70,7 +70,7 @@ namespace Defra.CustMaster.Identity.WfActivities
 
                 string jsonPayload = ReqPayload.Get(executionContext);
                 SCII.UpdateOrganisation accountPayload = JsonConvert.DeserializeObject<SCII.UpdateOrganisation>(jsonPayload);
-                objCommon.tracingService.Trace("seriallised object working"+accountPayload.organisationid+","+accountPayload.updates.name);
+                objCommon.tracingService.Trace("seriallised object working" + accountPayload.organisationid + "," + accountPayload.updates.name);
 
                 var ValidationContext = new ValidationContext(accountPayload, serviceProvider: null, items: null);
                 ICollection<ValidationResult> ValidationResults = null;
@@ -101,7 +101,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                         }
                     }
                     // if org exists then go on to update the organisation
-                    if (isOrgExists&&accountPayload.updates!=null)
+                    if (isOrgExists && accountPayload.updates != null)
                     {
 
 
@@ -197,6 +197,20 @@ namespace Defra.CustMaster.Identity.WfActivities
                         }
                         if (accountPayload.updates.email != null)
                             AccountObject[SCS.AccountContants.EMAILADDRESS1] = accountPayload.updates.email;
+                        if (accountPayload.updates.validatedwithcompanieshouse!=null)
+                        {
+                            bool isValidCompaniesHouse = false;
+                            if (Boolean.TryParse(accountPayload.updates.validatedwithcompanieshouse.ToString(), out isValidCompaniesHouse))
+                            {
+                                AccountObject[SCS.AccountContants.VALIDATED_WITH_COMPANYHOUSE] = isValidCompaniesHouse;
+                            }
+                            else
+                            {
+                                ErrorMessage = ErrorMessage.Append(String.Format("validated with companyhouse value {0} is not valid;",
+                        accountPayload.updates.validatedwithcompanieshouse));
+                            }
+
+                        }
                         objCommon.tracingService.Trace("before updating guid:" + AccountObject.Id.ToString());
                         objCommon.service.Update(AccountObject);
                         objCommon.tracingService.Trace("after updating guid:{0}", AccountObject.Id.ToString());
@@ -207,7 +221,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                     //if the organisation does not exists
                     else
                     {
-                        _errorCode = 417;
+                        _errorCode = 404;
                         ErrorMessage = ErrorMessage.Append(String.Format("Oranisation with id {0} does not exists.",
                         accountPayload.organisationid));
                     }
@@ -239,7 +253,6 @@ namespace Defra.CustMaster.Identity.WfActivities
                 _errorCode = 500;
                 _errorMessage = "Error occured while processing request";
                 _errorMessageDetail = ex.Message;
-
                 objCommon.tracingService.Trace(ex.Message);
 
             }

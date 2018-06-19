@@ -99,6 +99,20 @@ namespace Defra.CustMaster.Identity.WfActivities
                                     AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.NAME] = AccountPayload.name == null ? string.Empty : AccountPayload.name;
                                     AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.COMPANY_HOUSE_ID] = AccountPayload.crn == string.Empty ? null : AccountPayload.crn;
                                     AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.TELEPHONE1] = AccountPayload.telephone == null ? string.Empty : AccountPayload.telephone;
+                                    if (AccountPayload.validatedwithcompanieshouse != null)
+                                    {
+                                        bool isValidCompaniesHouse = false;
+                                        if (Boolean.TryParse(AccountPayload.validatedwithcompanieshouse.ToString(), out isValidCompaniesHouse))
+                                        {
+                                            AccountObject[SCS.AccountContants.VALIDATED_WITH_COMPANYHOUSE] = isValidCompaniesHouse;
+                                        }
+                                        else
+                                        {
+                                            ErrorMessage = ErrorMessage.Append(String.Format("validated with companyhouse value {0} is not valid;",
+                                    AccountPayload.validatedwithcompanieshouse));
+                                        }
+
+                                    }
                                     objCommon.tracingService.Trace("after  setting other fields");
 
                                     bool IsValidGuid;

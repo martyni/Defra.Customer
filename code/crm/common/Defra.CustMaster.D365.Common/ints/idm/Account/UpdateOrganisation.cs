@@ -6,6 +6,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
     {
 
         [Required(ErrorMessage = "Organisationid is mandatory.")]
+        [MaxLength(36, ErrorMessage = "Organiation name is more than 36 characters.")]
         public string organisationid { get; set; }
 
        public UpdateOrgDetails updates { get; set; }
@@ -27,11 +28,8 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         [EmailAddress]
         [MaxLength(100, ErrorMessage = "Email address cannot be more than 100 characters long.")]
         public string email { get; set; }
-
-        [MaxLength(100, ErrorMessage = "Validated with company house should have y or n")]
-        [RegularExpression(@"^y|n",
-         ErrorMessage = "Validated with company house can either be y or n.")]
-        public string validatedwithcompanieshouse { get; set; }
+                      
+        public bool? validatedwithcompanieshouse { get; set; }
 
         public Address address { get; set; }
 

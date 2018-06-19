@@ -36,10 +36,11 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         [MaxLength(8, ErrorMessage = "Postcode cannot be greater than 8;")]
         public string postcode { get; set; }
 
-        [DataMember]       
+        [DataMember]
+        [MaxLength(3, ErrorMessage = "Country ISO ALPHA-3 Code cannot be greater than 3;")]
         public string country { get; set; }
 
-        [DataMember]   
+        [DataMember]        
         public string fromcompanieshouse { get; set; }
     }
 
