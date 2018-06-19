@@ -28,7 +28,8 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         [EmailAddress]
         [MaxLength(100, ErrorMessage = "Email address cannot be more than 100 characters long.")]
         public string email { get; set; }
-                      
+
+        [DataType(DataType.Text)]
         public bool? validatedwithcompanieshouse { get; set; }
 
         public Address address { get; set; }
