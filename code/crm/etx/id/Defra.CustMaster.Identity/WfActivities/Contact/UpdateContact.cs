@@ -177,7 +177,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                         {
                             {
                                 localcontext.Trace("record does not exists");
-                                _errorCode = 417;//record does not exists
+                                _errorCode = 404;//record does not exists
                                 _errorMessage = "record does not exists.";
                             }
                         }
