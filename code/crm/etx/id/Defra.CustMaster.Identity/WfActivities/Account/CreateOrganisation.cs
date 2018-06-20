@@ -207,7 +207,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                     data = new SCIIR.AccountData()
                     {
                         accountid = CrmGuid,
-                        uniquerefere = UniqueReference,
+                        uniquereference = UniqueReference,
                         error = new SCIIR.ResponseErrorBase() { details = _ErrorMessageDetail }
                     }
 
