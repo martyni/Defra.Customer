@@ -61,7 +61,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                 var isValid = objCommon.Validate(contactPayload, out ValidationResults);
                 localcontext.Trace("just after validation");
 
-                if (isValid )//&& isValidAddress)
+                if (isValid )
                 {
                     if (_errorMessage == string.Empty)
                     {
@@ -100,11 +100,20 @@ namespace Defra.CustMaster.Identity.WfActivities
                                 contact = new Entity(SCS.Contact.ENTITY, _contactId);
                                 localcontext.Trace("update activity:ContactRecordGuidWithUPN is empty started, update ReqContact..");
 
-                                if (contactPayload.updates.title.HasValue && !String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.defra_Title), contactPayload.updates.title)))
-                                { 
-                                    contact[SCS.Contact.TITLE] = new OptionSetValue(contactPayload.updates.title.Value);
-                                }
-                                    localcontext.Trace("setting contact date params:started..");
+                                #region Cannot be cleared
+                                //Flag to check if the clearing of data is required for the selected OrganisationRequest fields
+                               
+
+
+                                if (contactPayload.updates.firstname != null)
+                                    contact[SCS.Contact.FIRSTNAME] = contactPayload.updates.firstname;
+                                if (contactPayload.updates.lastname != null)
+                                    contact[SCS.Contact.LASTNAME] = contactPayload.updates.lastname;
+                                if (contactPayload.updates.email != null)
+                                    contact[SCS.Contact.EMAILADDRESS1] = contactPayload.updates.email;
+                                if (contactPayload.updates.tacsacceptedversion != null)
+                                    contact[SCS.Contact.TACSACCEPTEDVERSION] = contactPayload.updates.tacsacceptedversion;
+
                                 if (!string.IsNullOrEmpty(contactPayload.updates.tacsacceptedon) && !string.IsNullOrWhiteSpace(contactPayload.updates.tacsacceptedon))
                                 {
                                     localcontext.Trace("date accepted on in string" + contactPayload.updates.tacsacceptedon);
@@ -116,36 +125,63 @@ namespace Defra.CustMaster.Identity.WfActivities
                                     }
                                 }
 
-                                if (contactPayload.updates.firstname != null)
-                                    contact[SCS.Contact.FIRSTNAME] = contactPayload.updates.firstname;
-                                if (contactPayload.updates.lastname != null)
-                                    contact[SCS.Contact.LASTNAME] = contactPayload.updates.lastname;
-                                if (contactPayload.updates.middlename != null)
+                                #endregion
+
+
+                                #region These fields can be cleared
+                                bool clearRequired = contactPayload.clearlist != null &&
+                                                                            contactPayload.clearlist.fields != null
+                                                                            && contactPayload.clearlist.fields.Length > 0;
+
+                                if (clearRequired && contactPayload.clearlist.fields.Contains(SCII.ContactClearFields.title))
+                                {
+                                    contact[SCS.Contact.TITLE] = null;
+                                }
+                                else if (contactPayload.updates.title.HasValue && !String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.defra_Title), contactPayload.updates.title)))
+                                {
+                                    contact[SCS.Contact.TITLE] = new OptionSetValue(contactPayload.updates.title.Value);
+                                }
+                                localcontext.Trace("setting contact date params:started..");
+
+                                if (clearRequired && contactPayload.clearlist.fields.Contains(SCII.ContactClearFields.middlename))
+                                {
+                                    contact[SCS.Contact.MIDDLENAME] = null;
+                                }
+
+                                else if (contactPayload.updates.middlename != null)
+                                {
                                     contact[SCS.Contact.MIDDLENAME] = contactPayload.updates.middlename;
-                                if (contactPayload.updates.email != null)
-                                    contact[SCS.Contact.EMAILADDRESS1] = contactPayload.updates.email;
-                                
-                                if (contactPayload.updates.tacsacceptedversion != null)
-                                    contact[SCS.Contact.TACSACCEPTEDVERSION] = contactPayload.updates.tacsacceptedversion;
-                                if (contactPayload.updates.telephone != null)
+                                }
+
+                                if (clearRequired && contactPayload.clearlist.fields.Contains(SCII.ContactClearFields.telephone))
+                                {
                                     contact[SCS.Contact.TELEPHONE1] = contactPayload.updates.telephone;
+
+                                }
+                                else if (contactPayload.updates.telephone != null)
+                                { 
+                                        contact[SCS.Contact.TELEPHONE1] = contactPayload.updates.telephone;
+                                }
 
 
                                 //set birthdate
-                                if (!string.IsNullOrEmpty(contactPayload.updates.dob) && !string.IsNullOrWhiteSpace(contactPayload.updates.dob))
+
+                                if (clearRequired && contactPayload.clearlist.fields.Contains(SCII.ContactClearFields.dob))
+                                {
+                                    contact[SCS.Contact.GENDERCODE] = null;
+                                }
+                                else if (!string.IsNullOrEmpty(contactPayload.updates.dob) && !string.IsNullOrWhiteSpace(contactPayload.updates.dob))
                                 {
                                     DateTime resultDob;
                                     if (DateTime.TryParse(contactPayload.updates.dob, out resultDob))
                                         contact[SCS.Contact.GENDERCODE] = resultDob;
                                 }
 
-                                if (contactPayload.updates.gender.HasValue && !String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.Contact_GenderCode), contactPayload.updates.gender)))
+                                if (clearRequired && contactPayload.clearlist.fields.Contains(SCII.ContactClearFields.dob))
                                 {
-                                    contact[SCS.Contact.GENDERCODE] = new OptionSetValue(contactPayload.updates.gender.Value);
+                                    contact[SCS.Contact.GENDERCODE] = null;
                                 }
-
-
-                                if (contactPayload.updates.gender != null)
+                                else if (contactPayload.updates.gender.HasValue && !String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.Contact_GenderCode), contactPayload.updates.gender)))
                                 {
                                     //Check whether the gendercode is found in GenderEnum mapping
                                     if (Enum.IsDefined(typeof(SCII.ContactGenderCodes), contactPayload.updates.gender))
@@ -153,10 +189,11 @@ namespace Defra.CustMaster.Identity.WfActivities
                                         //Check whether gendercode is found in Dynamics GenderEnum mapping
                                         string genderCode = Enum.GetName(typeof(SCSE.Contact_GenderCode), contactPayload.updates.gender);
                                         {
-                                            SCSE.Contact_GenderCode dynamicsGenderCode = (SCSE.Contact_GenderCode) Enum.Parse(typeof(SCSE.Contact_GenderCode), genderCode);
+                                            SCSE.Contact_GenderCode dynamicsGenderCode = (SCSE.Contact_GenderCode)Enum.Parse(typeof(SCSE.Contact_GenderCode), genderCode);
                                             contact[SCS.Contact.GENDERCODE] = new OptionSetValue((int)dynamicsGenderCode);
                                         }
-                                    }
+                                    } 
+                                    #endregion
                                 }
                                 localcontext.Trace("contactid: " + _contactId);
                                 objCommon.service.Update(contact);
