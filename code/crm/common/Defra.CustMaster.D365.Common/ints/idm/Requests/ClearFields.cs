@@ -6,7 +6,7 @@
         middlename,
         dob,
         gender,
-        telephone
+        telephone1
     }
 
     public enum OrganisationClearFields

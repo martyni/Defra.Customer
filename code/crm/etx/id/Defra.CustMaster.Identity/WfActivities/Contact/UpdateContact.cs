@@ -133,6 +133,9 @@ namespace Defra.CustMaster.Identity.WfActivities
                                                                             contactPayload.clearlist.fields != null
                                                                             && contactPayload.clearlist.fields.Length > 0;
 
+                                localcontext.Trace(String.Format("printing clear required value: {0}" , clearRequired));
+
+
                                 if (clearRequired && contactPayload.clearlist.fields.Contains(SCII.ContactClearFields.title))
                                 {
                                     contact[SCS.Contact.TITLE] = null;
@@ -153,7 +156,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                                     contact[SCS.Contact.MIDDLENAME] = contactPayload.updates.middlename;
                                 }
 
-                                if (clearRequired && contactPayload.clearlist.fields.Contains(SCII.ContactClearFields.telephone))
+                                if (clearRequired && contactPayload.clearlist.fields.Contains(SCII.ContactClearFields.telephone1))
                                 {
                                     contact[SCS.Contact.TELEPHONE1] = contactPayload.updates.telephone;
 
