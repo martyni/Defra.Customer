@@ -52,12 +52,11 @@ namespace Defra.CustMaster.Identity.WfActivities
             try
             {
                 string jsonPayload = this.PayLoad.Get(context);
-                SCII.ContactUpdate contactPayload = JsonConvert.DeserializeObject<SCII.ContactUpdate>(jsonPayload);
+                SCII.UpdateContact contactPayload = JsonConvert.DeserializeObject<SCII.UpdateContact>(jsonPayload);
                 Boolean duplicateRecordExist = false;
                 Entity contact;
                 var ValidationContext = new ValidationContext(contactPayload, serviceProvider: null, items: null);
                 ICollection<ValidationResult> ValidationResults = null;
-                ICollection<ValidationResult> ValidationResultsAddress = null;
 
                 var isValid = objCommon.Validate(contactPayload, out ValidationResults);
                 localcontext.Trace("just after validation");
@@ -69,7 +68,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                         //search contact record based on key named B2COBJECTID 
                         OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
                         var ContactWithUPN = from c in orgSvcContext.CreateQuery(SCS.Contact.ENTITY)
-                                             where ((Guid)c[SCS.Contact.Id]).Equals((contactPayload.contactid))
+                                             where ((Guid)c["contactid"]).Equals((contactPayload.contactid))
                                              select new { ContactId = c.Id, UniqueReference = c[SCS.Contact.UNIQUEREFERENCE] };
 
                         var contactRecordWithUPN = ContactWithUPN.FirstOrDefault() == null ? null : ContactWithUPN.FirstOrDefault();
@@ -77,9 +76,11 @@ namespace Defra.CustMaster.Identity.WfActivities
                         {
                             _contactId = contactRecordWithUPN.ContactId;
                             _uniqueReference = contactRecordWithUPN.UniqueReference.ToString();
-                             
+
 
                             //Search contact record based on key named emailaddress to prevent duplicates
+                            localcontext.Trace("before checking for data fields");
+
                             if (!string.IsNullOrEmpty(contactPayload.updates.email))
                             {
                                 localcontext.Trace("searching for contact ignoring current record");

@@ -13,20 +13,21 @@
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Account\UpdateOrganisation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Address.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Contact\Contact.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Contact\ContactUpdate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Contact\resp\AccountData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Contact\resp\AccountResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Contact\resp\ContactData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Contact\resp\ContactResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Contact\resp\ResponseCustomerMasterBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Contact\resp\ResponseDataBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Contact\resp\ResponseErrorBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Contact\UpdateContact.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Helper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\ParentOrganisation.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\AccountData.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\AccountResponse.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\ContactData.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\ContactResponse.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\ResponseCustomerMasterBase.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\ResponseDataBase.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Resp\ResponseErrorBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Schema\Account.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)schema\Address.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)schema\Contact.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)schema\ContactDetails.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)schema\CustomValidator\NulllAttributeValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)schema\ExtEnums\OptionSets.cs" />
   </ItemGroup>
 </Project>
