@@ -76,7 +76,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                 SCII.UpdateOrganisationRequest accountPayload = JsonConvert.DeserializeObject<SCII.UpdateOrganisationRequest>(jsonPayload);
                 if (accountPayload.clearlist != null)
                     //localcontext.Trace("TRACE TO CHECK:" + accountPayload.clearlist[0].ToString());
-                localcontext.Trace("TRACE TO CHECK:" + accountPayload.clearlist.fields[0].ToString());
+                    localcontext.Trace("TRACE TO CHECK:" + accountPayload.clearlist.fields[0].ToString());
 
                 var ValidationContext = new ValidationContext(accountPayload, serviceProvider: null, items: null);
                 ICollection<ValidationResult> ValidationResults = null;
@@ -87,6 +87,7 @@ namespace Defra.CustMaster.Identity.WfActivities
 
                    objCommon.Validate(accountPayload.updates, out ValidationResultUpdates);
 
+                localcontext.Trace("TRACE TO valid:" + isValid);
                 if (isValid && isValidUpdate)
                 {
                     //check organisation id exists
@@ -100,7 +101,8 @@ namespace Defra.CustMaster.Identity.WfActivities
                             {
                                 AccountObject.Id = existingAccountRecord.Id;
                                 _uniqueReference = (string)existingAccountRecord[SCS.AccountContants.UNIQUEREFERENCE];
-                                _crn = (string)existingAccountRecord[SCS.AccountContants.COMPANY_HOUSE_ID];
+                                if (existingAccountRecord.Contains(SCS.AccountContants.COMPANY_HOUSE_ID))
+                                    _crn = (string)existingAccountRecord[SCS.AccountContants.COMPANY_HOUSE_ID];
                                 isOrgExists = true;
                             }
 
