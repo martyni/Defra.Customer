@@ -60,8 +60,6 @@ namespace Defra.CustMaster.Identity.WfActivities
                 ICollection<ValidationResult> ValidationResultsAddress = null;
 
                 var isValid = objCommon.Validate(contactPayload, out ValidationResults);
-                //Boolean isValidAddress = contactPayload.address == null ? true :
-                //objCommon.Validate(contactPayload.address, out ValidationResultsAddress);
                 localcontext.Trace("just after validation");
 
                 if (isValid )//&& isValidAddress)
@@ -71,7 +69,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                         //search contact record based on key named B2COBJECTID 
                         OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
                         var ContactWithUPN = from c in orgSvcContext.CreateQuery(SCS.Contact.ENTITY)
-                                             where ((string)c[SCS.Contact.B2COBJECTID]).Equals((contactPayload.b2cobjectid.Trim()))
+                                             where ((Guid)c[SCS.Contact.Id]).Equals((contactPayload.contactid))
                                              select new { ContactId = c.Id, UniqueReference = c[SCS.Contact.UNIQUEREFERENCE] };
 
                         var contactRecordWithUPN = ContactWithUPN.FirstOrDefault() == null ? null : ContactWithUPN.FirstOrDefault();
@@ -82,13 +80,13 @@ namespace Defra.CustMaster.Identity.WfActivities
                              
 
                             //Search contact record based on key named emailaddress to prevent duplicates
-                            if (!string.IsNullOrEmpty(contactPayload.email))
+                            if (!string.IsNullOrEmpty(contactPayload.updates.email))
                             {
                                 localcontext.Trace("searching for contact ignoring current record");
 
                                 //compare with record ignoring current record
                                 var ContactWithEmail = from c in orgSvcContext.CreateQuery(SCS.Contact.ENTITY)
-                                                       where ((string)c[SCS.Contact.EMAILADDRESS1]) == contactPayload.email.Trim()
+                                                       where ((string)c[SCS.Contact.EMAILADDRESS1]) == contactPayload.updates.email.Trim()
                                                        && (string)c[SCS.Contact.UNIQUEREFERENCE] != _uniqueReference
                                                        select new { ContactId = c.Id, UniqueReference = c[SCS.Contact.UNIQUEREFERENCE] };
                                 var contactRecordWithEmail = ContactWithEmail.FirstOrDefault() == null ? null : ContactWithEmail.FirstOrDefault();
@@ -101,59 +99,58 @@ namespace Defra.CustMaster.Identity.WfActivities
                                 contact = new Entity(SCS.Contact.ENTITY, _contactId);
                                 localcontext.Trace("update activity:ContactRecordGuidWithUPN is empty started, update ReqContact..");
 
-                                if (contactPayload.title.HasValue && !String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.defra_Title), contactPayload.title)))
+                                if (contactPayload.updates.title.HasValue && !String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.defra_Title), contactPayload.updates.title)))
                                 { 
-                                    contact[SCS.Contact.TITLE] = new OptionSetValue(contactPayload.title.Value);
+                                    contact[SCS.Contact.TITLE] = new OptionSetValue(contactPayload.updates.title.Value);
                                 }
                                     localcontext.Trace("setting contact date params:started..");
-                                if (!string.IsNullOrEmpty(contactPayload.tacsacceptedon) && !string.IsNullOrWhiteSpace(contactPayload.tacsacceptedon))
+                                if (!string.IsNullOrEmpty(contactPayload.updates.tacsacceptedon) && !string.IsNullOrWhiteSpace(contactPayload.updates.tacsacceptedon))
                                 {
-                                    localcontext.Trace("date accepted on in string" + contactPayload.tacsacceptedon);
+                                    localcontext.Trace("date accepted on in string" + contactPayload.updates.tacsacceptedon);
                                     DateTime resultDate;
-                                    if (DateTime.TryParse(contactPayload.tacsacceptedon, out resultDate))
+                                    if (DateTime.TryParse(contactPayload.updates.tacsacceptedon, out resultDate))
                                     {
                                         localcontext.Trace("date accepted on in dateformat" + resultDate);
                                         contact[SCS.Contact.TACSACCEPTEDON] = (resultDate);
                                     }
                                 }
 
-                                if (contactPayload.firstname != null)
-                                    contact[SCS.Contact.FIRSTNAME] = contactPayload.firstname;
-                                if (contactPayload.lastname != null)
-                                    contact[SCS.Contact.LASTNAME] = contactPayload.lastname;
-                                if (contactPayload.middlename != null)
-                                    contact[SCS.Contact.MIDDLENAME] = contactPayload.middlename;
-                                if (contactPayload.email != null)
-                                    contact[SCS.Contact.EMAILADDRESS1] = contactPayload.email;
-                                if (contactPayload.b2cobjectid != null)
-                                    contact[SCS.Contact.B2COBJECTID] = contactPayload.b2cobjectid;
-                                if (contactPayload.tacsacceptedversion != null)
-                                    contact[SCS.Contact.TACSACCEPTEDVERSION] = contactPayload.tacsacceptedversion;
-                                if (contactPayload.telephone != null)
-                                    contact[SCS.Contact.TELEPHONE1] = contactPayload.telephone;
+                                if (contactPayload.updates.firstname != null)
+                                    contact[SCS.Contact.FIRSTNAME] = contactPayload.updates.firstname;
+                                if (contactPayload.updates.lastname != null)
+                                    contact[SCS.Contact.LASTNAME] = contactPayload.updates.lastname;
+                                if (contactPayload.updates.middlename != null)
+                                    contact[SCS.Contact.MIDDLENAME] = contactPayload.updates.middlename;
+                                if (contactPayload.updates.email != null)
+                                    contact[SCS.Contact.EMAILADDRESS1] = contactPayload.updates.email;
+                                
+                                if (contactPayload.updates.tacsacceptedversion != null)
+                                    contact[SCS.Contact.TACSACCEPTEDVERSION] = contactPayload.updates.tacsacceptedversion;
+                                if (contactPayload.updates.telephone != null)
+                                    contact[SCS.Contact.TELEPHONE1] = contactPayload.updates.telephone;
 
 
                                 //set birthdate
-                                if (!string.IsNullOrEmpty(contactPayload.dob) && !string.IsNullOrWhiteSpace(contactPayload.dob))
+                                if (!string.IsNullOrEmpty(contactPayload.updates.dob) && !string.IsNullOrWhiteSpace(contactPayload.updates.dob))
                                 {
                                     DateTime resultDob;
-                                    if (DateTime.TryParse(contactPayload.dob, out resultDob))
+                                    if (DateTime.TryParse(contactPayload.updates.dob, out resultDob))
                                         contact[SCS.Contact.GENDERCODE] = resultDob;
                                 }
 
-                                if (contactPayload.gender.HasValue && !String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.Contact_GenderCode), contactPayload.gender)))
+                                if (contactPayload.updates.gender.HasValue && !String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.Contact_GenderCode), contactPayload.updates.gender)))
                                 {
-                                    contact[SCS.Contact.GENDERCODE] = new OptionSetValue(contactPayload.gender.Value);
+                                    contact[SCS.Contact.GENDERCODE] = new OptionSetValue(contactPayload.updates.gender.Value);
                                 }
 
 
-                                if (contactPayload.gender != null)
+                                if (contactPayload.updates.gender != null)
                                 {
                                     //Check whether the gendercode is found in GenderEnum mapping
-                                    if (Enum.IsDefined(typeof(SCII.ContactGenderCodes), contactPayload.gender))
+                                    if (Enum.IsDefined(typeof(SCII.ContactGenderCodes), contactPayload.updates.gender))
                                     {
                                         //Check whether gendercode is found in Dynamics GenderEnum mapping
-                                        string genderCode = Enum.GetName(typeof(SCSE.Contact_GenderCode), contactPayload.gender);
+                                        string genderCode = Enum.GetName(typeof(SCSE.Contact_GenderCode), contactPayload.updates.gender);
                                         {
                                             SCSE.Contact_GenderCode dynamicsGenderCode = (SCSE.Contact_GenderCode) Enum.Parse(typeof(SCSE.Contact_GenderCode), genderCode);
                                             contact[SCS.Contact.GENDERCODE] = new OptionSetValue((int)dynamicsGenderCode);
@@ -194,11 +191,11 @@ namespace Defra.CustMaster.Identity.WfActivities
                     {
                         ErrorMessage.Append(vr.ErrorMessage + " ");
                     }
-                    if (contactPayload.address != null)
-                        foreach (ValidationResult vr in ValidationResultsAddress)
-                        {
-                            ErrorMessage.Append(vr.ErrorMessage + " ");
-                        }
+                    //if (contactPayload.updates.address != null)
+                    //    foreach (ValidationResult vr in ValidationResultsAddress)
+                    //    {
+                    //        ErrorMessage.Append(vr.ErrorMessage + " ");
+                    //    }
                     _errorCode = 400;
                     _errorMessage = ErrorMessage.ToString();
                 }
