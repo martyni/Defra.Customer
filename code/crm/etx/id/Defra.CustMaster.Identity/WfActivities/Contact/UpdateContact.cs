@@ -134,13 +134,17 @@ namespace Defra.CustMaster.Identity.WfActivities
                                                                             && contactPayload.clearlist.fields.Length > 0;
 
                                 localcontext.Trace(String.Format("printing clear required value: {0}" , clearRequired));
+                                localcontext.Trace(String.Format("title value: {0}", contactPayload.updates.title.HasValue ));
+
                                 if (clearRequired && contactPayload.clearlist.fields.Contains(SCII.ContactClearFields.title))
                                 {
                                     contact[SCS.Contact.TITLE] = null;
                                 }
                                 else if (contactPayload.updates.title.HasValue && !String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.defra_Title), contactPayload.updates.title)))
                                 {
+
                                     contact[SCS.Contact.TITLE] = new OptionSetValue(contactPayload.updates.title.Value);
+                                    localcontext.Trace("assigning title");
                                 }
                                 localcontext.Trace("setting contact date params:started..");
 
@@ -175,7 +179,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                                 {
                                     DateTime resultDob;
                                     if (DateTime.TryParse(contactPayload.updates.dob, out resultDob))
-                                        contact[SCS.Contact.GENDERCODE] = resultDob;
+                                        contact[SCS.Contact.BIRTHDATE] = resultDob;
                                 }
 
                                 if (clearRequired && contactPayload.clearlist.fields.Contains(SCII.ContactClearFields.dob))
