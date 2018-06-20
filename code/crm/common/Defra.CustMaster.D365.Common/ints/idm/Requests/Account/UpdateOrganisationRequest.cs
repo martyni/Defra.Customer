@@ -11,6 +11,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
 
         public UpdateOrgDetails updates { get; set; }
         public OrganisationClearList clearlist { get; set; }
+        //public OrganisationClearFields[] clearlist { get; set; }
 
     }
     public class UpdateOrgDetails
@@ -32,13 +33,12 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         public string email { get; set; }
 
         [DataType(DataType.Text)]
-        public bool? validatedwithcompanieshouse { get; set; }
-
-        public Address address { get; set; }
+        public bool? validatedwithcompanieshouse { get; set; } 
 
         public string telephone { get; set; }
 
-        public int hierarchylevel { get; set; }
+        [DataType(DataType.Text)]
+        public int? hierarchylevel { get; set; }
         public string parentorganisationcrmid { get; set; }
 
     }

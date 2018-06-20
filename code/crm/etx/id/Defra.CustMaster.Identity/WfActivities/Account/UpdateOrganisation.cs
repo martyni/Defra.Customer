@@ -61,18 +61,22 @@ namespace Defra.CustMaster.Identity.WfActivities
             string _crn = string.Empty;
             bool isOrgExists = false;
             Entity AccountObject = new Entity(SCS.AccountContants.ENTITY_NAME);
+            LocalWorkflowContext localcontext = new LocalWorkflowContext(executionContext);
 
             try
             {
                 objCommon = new SCII.Helper(executionContext);
-                objCommon.tracingService.Trace("Load CRM Service from context --- OK");
 
-                objCommon.tracingService.Trace("attempt to seriallised");
+                localcontext.Trace("started execution");
+
+
+                localcontext.Trace("attempt to seriallised");
 
                 string jsonPayload = ReqPayload.Get(executionContext);
                 SCII.UpdateOrganisationRequest accountPayload = JsonConvert.DeserializeObject<SCII.UpdateOrganisationRequest>(jsonPayload);
-                
-                objCommon.tracingService.Trace("TRACE TO CHECK:" +accountPayload.clearlist.fields[0].ToString());
+                if (accountPayload.clearlist != null)
+                    //localcontext.Trace("TRACE TO CHECK:" + accountPayload.clearlist[0].ToString());
+                localcontext.Trace("TRACE TO CHECK:" + accountPayload.clearlist.fields[0].ToString());
 
                 var ValidationContext = new ValidationContext(accountPayload, serviceProvider: null, items: null);
                 ICollection<ValidationResult> ValidationResults = null;
@@ -105,12 +109,29 @@ namespace Defra.CustMaster.Identity.WfActivities
                     // if org exists then go on to update the organisation
                     if (isOrgExists && accountPayload.updates != null)
                     {
-                        objCommon.tracingService.Trace("length{0}", accountPayload.updates.name.Length);
+                        localcontext.Trace("length:" + accountPayload.updates.name.Length);
                         //if (accountPayload.updates.hierarchylevel != 0)
 
                         #region Cannot be Cleared Update Fields
                         if (accountPayload.updates.name != null)
                             AccountObject[SCS.AccountContants.NAME] = accountPayload.updates.name;
+
+                        if (!String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.defra_OrganisationType), accountPayload.updates.type)))
+                        {
+                            optionSetValue = accountPayload.updates.type;
+                            localcontext.Trace("before assigning type  " + accountPayload.updates.type);
+                            localcontext.Trace(optionSetValue.ToString());
+                            localcontext.Trace("after  setting up option set value");
+                            OptionSetValueCollection BusinessTypes = new OptionSetValueCollection();
+                            BusinessTypes.Add(new OptionSetValue(optionSetValue.Value));
+                            AccountObject[SCS.AccountContants.TYPE] = BusinessTypes;
+                        }
+                        else
+                        {
+                            ErrorMessage = ErrorMessage.Append(String.Format("Option set value {0} for orgnisation type does not exists.",
+                            accountPayload.updates.type));
+                        }
+
                         #endregion
 
                         #region Clear able update fields
@@ -123,17 +144,17 @@ namespace Defra.CustMaster.Identity.WfActivities
                         {
                             AccountObject[SCS.AccountContants.HIERARCHYLEVEL] = null;
                         }
-                        else
-                        { 
-                            objCommon.tracingService.Trace("hierarchylevel level: {0}", accountPayload.updates.hierarchylevel);
+                        else if (accountPayload.updates.hierarchylevel != null)
+                        {
+                            localcontext.Trace("hierarchylevel level:" + accountPayload.updates.hierarchylevel);
 
                             if (!String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.defra_OrganisationHierarchyLevel), accountPayload.updates.hierarchylevel)))
                             {
 
-                                objCommon.tracingService.Trace("before assinging value");
+                                localcontext.Trace("before assinging value");
 
-                                AccountObject[SCS.AccountContants.HIERARCHYLEVEL] = new OptionSetValue(accountPayload.updates.hierarchylevel);
-                                objCommon.tracingService.Trace("after assinging value");
+                                AccountObject[SCS.AccountContants.HIERARCHYLEVEL] = new OptionSetValue((int)accountPayload.updates.hierarchylevel);
+                                localcontext.Trace("after assinging value");
                             }
                             else
                             {
@@ -141,98 +162,118 @@ namespace Defra.CustMaster.Identity.WfActivities
                                 ErrorMessage = ErrorMessage.Append(String.Format("Option set value {0} for orgnisation hirarchy level not found.",
                                 accountPayload.updates.hierarchylevel));
                             }
-                        } 
-                        #endregion
+                        }
 
-                        if (!String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.defra_OrganisationType), accountPayload.updates.type)))
+
+                        if (clearRequired && accountPayload.clearlist.fields.Contains(SCII.OrganisationClearFields.crn))
                         {
-                            optionSetValue = accountPayload.updates.type;
-                            objCommon.tracingService.Trace("before assigning type  " + accountPayload.updates.type);
-                            objCommon.tracingService.Trace(optionSetValue.ToString());
-                            objCommon.tracingService.Trace("after  setting up option set value");
-                            OptionSetValueCollection BusinessTypes = new OptionSetValueCollection();
-                            BusinessTypes.Add(new OptionSetValue(optionSetValue.Value));
-                            AccountObject[SCS.AccountContants.TYPE] = BusinessTypes;
+                            AccountObject[SCS.AccountContants.COMPANY_HOUSE_ID] = null;
                         }
                         else
                         {
-                            ErrorMessage = ErrorMessage.Append(String.Format("Option set value {0} for orgnisation type does not exists.",
-                            accountPayload.updates.type));
-                        }
 
-                        //check if crn exists
-                        if (accountPayload.updates.crn != null && _crn != accountPayload.updates.crn)
-                        {
-                            OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
-                            var checkCRNExistis = from c in orgSvcContext.CreateQuery("account")
-                                                  where (string)c[SCS.AccountContants.COMPANY_HOUSE_ID] == accountPayload.updates.crn
-                                                  select new { organisationid = c.Id };
+                            //check if crn exists
 
-
-                            if (checkCRNExistis.FirstOrDefault() == null)
+                            if (accountPayload.updates.crn != null && _crn != accountPayload.updates.crn)
                             {
-                                AccountObject[SCS.AccountContants.COMPANY_HOUSE_ID] = accountPayload.updates.crn;
-                            }
-                            else
-                            {
-                                _errorCode = 412;
-                                ErrorMessage = ErrorMessage.Append(String.Format("Company house id already exists."));
-                            }
-                        }
-                        
-                        if (accountPayload.updates.telephone != null)
-                            AccountObject[SCS.AccountContants.TELEPHONE1] = accountPayload.updates.telephone;
-                        objCommon.tracingService.Trace("after  setting other fields");
+                                OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
+                                var checkCRNExistis = from c in orgSvcContext.CreateQuery("account")
+                                                      where (string)c[SCS.AccountContants.COMPANY_HOUSE_ID] == accountPayload.updates.crn
+                                                      select new { organisationid = c.Id };
 
-                        bool IsValidGuid;
-                        Guid ParentAccountId;
-                        if (!String.IsNullOrEmpty(accountPayload.updates.parentorganisationcrmid))
-                        {
-                            IsValidGuid = Guid.TryParse(accountPayload.updates.parentorganisationcrmid, out ParentAccountId);
-                            if (IsValidGuid)
-                            {
-                                if (existingAccountRecord.Contains(SCS.AccountContants.PARENTACCOUNTID))
+
+                                if (checkCRNExistis.FirstOrDefault() == null)
                                 {
-                                    objCommon.tracingService.Trace("inside parent update:" + ParentAccountId);
-                                    if (((EntityReference)existingAccountRecord[SCS.AccountContants.PARENTACCOUNTID]).Id.ToString() != accountPayload.updates.parentorganisationcrmid)
+                                    AccountObject[SCS.AccountContants.COMPANY_HOUSE_ID] = accountPayload.updates.crn;
+                                }
+                                else
+                                {
+                                    _errorCode = 412;
+                                    ErrorMessage = ErrorMessage.Append(String.Format("Company house id already exists."));
+                                }
+                            }
+                        }
+                        if (clearRequired && accountPayload.clearlist.fields.Contains(SCII.OrganisationClearFields.telephone))
+                        {
+                            AccountObject[SCS.AccountContants.TELEPHONE1] = null;
+                        }
+                        else
+                        {
+                            if (accountPayload.updates.telephone != null)
+                                AccountObject[SCS.AccountContants.TELEPHONE1] = accountPayload.updates.telephone;
+                        }
+                        localcontext.Trace("after  setting other fields");
+                        if (clearRequired && accountPayload.clearlist.fields.Contains(SCII.OrganisationClearFields.parentorganisationcrmid))
+                        {
+                            AccountObject[SCS.AccountContants.PARENTACCOUNTID] = null;
+                        }
+                        else
+                        {
+                            bool IsValidGuid;
+                            Guid ParentAccountId;
+                            if (!String.IsNullOrEmpty(accountPayload.updates.parentorganisationcrmid))
+                            {
+                                IsValidGuid = Guid.TryParse(accountPayload.updates.parentorganisationcrmid, out ParentAccountId);
+                                if (IsValidGuid)
+                                {
+                                    if (existingAccountRecord.Contains(SCS.AccountContants.PARENTACCOUNTID))
                                     {
+                                        localcontext.Trace("inside parent update:" + ParentAccountId);
+                                        if (((EntityReference)existingAccountRecord[SCS.AccountContants.PARENTACCOUNTID]).Id.ToString() != accountPayload.updates.parentorganisationcrmid)
+                                        {
 
+                                            AccountObject[SCS.AccountContants.PARENTACCOUNTID] = new EntityReference(SCS.AccountContants.ENTITY_NAME, ParentAccountId);
+                                        }
+                                    }
+                                    else
+                                    {
                                         AccountObject[SCS.AccountContants.PARENTACCOUNTID] = new EntityReference(SCS.AccountContants.ENTITY_NAME, ParentAccountId);
                                     }
                                 }
                                 else
                                 {
-                                    AccountObject[SCS.AccountContants.PARENTACCOUNTID] = new EntityReference(SCS.AccountContants.ENTITY_NAME, ParentAccountId);
+                                    ErrorMessage = ErrorMessage.Append(String.Format("parentorganisationcrmid: {0} is not valid guid",
+                             accountPayload.updates.parentorganisationcrmid));
                                 }
-                            }
-                            else
-                            {
-                                ErrorMessage = ErrorMessage.Append(String.Format("parentorganisationcrmid: {0} is not valid guid",
-                         accountPayload.updates.parentorganisationcrmid));
-                            }
 
+                            }
                         }
-                        if (accountPayload.updates.email != null)
-                            AccountObject[SCS.AccountContants.EMAILADDRESS1] = accountPayload.updates.email;
-                        if (accountPayload.updates.validatedwithcompanieshouse != null)
+                        if (clearRequired && accountPayload.clearlist.fields.Contains(SCII.OrganisationClearFields.email))
                         {
-                            objCommon.tracingService.Trace("inside validated with companies house:" + accountPayload.updates.validatedwithcompanieshouse);
-                            bool isValidCompaniesHouse = false;
-                            if (Boolean.TryParse(accountPayload.updates.validatedwithcompanieshouse.ToString(), out isValidCompaniesHouse))
-                            {
-                                AccountObject[SCS.AccountContants.VALIDATED_WITH_COMPANYHOUSE] = isValidCompaniesHouse;
-                            }
-                            else
-                            {
-                                ErrorMessage = ErrorMessage.Append(String.Format("validated with companyhouse value {0} is not valid;",
-                        accountPayload.updates.validatedwithcompanieshouse));
-                            }
-
+                            AccountObject[SCS.AccountContants.EMAILADDRESS1] = null;
                         }
-                        objCommon.tracingService.Trace("outside validated with companies house:" + accountPayload.updates.validatedwithcompanieshouse);
-                        objCommon.tracingService.Trace("before updating guid:" + AccountObject.Id.ToString());
+                        else
+                        {
+                            if (accountPayload.updates.email != null)
+                                AccountObject[SCS.AccountContants.EMAILADDRESS1] = accountPayload.updates.email;
+                        }
+                        if (clearRequired && accountPayload.clearlist.fields.Contains(SCII.OrganisationClearFields.validatedwithcompanieshouse))
+                        {
+                            AccountObject[SCS.AccountContants.VALIDATED_WITH_COMPANYHOUSE] = null;
+                        }
+                        else
+                        {
+                            if (accountPayload.updates.validatedwithcompanieshouse != null)
+                            {
+                                localcontext.Trace("inside validated with companies house:" + accountPayload.updates.validatedwithcompanieshouse);
+                                bool isValidCompaniesHouse = false;
+                                if (Boolean.TryParse(accountPayload.updates.validatedwithcompanieshouse.ToString(), out isValidCompaniesHouse))
+                                {
+                                    AccountObject[SCS.AccountContants.VALIDATED_WITH_COMPANYHOUSE] = isValidCompaniesHouse;
+                                }
+                                else
+                                {
+                                    ErrorMessage = ErrorMessage.Append(String.Format("validated with companyhouse value {0} is not valid;",
+                            accountPayload.updates.validatedwithcompanieshouse));
+                                }
+
+                            }
+                        }
+                        #endregion
+                        localcontext.Trace("outside validated with companies house:" + accountPayload.updates.validatedwithcompanieshouse);
+                        localcontext.Trace("before updating guid:" + AccountObject.Id.ToString());
                         objCommon.service.Update(AccountObject);
-                        objCommon.tracingService.Trace("after updating guid:{0}", AccountObject.Id.ToString());
+                        localcontext.Trace("after updating guid:" + AccountObject.Id.ToString());
 
                         _errorCode = 200;
 
@@ -247,7 +288,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                 }
                 else
                 {
-                    objCommon.tracingService.Trace("inside validation result");
+                    localcontext.Trace("inside validation result");
                     ErrorMessage = new StringBuilder();
                     //this will throw an error
                     foreach (ValidationResult vr in ValidationResults)
@@ -267,19 +308,19 @@ namespace Defra.CustMaster.Identity.WfActivities
 
             catch (Exception ex)
             {
-                objCommon.tracingService.Trace("inside exception");
+                localcontext.Trace("inside exception");
 
                 _errorCode = 500;
                 _errorMessage = "Error occured while processing request";
                 _errorMessageDetail = ex.Message;
-                objCommon.tracingService.Trace(ex.Message);
+                localcontext.Trace(ex.Message);
 
             }
             finally
             {
 
 
-                objCommon.tracingService.Trace("finally block start");
+                localcontext.Trace("finally block start");
                 SCIIR.AccountResponse responsePayload = new SCIIR.AccountResponse()
                 {
                     code = _errorCode,
@@ -291,7 +332,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                     data = new SCIIR.AccountData()
                     {
                         accountid = AccountObject.Id,
-                        uniquerefere = _uniqueReference,
+                        uniquereference = _uniqueReference,
                         error = new SCIIR.ResponseErrorBase() { details = _errorMessageDetail }
                     }
 
@@ -299,7 +340,7 @@ namespace Defra.CustMaster.Identity.WfActivities
 
                 string resPayload = JsonConvert.SerializeObject(responsePayload);
                 ResPayload.Set(executionContext, resPayload);
-                objCommon.tracingService.Trace("finally block end");
+                localcontext.Trace("finally block end");
 
 
             }
