@@ -2,14 +2,16 @@
 
 namespace Defra.CustMaster.D365.Common.Ints.Idm
 {
-    public class UpdateOrganisation
+    public class UpdateOrganisationRequest
     {
 
         [Required(ErrorMessage = "Organisationid is mandatory.")]
         [MaxLength(36, ErrorMessage = "Organiation name is more than 36 characters.")]
         public string organisationid { get; set; }
 
-       public UpdateOrgDetails updates { get; set; }
+        public UpdateOrgDetails updates { get; set; }
+        public OrganisationClearList clearlist { get; set; }
+
     }
     public class UpdateOrgDetails
     {
@@ -38,7 +40,6 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
 
         public int hierarchylevel { get; set; }
         public string parentorganisationcrmid { get; set; }
-       
-    }
 
+    }
 }

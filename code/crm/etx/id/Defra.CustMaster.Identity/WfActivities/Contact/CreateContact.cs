@@ -53,7 +53,7 @@ namespace Defra.CustMaster.Identity.WfActivities
             try
             {
                 string jsonPayload = Payload.Get(executionContext);
-                SCII.Contact contactPayload = JsonConvert.DeserializeObject<SCII.Contact>(jsonPayload);
+                SCII.ContactRequest contactPayload = JsonConvert.DeserializeObject<SCII.ContactRequest>(jsonPayload);
 
                 Entity contact = new Entity(SCS.Contact.ENTITY);//,"defra_upn", _UPN);
 
@@ -239,7 +239,7 @@ namespace Defra.CustMaster.Identity.WfActivities
         /// </summary>
         /// <param name="ContactRequest"></param>
         /// <returns></returns>
-        string FieldValidation(SCII.Contact ContactRequest)
+        string FieldValidation(SCII.ContactRequest ContactRequest)
         {
             string _ErrorMessage = string.Empty;
 

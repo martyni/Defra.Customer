@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Defra.CustMaster.D365.Common.Ints.Idm
 {
-    public class UpdateContact
+    public class UpdateContactRequest
     {
 
         [Required(AllowEmptyStrings = false, ErrorMessage = "Contact ID is required and can not be empty;")]
@@ -12,6 +12,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         public String contactid { get; set; }
 
         public UpdateContactDetails updates { get; set; }
+        public ContactClearList clearlist { get; set; }
     }
     public class UpdateContactDetails
     {

@@ -52,7 +52,7 @@ namespace Defra.CustMaster.Identity.WfActivities
             try
             {
                 string jsonPayload = this.PayLoad.Get(context);
-                SCII.UpdateContact contactPayload = JsonConvert.DeserializeObject<SCII.UpdateContact>(jsonPayload);
+                SCII.UpdateContactRequest contactPayload = JsonConvert.DeserializeObject<SCII.UpdateContactRequest>(jsonPayload);
                 Boolean duplicateRecordExist = false;
                 Entity contact;
                 var ValidationContext = new ValidationContext(contactPayload, serviceProvider: null, items: null);

@@ -52,7 +52,7 @@ namespace Defra.CustMaster.Identity.WfActivities
 
             string orgPayload = ReqPayload.Get(executionContext);
 
-            DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(SCII.Organisation));
+            DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(SCII.OrganisationRequest));
             int? optionSetValue;
             Guid orgId = Guid.Empty;
             Entity existingAccountRecord = new Entity();
@@ -64,15 +64,15 @@ namespace Defra.CustMaster.Identity.WfActivities
 
             try
             {
-
                 objCommon = new SCII.Helper(executionContext);
                 objCommon.tracingService.Trace("Load CRM Service from context --- OK");
 
                 objCommon.tracingService.Trace("attempt to seriallised");
 
                 string jsonPayload = ReqPayload.Get(executionContext);
-                SCII.UpdateOrganisation accountPayload = JsonConvert.DeserializeObject<SCII.UpdateOrganisation>(jsonPayload);
-                objCommon.tracingService.Trace("seriallised object working" + accountPayload.organisationid + "," + accountPayload.updates.name);
+                SCII.UpdateOrganisationRequest accountPayload = JsonConvert.DeserializeObject<SCII.UpdateOrganisationRequest>(jsonPayload);
+                
+                objCommon.tracingService.Trace("TRACE TO CHECK:" +accountPayload.clearlist.fields[0].ToString());
 
                 var ValidationContext = new ValidationContext(accountPayload, serviceProvider: null, items: null);
                 ICollection<ValidationResult> ValidationResults = null;
@@ -105,11 +105,26 @@ namespace Defra.CustMaster.Identity.WfActivities
                     // if org exists then go on to update the organisation
                     if (isOrgExists && accountPayload.updates != null)
                     {
-
-
                         objCommon.tracingService.Trace("length{0}", accountPayload.updates.name.Length);
-                        if (accountPayload.updates.hierarchylevel != 0)
+                        //if (accountPayload.updates.hierarchylevel != 0)
+
+                        #region Cannot be Cleared Update Fields
+                        if (accountPayload.updates.name != null)
+                            AccountObject[SCS.AccountContants.NAME] = accountPayload.updates.name;
+                        #endregion
+
+                        #region Clear able update fields
+                        //Flag to check if the clearing of data is required for the selected OrganisationRequest fields
+                        bool clearRequired = accountPayload.clearlist != null &&
+                                             accountPayload.clearlist.fields != null && accountPayload.clearlist.fields.Length > 0;
+
+                        //Hierarchy Level
+                        if (clearRequired && accountPayload.clearlist.fields.Contains(SCII.OrganisationClearFields.hierarchylevel))
                         {
+                            AccountObject[SCS.AccountContants.HIERARCHYLEVEL] = null;
+                        }
+                        else
+                        { 
                             objCommon.tracingService.Trace("hierarchylevel level: {0}", accountPayload.updates.hierarchylevel);
 
                             if (!String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.defra_OrganisationHierarchyLevel), accountPayload.updates.hierarchylevel)))
@@ -126,7 +141,8 @@ namespace Defra.CustMaster.Identity.WfActivities
                                 ErrorMessage = ErrorMessage.Append(String.Format("Option set value {0} for orgnisation hirarchy level not found.",
                                 accountPayload.updates.hierarchylevel));
                             }
-                        }
+                        } 
+                        #endregion
 
                         if (!String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.defra_OrganisationType), accountPayload.updates.type)))
                         {
@@ -163,8 +179,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                                 ErrorMessage = ErrorMessage.Append(String.Format("Company house id already exists."));
                             }
                         }
-                        if (accountPayload.updates.name != null)
-                            AccountObject[SCS.AccountContants.NAME] = accountPayload.updates.name;
+                        
                         if (accountPayload.updates.telephone != null)
                             AccountObject[SCS.AccountContants.TELEPHONE1] = accountPayload.updates.telephone;
                         objCommon.tracingService.Trace("after  setting other fields");

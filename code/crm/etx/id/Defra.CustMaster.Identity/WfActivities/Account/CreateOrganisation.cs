@@ -50,7 +50,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                 Entity AccountObject = new Entity(Defra.CustMaster.D365.Common.schema.AccountContants.ENTITY_NAME);
 
                 objCommon.tracingService.Trace("attempt to seriallised new");
-                SCII.Organisation AccountPayload = JsonConvert.DeserializeObject<SCII.Organisation>(PayloadDetails);
+                SCII.OrganisationRequest AccountPayload = JsonConvert.DeserializeObject<SCII.OrganisationRequest>(PayloadDetails);
                 objCommon.tracingService.Trace("seriallised object working");
                 var ValidationContext = new ValidationContext(AccountPayload, serviceProvider: null, items: null);
                 ICollection<System.ComponentModel.DataAnnotations.ValidationResult> ValidationResults = null;
