@@ -17,5 +17,7 @@ namespace Defra.CustMaster.D365.Common.schema
         public const string VALIDATED_WITH_COMPANYHOUSE = "defra_validatedwithcompanyhouse";
         public const string EMAILADDRESS1 = "emailaddress1";
         public const string UNIQUEREFERENCE = "defra_uniquereference";
+        public const string ACCOUNTID = "accountid";
+
     }
 }

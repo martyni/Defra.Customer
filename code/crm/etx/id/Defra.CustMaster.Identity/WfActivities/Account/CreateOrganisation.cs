@@ -86,6 +86,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                                                       where (string)c[Defra.CustMaster.D365.Common.schema.AccountContants.COMPANY_HOUSE_ID] == AccountPayload.crn
                                                       select new { organisationid = c.Id };
 
+                               
                                 if (checkCRNExistis.FirstOrDefault() == null)
                                 {
                                     objCommon.tracingService.Trace("After completing validation 12" + AccountPayload.type);
@@ -117,12 +118,35 @@ namespace Defra.CustMaster.Identity.WfActivities
 
                                     bool IsValidGuid;
                                     Guid ParentAccountId;
-                                    if (AccountPayload.parentorganisation != null && String.IsNullOrEmpty(AccountPayload.parentorganisation.parentorganisationcrmid))
+                                    if (AccountPayload.parentorganisation != null && !String.IsNullOrEmpty(AccountPayload.parentorganisation.parentorganisationcrmid))
                                     {
+
+                                        objCommon.tracingService.Trace("before checking value");
                                         IsValidGuid = Guid.TryParse(AccountPayload.parentorganisation.parentorganisationcrmid, out ParentAccountId);
                                         if (IsValidGuid)
                                         {
-                                            AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.PARENTACCOUNTID] = new EntityReference(SCS.AccountContants.ENTITY_NAME, ParentAccountId); ;
+                                            var checkParentOrgExists = from c in orgSvcContext.CreateQuery("account")
+                                                                       where (string)c[Defra.CustMaster.D365.Common.schema.AccountContants.ACCOUNTID] == AccountPayload.parentorganisation.parentorganisationcrmid
+                                                                       select new
+                                                                       {
+                                                                           organisationid = c.Id
+                                                                       };
+                                            if (checkParentOrgExists.FirstOrDefault() != null)
+                                            {
+                                                AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.PARENTACCOUNTID]
+                                                        = new EntityReference(SCS.AccountContants.ENTITY_NAME, ParentAccountId);
+                                                objCommon.tracingService.Trace("after assinging value");
+                                            }
+                                            else
+                                            {
+                                                objCommon.tracingService.Trace("throwing error becuase organisation does not exists.");
+                                                throw new Exception("Parent account id does not exists.");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            objCommon.tracingService.Trace("invalid Guid.");
+                                            throw new Exception("Invalid parent account Id.");
                                         }
                                     }
 
@@ -142,6 +166,12 @@ namespace Defra.CustMaster.Identity.WfActivities
                                     ErrorMessage = ErrorMessage.Append(String.Format("Company house id already exists."));
                                 }
 
+                            }
+                            else
+                            {
+                                ErrorCode = 400;
+                                ErrorMessage = ErrorMessage.Append(String.Format("Option set value {0} for orgnisation type does not exists.",
+                                AccountPayload.type));
                             }
                         }
                         else
