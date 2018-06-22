@@ -6,11 +6,15 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
     public class AddressRequest
     {
         [Required(ErrorMessage = "record type can not be empty")]
+        [DataMember]
         public RecordType recordtype { get; set; }
 
+        [DataMember]
         [Required(ErrorMessage = "recordid can not be empty")]
         [MaxLength(36, ErrorMessage = "record id exceeded the max length(36);")]
         public string recordid { get; set; }
+
+        [DataMember]
         public Address address { get; set;}
 
     }
@@ -21,6 +25,6 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
     }
     public enum RecordType
     {
-        Organisation = 1, Contact = 2
+        organisation = 1, contact = 2
     }
 }

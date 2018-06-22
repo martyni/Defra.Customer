@@ -12,6 +12,7 @@ using SCS = Defra.CustMaster.D365.Common.schema;
 using SCSE = Defra.CustMaster.D365.Common.Schema.ExtEnums;
 using SCII = Defra.CustMaster.D365.Common.Ints.Idm;
 using SCIIR = Defra.CustMaster.D365.Common.Ints.Idm.Resp;
+using System.Globalization;
 
 namespace Defra.CustMaster.Identity.WfActivities
 {
@@ -132,7 +133,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                             {
                                 objCommon.tracingService.Trace("date accepted on in string" + contactPayload.tacsacceptedon);
                                 DateTime resultDate;
-                                if (DateTime.TryParse(contactPayload.tacsacceptedon, out resultDate))
+                                if (DateTime.TryParseExact(contactPayload.tacsacceptedon, "dd/MM/yyyy HH:mm tt", new CultureInfo("en-Uk"),DateTimeStyles.None, out resultDate))
                                 {
                                     objCommon.tracingService.Trace("date accepted on in dateformat" + resultDate);
                                     contact[SCS.Contact.TACSACCEPTEDON] = (resultDate);
@@ -143,7 +144,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                             if (!string.IsNullOrEmpty(contactPayload.dob) && !string.IsNullOrWhiteSpace(contactPayload.dob))
                             {
                                 DateTime resultDob;
-                                if (DateTime.TryParse(contactPayload.dob, out resultDob))
+                                if (DateTime.TryParseExact(contactPayload.dob,"dd/MM/yyyy", new CultureInfo("en-Uk"),DateTimeStyles.None, out resultDob))
                                     contact[SCS.Contact.BIRTHDATE] = resultDob;
                             }
 

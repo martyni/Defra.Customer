@@ -7,6 +7,7 @@ namespace Defra.CustMaster.D365.Common.schema
     public partial class Contact
     {
         public const string ENTITY = "contact";
+        public const string CONTACTID = "contactid";
         public const string NAME = "name";
         public const string B2COBJECTID = "defra_b2cobjectid";
         public const string EMAILADDRESS1 = "emailaddress1";
