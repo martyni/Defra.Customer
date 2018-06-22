@@ -80,6 +80,7 @@
     <Reference Include="System.ServiceModel" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Connection\ConnectContact.cs" />
     <Compile Include="Contact\AddAddress.cs" />
     <Compile Include="Contact\CreateContact.cs" />
     <Compile Include="Account\CreateOrganisation.cs" />
