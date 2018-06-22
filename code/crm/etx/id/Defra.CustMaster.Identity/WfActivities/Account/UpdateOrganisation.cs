@@ -34,38 +34,37 @@ namespace Defra.CustMaster.Identity.WfActivities
         public OutArgument<String> ResPayload { get; set; }
 
         #endregion
-        #region global parameters
-        SCII.Helper objCommon;
-        //EntityReference _Contact;
-        int _errorCode = 400; //Bad Request
-        string _errorMessage = string.Empty;
-        string _errorMessageDetail = string.Empty;
-        Guid orgId = Guid.Empty;
-        string _uniqueReference = string.Empty;
 
-
-        #endregion
 
         #region Execute
         public override void ExecuteCRMWorkFlowActivity(CodeActivityContext executionContext, LocalWorkflowContext crmWorkflowContext)
         {
+            #region local variables
+            SCII.Helper objCommon;
+            //EntityReference _Contact;
+            int _errorCode = 400; //Bad Request
 
-            string orgPayload = ReqPayload.Get(executionContext);
+            string _errorMessageDetail = string.Empty;
 
-            DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(SCII.OrganisationRequest));
+
+
             int? optionSetValue;
             Guid orgId = Guid.Empty;
             Entity existingAccountRecord = new Entity();
-            StringBuilder ErrorMessage = new StringBuilder();
+            StringBuilder _errorMessage = new StringBuilder();
             string _uniqueReference = string.Empty;
             string _crn = string.Empty;
             bool isOrgExists = false;
-            Entity AccountObject = new Entity(SCS.AccountContants.ENTITY_NAME);
+            #endregion
+
             LocalWorkflowContext localcontext = new LocalWorkflowContext(executionContext);
+            Entity AccountObject = new Entity(SCS.AccountContants.ENTITY_NAME);
 
             try
             {
+
                 objCommon = new SCII.Helper(executionContext);
+                OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
 
                 localcontext.Trace("started execution");
 
@@ -74,9 +73,9 @@ namespace Defra.CustMaster.Identity.WfActivities
 
                 string jsonPayload = ReqPayload.Get(executionContext);
                 SCII.UpdateOrganisationRequest accountPayload = JsonConvert.DeserializeObject<SCII.UpdateOrganisationRequest>(jsonPayload);
-                if (accountPayload.clearlist != null)
-                    //localcontext.Trace("TRACE TO CHECK:" + accountPayload.clearlist[0].ToString());
-                    localcontext.Trace("TRACE TO CHECK:" + accountPayload.clearlist.fields[0].ToString());
+                //if (accountPayload.clearlist != null)
+                //    //localcontext.Trace("TRACE TO CHECK:" + accountPayload.clearlist[0].ToString());
+                //    localcontext.Trace("TRACE TO CHECK:" + accountPayload.clearlist.fields[0].ToString());
 
                 var ValidationContext = new ValidationContext(accountPayload, serviceProvider: null, items: null);
                 ICollection<ValidationResult> ValidationResults = null;
@@ -96,7 +95,7 @@ namespace Defra.CustMaster.Identity.WfActivities
 
                         if (Guid.TryParse(accountPayload.organisationid, out orgId))
                         {
-                            existingAccountRecord = objCommon.service.Retrieve("account", orgId, new Microsoft.Xrm.Sdk.Query.ColumnSet(SCS.AccountContants.UNIQUEREFERENCE, SCS.AccountContants.COMPANY_HOUSE_ID, SCS.AccountContants.PARENTACCOUNTID));
+                            existingAccountRecord = objCommon.service.Retrieve(SCS.AccountContants.ENTITY_NAME, orgId, new Microsoft.Xrm.Sdk.Query.ColumnSet(SCS.AccountContants.UNIQUEREFERENCE, SCS.AccountContants.COMPANY_HOUSE_ID, SCS.AccountContants.PARENTACCOUNTID));
                             if (existingAccountRecord != null && existingAccountRecord.Id != null)
                             {
                                 AccountObject.Id = existingAccountRecord.Id;
@@ -130,7 +129,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                         }
                         else
                         {
-                            ErrorMessage = ErrorMessage.Append(String.Format("Option set value {0} for orgnisation type does not exists.",
+                            _errorMessage = _errorMessage.Append(String.Format("Option set value {0} for orgnisation type does not exists.",
                             accountPayload.updates.type));
                         }
 
@@ -161,7 +160,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                             else
                             {
 
-                                ErrorMessage = ErrorMessage.Append(String.Format("Option set value {0} for orgnisation hirarchy level not found.",
+                                _errorMessage = _errorMessage.Append(String.Format("Option set value {0} for orgnisation hirarchy level not found.",
                                 accountPayload.updates.hierarchylevel));
                             }
                         }
@@ -178,7 +177,7 @@ namespace Defra.CustMaster.Identity.WfActivities
 
                             if (accountPayload.updates.crn != null && _crn != accountPayload.updates.crn)
                             {
-                                OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
+                                orgSvcContext = new OrganizationServiceContext(objCommon.service);
                                 var checkCRNExistis = from c in orgSvcContext.CreateQuery("account")
                                                       where (string)c[SCS.AccountContants.COMPANY_HOUSE_ID] == accountPayload.updates.crn
                                                       select new { organisationid = c.Id };
@@ -191,7 +190,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                                 else
                                 {
                                     _errorCode = 412;
-                                    ErrorMessage = ErrorMessage.Append(String.Format("Company house id already exists."));
+                                    _errorMessage = _errorMessage.Append(String.Format("Company house id already exists."));
                                 }
                             }
                         }
@@ -218,24 +217,39 @@ namespace Defra.CustMaster.Identity.WfActivities
                                 IsValidGuid = Guid.TryParse(accountPayload.updates.parentorganisationcrmid, out ParentAccountId);
                                 if (IsValidGuid)
                                 {
-                                    if (existingAccountRecord.Contains(SCS.AccountContants.PARENTACCOUNTID))
+                                    var checkParentOrgExists = from c in orgSvcContext.CreateQuery(SCS.AccountContants.ENTITY_NAME)
+                                                               where (string)c[SCS.AccountContants.ACCOUNTID] == accountPayload.updates.parentorganisationcrmid
+                                                               select new
+                                                               {
+                                                                   organisationid = c.Id
+                                                               };
+                                    if (checkParentOrgExists.FirstOrDefault() != null)
                                     {
-                                        localcontext.Trace("inside parent update:" + ParentAccountId);
-                                        if (((EntityReference)existingAccountRecord[SCS.AccountContants.PARENTACCOUNTID]).Id.ToString() != accountPayload.updates.parentorganisationcrmid)
+                                        if (existingAccountRecord.Contains(SCS.AccountContants.PARENTACCOUNTID))
                                         {
+                                            localcontext.Trace("inside parent update:" + ParentAccountId);
+                                            if (((EntityReference)existingAccountRecord[SCS.AccountContants.PARENTACCOUNTID]).Id.ToString() != accountPayload.updates.parentorganisationcrmid)
+                                            {
 
+                                                AccountObject[SCS.AccountContants.PARENTACCOUNTID] = new EntityReference(SCS.AccountContants.ENTITY_NAME, ParentAccountId);
+                                            }
+                                        }
+                                        else
+                                        {
                                             AccountObject[SCS.AccountContants.PARENTACCOUNTID] = new EntityReference(SCS.AccountContants.ENTITY_NAME, ParentAccountId);
                                         }
                                     }
                                     else
                                     {
-                                        AccountObject[SCS.AccountContants.PARENTACCOUNTID] = new EntityReference(SCS.AccountContants.ENTITY_NAME, ParentAccountId);
+                                        localcontext.Trace("throwing error becuase organisation does not exists.");
+                                        throw new Exception("Parent account id does not exists.");
                                     }
                                 }
                                 else
                                 {
-                                    ErrorMessage = ErrorMessage.Append(String.Format("parentorganisationcrmid: {0} is not valid guid",
-                             accountPayload.updates.parentorganisationcrmid));
+
+                                    localcontext.Trace("throwing error becuase invalid Guid;");
+                                    throw new Exception("parentorganisationcrmid is not valid guid;");
                                 }
 
                             }
@@ -265,7 +279,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                                 }
                                 else
                                 {
-                                    ErrorMessage = ErrorMessage.Append(String.Format("validated with companyhouse value {0} is not valid;",
+                                    _errorMessage = _errorMessage.Append(String.Format("validated with companyhouse value {0} is not valid;",
                             accountPayload.updates.validatedwithcompanieshouse));
                                 }
 
@@ -284,23 +298,23 @@ namespace Defra.CustMaster.Identity.WfActivities
                     else
                     {
                         _errorCode = 404;
-                        ErrorMessage = ErrorMessage.Append(String.Format("Oranisation with id {0} does not exists.",
+                        _errorMessage = _errorMessage.Append(String.Format("Oranisation with id {0} does not exists.",
                         accountPayload.organisationid));
                     }
                 }
                 else
                 {
                     localcontext.Trace("inside validation result");
-                    ErrorMessage = new StringBuilder();
+                    _errorMessage = new StringBuilder();
                     //this will throw an error
                     foreach (ValidationResult vr in ValidationResults)
                     {
-                        ErrorMessage.Append(vr.ErrorMessage + " ");
+                        _errorMessage.Append(vr.ErrorMessage + " ");
                     }
                     if (ValidationResultUpdates != null)
                         foreach (ValidationResult vr in ValidationResultUpdates)
                         {
-                            ErrorMessage.Append(vr.ErrorMessage + " ");
+                            _errorMessage.Append(vr.ErrorMessage + " ");
                         }
                     _errorCode = 400;
 
@@ -313,7 +327,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                 localcontext.Trace("inside exception");
 
                 _errorCode = 500;
-                _errorMessage = "Error occured while processing request";
+                _errorMessage = _errorMessage.Append("Error occured while processing request");
                 _errorMessageDetail = ex.Message;
                 localcontext.Trace(ex.Message);
 
@@ -326,7 +340,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                 SCIIR.AccountResponse responsePayload = new SCIIR.AccountResponse()
                 {
                     code = _errorCode,
-                    message = ErrorMessage.ToString(),
+                    message = _errorMessage.ToString(),
                     datetime = DateTime.UtcNow,
                     version = "1.0.0.2",
 
@@ -335,7 +349,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                     {
                         accountid = AccountObject.Id,
                         uniquereference = _uniqueReference,
-                        error = new SCIIR.ResponseErrorBase() { details = _errorMessageDetail }
+                        error = new SCIIR.ResponseErrorBase() { details = _errorMessageDetail == string.Empty ? _errorMessage.ToString() : _errorMessageDetail }
                     }
 
                 };

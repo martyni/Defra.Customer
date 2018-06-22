@@ -9,11 +9,12 @@
     <Import_RootNamespace>Defra.CustMaster.D365.Common</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Address.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Helper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\ParentOrganisation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Requests\Account\OrganisationRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Requests\Account\UpdateOrganisationRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Requests\Address\Address.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Requests\Address\AddressRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Requests\ClearFields.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Requests\ClearLists.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Requests\Connection\ConnectContactRequest.cs" />
@@ -21,6 +22,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Requests\Contact\UpdateContactRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\AccountData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\AccountResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\AddressResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\ContactData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\ContactResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\ResponseCustomerMasterBase.cs" />

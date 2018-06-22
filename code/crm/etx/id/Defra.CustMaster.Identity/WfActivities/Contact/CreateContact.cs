@@ -30,28 +30,27 @@ namespace Defra.CustMaster.Identity.WfActivities
         public OutArgument<String> Response { get; set; }
 
         #endregion
-        #region Local Properties
-        SCII.Helper objCommon;
-        //EntityReference _Contact;
-        int _errorCode = 400; //Bad Request
-        string _errorMessage = string.Empty;
-        string _errorMessageDetail = string.Empty;
-        Guid _contactId = Guid.Empty;
-        string _uniqueReference = string.Empty;
-
-        #endregion
+       
         public override void ExecuteCRMWorkFlowActivity(CodeActivityContext executionContext, LocalWorkflowContext crmWorkflowContext)
         {
-            #region "Load CRM Service from context"
-            objCommon = new SCII.Helper(executionContext);
+            #region Local Properties
+            SCII.Helper objCommon;
+            //EntityReference _Contact;
+            int _errorCode = 400; //Bad Request
+            string _errorMessage = string.Empty;
+            string _errorMessageDetail = string.Empty;
+            Guid _contactId = Guid.Empty;
+            string _uniqueReference = string.Empty;
 
-            objCommon.tracingService.Trace("CreateContact activity:Load CRM Service from context --- OK");
             #endregion
 
             #region "Create Execution"
+            objCommon = new SCII.Helper(executionContext);
 
             try
             {
+               
+                objCommon.tracingService.Trace("CreateContact activity:Load CRM Service from context --- OK");
                 string jsonPayload = Payload.Get(executionContext);
                 SCII.ContactRequest contactPayload = JsonConvert.DeserializeObject<SCII.ContactRequest>(jsonPayload);
 
