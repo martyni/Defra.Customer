@@ -23,6 +23,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\AccountData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\AccountResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\AddressResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\ConnectContactResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\ContactData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\ContactResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\ResponseCustomerMasterBase.cs" />
