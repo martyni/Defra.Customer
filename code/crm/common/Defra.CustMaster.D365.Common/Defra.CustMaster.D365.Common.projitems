@@ -17,11 +17,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Requests\Address\AddressRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Requests\ClearFields.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Requests\ClearLists.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Requests\Connection\ConnectContactRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Requests\Contact\ContactRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\Requests\Contact\UpdateContactRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\AccountData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\AccountResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\AddressResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\ConnectContactResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\ContactData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\ContactResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\ResponseCustomerMasterBase.cs" />
