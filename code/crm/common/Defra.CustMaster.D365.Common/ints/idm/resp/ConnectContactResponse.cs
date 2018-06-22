@@ -3,16 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Defra.CustMaster.D365.Common.Ints.Idm.resp
+namespace Defra.CustMaster.D365.Common.Ints.Idm.Resp
 {
     public class ConnectContactResponse : ResponseCustomerMasterBase
     {
-        public ConnectContact data;
+        public ConnectContactData data;
     }
 
-    public class ConnectContact : ResponseDataBase
+    public class ConnectContactData : ResponseDataBase
     {
-        public Guid contactdetailsid { get; set; }
-        public Guid addressid { get; set; }
+        public Guid toconnectionid { get; set; }
+        public Guid fromconnectionid { get; set; }
     }
 }

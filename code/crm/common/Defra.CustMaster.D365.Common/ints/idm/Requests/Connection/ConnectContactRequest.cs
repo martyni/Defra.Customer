@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Defra.CustMaster.D365.Common.Ints.Idm.Requests.Connection
+namespace Defra.CustMaster.D365.Common.Ints.Idm
 {
     public partial class ConnectContactRequest
     {

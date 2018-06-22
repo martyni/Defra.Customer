@@ -31,6 +31,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Ints\Idm\resp\ResponseErrorBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Schema\Account.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)schema\Address.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)schema\Connection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)schema\Contact.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)schema\ContactDetails.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)schema\CustomValidator\NulllAttributeValidator.cs" />
