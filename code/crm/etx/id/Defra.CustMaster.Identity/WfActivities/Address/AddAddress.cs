@@ -69,8 +69,8 @@ namespace Defra.CustMaster.Identity.WfActivities
                     bool isValidAddress = _objCommon.Validate(addressPayload.address, out ValidationResultsAddress);
 
                     localcontext.Trace("TRACE TO valid:" + isValid);
-                    string customerEntity = addressPayload.recordtype == SCII.RecordType.Organisation ? SCS.AccountContants.ENTITY_NAME : SCS.Contact.ENTITY;
-                    string customerEntityId = addressPayload.recordtype == SCII.RecordType.Organisation ? SCS.AccountContants.ACCOUNTID : SCS.Contact.CONTACTID;
+                    string customerEntity = addressPayload.recordtype == SCII.RecordType.contact ? SCS.Contact.ENTITY : SCS.AccountContants.ENTITY_NAME;
+                    string customerEntityId = addressPayload.recordtype == SCII.RecordType.contact ? SCS.Contact.CONTACTID : SCS.AccountContants.ACCOUNTID;
                     if (isValid && isValidAddress)
                     {
                         //check recordid exists
@@ -82,7 +82,8 @@ namespace Defra.CustMaster.Identity.WfActivities
 
                                 localcontext.Trace("record id:" + customerEntity + ":" + _customerId);
                                 OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(_objCommon.service);
-                                var checkRecordExists = from c in orgSvcContext.CreateQuery(customerEntity) where (string)c[customerEntityId] == _customerId.ToString()
+                                var checkRecordExists = from c in orgSvcContext.CreateQuery(customerEntity)
+                                                        where (string)c[customerEntityId] == _customerId.ToString()
                                                         select new { recordId = c.Id };
 
                                 if (checkRecordExists != null && checkRecordExists.FirstOrDefault() != null)
