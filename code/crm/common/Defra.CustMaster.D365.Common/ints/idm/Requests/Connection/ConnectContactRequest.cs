@@ -12,15 +12,20 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         [MaxLength(36, ErrorMessage = "Account id cannont be more than 36 chacters.")]
         [Required(ErrorMessage = "Account id is mandatory.")]
         [DataType(DataType.Text)]
-        public string accountid { get; set; }
+        public string organisationid { get; set; }
 
+        public RelationsDetails relations;
+        
 
+    }
+
+    public partial class RelationsDetails
+    {
         [MaxLength(25, ErrorMessage = "From role name lenght cannot be more than 25.")]
         [Required(ErrorMessage = "From role is mandatory.")]
         public string fromrole { get; set; }
 
         [MaxLength(25, ErrorMessage = "To role name lenght cannot be more than 25.")]
         public string torole { get; set; }
-
     }
 }

@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WfActivities", "WfActivitie
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Defra.CustMaster.D365.Common", "..\..\..\common\Defra.CustMaster.D365.Common\Defra.CustMaster.D365.Common.shproj", "{0983A5D6-277F-4169-9575-EBE845148694}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginUnitTest", "PluginUnitTest\PluginUnitTest.csproj", "{67CB215D-9E87-47F8-8B3F-A5E874D134CC}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\..\..\common\Defra.CustMaster.D365.Common\Defra.CustMaster.D365.Common.projitems*{0983a5d6-277f-4169-9575-ebe845148694}*SharedItemsImports = 13
@@ -39,9 +41,16 @@ Global
 		{FC905F68-7E0B-44A9-B6E7-5A8960B2CFCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC905F68-7E0B-44A9-B6E7-5A8960B2CFCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC905F68-7E0B-44A9-B6E7-5A8960B2CFCC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67CB215D-9E87-47F8-8B3F-A5E874D134CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67CB215D-9E87-47F8-8B3F-A5E874D134CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67CB215D-9E87-47F8-8B3F-A5E874D134CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67CB215D-9E87-47F8-8B3F-A5E874D134CC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(CRMSolutionProperties) = preSolution
+		SolutionIsBoundToCRM = True
 	EndGlobalSection
 	GlobalSection(CRMSolutionProperties) = preSolution
 		SolutionIsBoundToCRM = True
