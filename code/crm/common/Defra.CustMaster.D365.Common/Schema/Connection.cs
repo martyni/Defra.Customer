@@ -10,7 +10,7 @@ namespace Defra.CustMaster.D365.Common.schema
         public const string CONNECTIONID = "connectionid";
         public const string CONNECTIONROLE = "connectionrole";
         public const string NAME = "name";
-        public const string REVERSECONNECTIONENTITY = "connectionroleassociation";
+        public const string CONNECTIONROLEASSOCIATION = "connectionroleassociation";
         public const string ASSOCIATEDCONNECTIONROLEID = "associatedconnectionroleid";
         public const string CONNECTIONROLEID = "connectionroleid";
 
@@ -18,7 +18,7 @@ namespace Defra.CustMaster.D365.Common.schema
         public const string RECORD2ID = "record2id";
         public const string RECORD1ROLEID = "record1roleid";
         public const string RECORD2ROLEID = "record2roleid";
-        public const string STATUS = "status";
+        public const string STATECODE = "statecode";
         public const string PRIMARYUSERROLENAME = "Primary User";
 
 
