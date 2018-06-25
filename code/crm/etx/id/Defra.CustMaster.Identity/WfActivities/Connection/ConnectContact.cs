@@ -245,16 +245,9 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                                     ErrorCode = 200;
                                 }
                             }
-
-                            
-
-
                         }
                         
                         #endregion
-
-
-
 
                     }
 
@@ -304,7 +297,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
             {
                 crmWorkflowContext.Trace("inside catch");
                 ErrorCode = 500;
-                _ErrorMessage = "Error occured while processing request";
+                _ErrorMessage = ex.Message;
 
                // crmWorkflowContext.Trace(String.Format("message details {0}", ex.Message));
                 //_ErrorMessageDetail = ex.Message ;

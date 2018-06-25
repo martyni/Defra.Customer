@@ -218,7 +218,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                 objCommon.tracingService.Trace("inside exception");
 
                 ErrorCode = 500;
-                _ErrorMessage = "Error occured while processing request";
+                ErrorMessage.Append (ex.Message);
                 _ErrorMessageDetail = ex.Message;
                 ErrorCode = 400;
                 this.ReturnMessageDetails.Set(executionContext, _ErrorMessageDetail);
@@ -227,8 +227,6 @@ namespace Defra.CustMaster.Identity.WfActivities
             }
             finally
             {
-
-
                 objCommon.tracingService.Trace("finally block start");
                 SCIIR.AccountResponse responsePayload = new SCIIR.AccountResponse()
                 {
