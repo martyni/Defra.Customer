@@ -111,21 +111,18 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                             if (contactPayload.relations.fromrole == (string)ConnectionRoles[SCS.Connection.NAME])
                             {
                                 localcontext.Trace("received from role id");
-
                                 FromEntityRole = new EntityReference(ConnectionRoles.LogicalName, ConnectionRoles.Id);
                             }
 
                             if (contactPayload.relations.torole == (string)ConnectionRoles[SCS.Connection.NAME])
                             {
                                 localcontext.Trace("received to role id");
-
                                 ToEntityRole = new EntityReference(ConnectionRoles.LogicalName, ConnectionRoles.Id);
                             }
 
                             if (SCS.Connection.PRIMARYUSERROLENAME == (string)ConnectionRoles[SCS.Connection.NAME])
                             {
                                 localcontext.Trace("received to primary role id");
-
                                 PrimaryUserRole = new EntityReference(ConnectionRoles.LogicalName, ConnectionRoles.Id);
                             }
                         } 
@@ -136,20 +133,19 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                             ErrorCode = 404;
                             _ErrorMessage = String.Format( "From role {0} not found.", contactPayload.relations.fromrole);
                         }
-                        
 
-                        if (!String.IsNullOrEmpty(contactPayload.relations.torole) && ToEntityAccount == null)
+                        if (ToEntityRole == null)
                         {
                             //to role not found
                             ErrorCode = 404;
                             _ErrorMessage = String.Format("To role {0} not found.", contactPayload.relations.torole);
                         }
 
-                        if (!String.IsNullOrEmpty(contactPayload.relations.torole) && ToEntityAccount == null)
+                        if (PrimaryUserRole == null)
                         {
                             //primary role not found
                             ErrorCode = 404;
-                            _ErrorMessage = String.Format("Primary role {0} not found.") ;
+                            _ErrorMessage = String.Format("Primary rolenot found.") ;
                         }
 
                         #endregion
@@ -160,9 +156,9 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
 
                         Guid? ToEntityRoleID = ToEntityRole == null ? Guid.Empty : ToEntityRole.Id;
 
-                        if (RoleCountToCheck > 1 && _ErrorMessage == string.Empty)
+                        if (_ErrorMessage == string.Empty)
                         {
-                            if (contactPayload.relations.fromrole != null && contactPayload.relations.torole != null)
+                            if (FromEntityRole != null && ToEntityRole!= null)
                             {
                                 localcontext.Trace("case when both role ids present");
 
@@ -170,7 +166,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                                 if (CheckIfReverseConnectionRoleExists( FromEntityRole, ToEntityRole))
                                 {
                                     localcontext.Trace("checking for reverse connection");
-                                    if ( CheckIfSameConnectionExists(FromEntityContact, ToEntityAccount,FromEntityRole.Id
+                                    if ( IsSameConnectionExists(FromEntityContact, ToEntityAccount,FromEntityRole.Id
                                         , ToEntityRole.Id))
                                         {
                                         //connection already exists
@@ -181,16 +177,28 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                                    else
                                     {
                                         //check if there is any other contact as a primary user for the same account
-                                localcontext.Trace("before primary check");
-
-                                        if (!IsPrimaryUserExists(ToEntityAccount, PrimaryUserRole.Id))
+                                        localcontext.Trace("before primary check");
+                                        if (!CheckifSingleRoleAlreadyExists(ToEntityAccount, PrimaryUserRole.Id))
                                         {
                                             //create primary connection
                                             localcontext.Trace("before creating primary connection");
-                                            CreateConnection(FromEntityContact, ToEntityAccount, FromEntityRole.Id);
+                                            CreateSingleConnection(FromEntityContact, ToEntityAccount, PrimaryUserRole.Id);
                                         }
 
-                                        ToConnectId =  CreateConnection(FromEntityContact, ToEntityAccount, FromEntityRole.Id, ToEntityRole.Id);
+                                        if(FromEntityRole != null && ToEntityRoleID != null)
+                                        {
+                                            ToConnectId = CreateDoubleConnection(FromEntityContact, ToEntityAccount, FromEntityRole.Id, ToEntityRole.Id);
+                                        }
+                                        else if(FromEntityRole == null && ToEntityRole != null)
+                                        {
+                                            ToConnectId = CreateSingleConnection(FromEntityContact, ToEntityAccount,  ToEntityRole.Id);
+
+                                        }
+                                        else if(FromEntityRole != null && ToEntityRole == null)
+                                        {
+                                            ToConnectId = CreateSingleConnection(FromEntityContact, ToEntityAccount, FromEntityRole.Id);
+
+                                        }
                                         ErrorCode = 200;
 
                                     }
@@ -206,12 +214,12 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                             else
                             {
                                 //single conneciton
-                                localcontext.Trace("single connection check");
+                                localcontext.Trace("checking if single connection exists");
 
-                                if (CheckIfSameConnectionExists( FromEntityContact, ToEntityAccount, Guid.Parse(contactPayload.relations.fromrole) ))
+                                if (CheckifSingleRoleAlreadyExists(  ToEntityAccount, ToEntityRole.Id))
                                           
                                 {
-                                    //connection already exists
+                                    //connection already
                                     ErrorCode = 412;
                                     _ErrorMessage = "Connection already exists";
                                 }
@@ -220,13 +228,13 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                                 {
                                     //check if there are any other contact as a primary user for the same account
 
-                                    if (!IsPrimaryUserExists( ToEntityAccount, PrimaryUserRole.Id))
+                                    if (!CheckifSingleRoleAlreadyExists( ToEntityAccount, PrimaryUserRole.Id))
                                     {
                                         //create primary connection
-                                        CreateConnection(FromEntityContact, ToEntityAccount, FromEntityRole.Id);
+                                        CreateSingleConnection(FromEntityContact, ToEntityAccount, PrimaryUserRole.Id);
                                     }
 
-                                    ToConnectId = CreateConnection( FromEntityContact, ToEntityAccount, FromEntityRole.Id, ToEntityRole.Id);
+                                    ToConnectId = CreateSingleConnection( FromEntityContact, ToEntityAccount,  ToEntityRole.Id);
                                     ErrorCode = 200;
                                 }
                             }
@@ -235,10 +243,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
 
 
                         }
-                        else
-                        {
-                            _ErrorMessage = "Mimimum 1 role is required.";
-                        }
+                        
                         #endregion
 
 
@@ -285,8 +290,6 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                     ErrorCode = 400;
                     _ErrorMessage = ErrorMessage.ToString();
                 }
-                localcontext.Trace("CreateContact activity:setting output params like error code etc.. started");
-                localcontext.Trace("CreateContact activity:setting output params like error code etc.. ended");
             }
 
             #region Catch Exception
@@ -296,11 +299,11 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                 ErrorCode = 500;
                 _ErrorMessage = "Error occured while processing request";
 
-                crmWorkflowContext.Trace(String.Format("message details {0}", ex.Message));
-                _ErrorMessageDetail = ex.Message;
+               // crmWorkflowContext.Trace(String.Format("message details {0}", ex.Message));
+                //_ErrorMessageDetail = ex.Message ;
                 ErrorCode = 400;
                 this.ReturnMessageDetails.Set(executionContext, _ErrorMessageDetail);
-                throw ex;
+                //throw ex;
             }
             #endregion
 
@@ -426,7 +429,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
 
         }
 
-        private Boolean CheckIfSameConnectionExists( EntityReference FromEntity, EntityReference ToEntity
+        private Boolean IsSameConnectionExists( EntityReference FromEntity, EntityReference ToEntity
             , Guid? FromConnectionRoleId, Guid? ToConnectionRoleId = null)
         {
 
@@ -439,13 +442,15 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                 var RelateConneciton = from connection in orgSvcContext.CreateQuery(SCS.Connection.CONNECTIONENTITY)
                                        where (Guid)connection[SCS.Connection.RECORD1ID] ==
                                        FromEntity.Id && (Guid)connection[SCS.Connection.RECORD2ID] == ToEntity.Id
-                                       && (Guid)connection[SCS.Connection.RECORD2ROLEID] == FromConnectionRoleId
-                                       && (Guid)connection[SCS.Connection.RECORD1ROLEID] == ToConnectionRoleId
+                                       && (Guid)connection[SCS.Connection.RECORD2ROLEID] == ToConnectionRoleId.Value
+                                       && (Guid)connection[SCS.Connection.RECORD1ROLEID] == FromConnectionRoleId.Value
                                        select new
                                        {
                                            ConnectionID = connection[SCS.Connection.CONNECTIONID]
                                        };
+                localcontext.Trace(String.Format("from role id {0} to role id {1} " , FromConnectionRoleId.Value, ToConnectionRoleId.Value));
 
+                localcontext.Trace("both ids provided count: " + RelateConneciton.ToList().Count);
 
                 returnVal = RelateConneciton.ToList().Count > 0 ? true : false;
             }
@@ -455,10 +460,17 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                 localcontext.Trace("checkign if from id provided");
 
                 var RelateConneciton = from connection in orgSvcContext.CreateQuery(SCS.Connection.CONNECTIONENTITY)
-                                       where (Guid)connection[SCS.Connection.RECORD1ID] == FromEntity.Id && connection[SCS.Connection.RECORD2ID] == ToEntity
-                                       && (Guid)connection[SCS.Connection.RECORD2ROLEID] == FromConnectionRoleId
-                                       select new { ConnectionID = connection[SCS.Connection.CONNECTIONID] };
-                localcontext.Trace(String.Format("record count: {0} " + RelateConneciton.Count()));
+                                       where (Guid)connection[SCS.Connection.RECORD1ID] ==
+                                       FromEntity.Id && (Guid)connection[SCS.Connection.RECORD2ID] == ToEntity.Id
+                                       && (Guid)connection[SCS.Connection.RECORD1ROLEID] == FromConnectionRoleId.Value
+                                       select new
+                                       {
+                                           ConnectionID = connection[SCS.Connection.CONNECTIONID]
+                                       };
+
+                localcontext.Trace(String.Format("from role id {0}", FromConnectionRoleId.Value));
+
+                localcontext.Trace(String.Format("record count: {0} " + RelateConneciton.ToList().Count()));
 
                 returnVal = RelateConneciton.ToList().Count > 0 ? true : false;
 
@@ -467,7 +479,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
         }
 
 
-        private Boolean IsPrimaryUserExists(  EntityReference ToEntity, Guid PrimaryUserConnectionRoleId)
+        private Boolean CheckifSingleRoleAlreadyExists(  EntityReference ToEntity, Guid PrimaryUserConnectionRoleId)
         {
 
             OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(localcontext.OrganizationService);
@@ -478,14 +490,35 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                                    (Guid)connection[SCS.Connection.RECORD2ROLEID] == PrimaryUserConnectionRoleId &&
                                    (int) connection[SCS.Connection.STATECODE] == 0
                                    select new { ConnectionID = connection[SCS.Connection.CONNECTIONID] };
-           // localcontext.Trace(String.Format("record count: {0} " + PrimaryUserConnection.Count()));
+
+
+           localcontext.Trace(String.Format("primary user role id {0} " , PrimaryUserConnectionRoleId));
 
             return  PrimaryUserConnection.ToList().Count > 0 ? true : false;
 
         }
 
-        private Guid CreateConnection( EntityReference FromEntity, EntityReference ToEntity
-            , Guid? FromConnectionRoleId, Guid? ToConnectionRoleId = null)
+
+        private Guid CreateSingleConnection(EntityReference FromEntity, EntityReference ToEntity
+            ,  Guid? ToConnectionRoleId)
+        {
+            Guid returnVal;
+            Entity ConnectionToCreate = new Entity
+            {
+                LogicalName = SCS.Connection.CONNECTIONENTITY,
+                [SCS.Connection.RECORD1ID] = FromEntity,
+                [SCS.Connection.RECORD2ID] = ToEntity,
+                [SCS.Connection.RECORD2ROLEID] = new EntityReference(SCS.Connection.CONNECTIONROLE,
+                             ToConnectionRoleId.Value)
+
+            };
+            localcontext.Trace("one single connection connection");
+            returnVal = localcontext.OrganizationService.Create(ConnectionToCreate);
+            return returnVal;
+        }
+
+        private Guid CreateDoubleConnection( EntityReference FromEntity, EntityReference ToEntity
+            , Guid? FromConnectionRoleId, Guid? ToConnectionRoleId )
         {
             Guid returnVal = Guid.Empty;
             Entity ConnectionToCreate;
@@ -497,7 +530,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                 localcontext.Trace("two way connection");
 
                 localcontext.Trace("from connection role id " + FromConnectionRoleId.Value);
-                localcontext.Trace("to connection role id " + ToConnectionRoleId.Value);
+               // localcontext.Trace("to connection role id " + ToConnectionRoleId.Value);
 
 
                 ConnectionToCreate = new Entity
