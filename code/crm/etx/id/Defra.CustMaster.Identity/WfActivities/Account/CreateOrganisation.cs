@@ -200,9 +200,13 @@ namespace Defra.CustMaster.Identity.WfActivities
                     {
                         ErrorMessage.Append(vr.ErrorMessage + " ");
                     }
-                    foreach (System.ComponentModel.DataAnnotations.ValidationResult vr in ValidationResultsAddress)
+
+                    if (ValidationResultsAddress != null)
                     {
-                        ErrorMessage.Append(vr.ErrorMessage + " ");
+                        foreach (System.ComponentModel.DataAnnotations.ValidationResult vr in ValidationResultsAddress)
+                        {
+                            ErrorMessage.Append(vr.ErrorMessage + " ");
+                        }
                     }
                     ErrorCode = 400;
 
