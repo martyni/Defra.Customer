@@ -48,35 +48,42 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
             {
 
                 localcontext.Trace("before seriallising1");
-                SCII.ConnectContactRequest contactPayload = JsonConvert.DeserializeObject<SCII.ConnectContactRequest>(PayloadDetails);
+                SCII.ConnectContactRequest ConnectContact = JsonConvert.DeserializeObject<SCII.ConnectContactRequest>(PayloadDetails);
                 localcontext.Trace("after seriallising");
 
-                EntityReference FromEntityContact;
+                EntityReference FromEntityContact = null;
                 EntityReference ToEntityAccount;
 
-                var ValidationContext = new ValidationContext(contactPayload, serviceProvider: null, items: null);
+                var ValidationContext = new ValidationContext(ConnectContact, serviceProvider: null, items: null);
                 ICollection<ValidationResult> ValidationResultsConnectContact = null;
                 ICollection<ValidationResult> ValidationResultsRoles= null;
                 localcontext.Trace("before validating");
 
-                Boolean isValid = objCommon.Validate(contactPayload, out ValidationResultsConnectContact);
-                Boolean isValidRoles = objCommon.Validate(contactPayload.relations, out ValidationResultsRoles);
+                Boolean isValid = objCommon.Validate(ConnectContact, out ValidationResultsConnectContact);
+                Boolean isValidRoles = objCommon.Validate(ConnectContact.relations, out ValidationResultsRoles);
 
+
+                string FromEntityName = ConnectContact.fromrecordtype == SCII.RecordTypeName.contact ? SCS.Contact.ENTITY : SCS.AccountContants.ENTITY_NAME;
+                string ToEntityName = ConnectContact.torecordtype == SCII.RecordTypeName.contact ? SCS.Contact.ENTITY : SCS.AccountContants.ENTITY_NAME;
 
                 if (isValid && isValidRoles)
                 {
                     //get role ids
                     localcontext.Trace("inside valid schema");
 
-                    localcontext.Trace(string.Format("contact id {0} org id {1}.", contactPayload.contactid, contactPayload.organisationid ));
+                    localcontext.Trace(string.Format("contact id {0} org id {1}.", ConnectContact.fromrecordid, ConnectContact.torecordid ));
 
                     #region Validate record exists
                     //check if account record exists
-                    FromEntityContact = new EntityReference(SCS.Contact.ENTITY, Guid.Parse(contactPayload.contactid));
-                    ToEntityAccount = new EntityReference(SCS.AccountContants.ENTITY_NAME, Guid.Parse(contactPayload.organisationid));
+                    Boolean ContactExists = false;
+                    if (!String.IsNullOrEmpty(ConnectContact.fromrecordid))
+                    {
+                        FromEntityContact = new EntityReference(FromEntityName, Guid.Parse(ConnectContact.fromrecordid));
+                        ContactExists = CheckIfRecordExists(FromEntityContact);
+                    }
+                    ToEntityAccount = new EntityReference(ToEntityName, Guid.Parse(ConnectContact.torecordid));
                     localcontext.Trace("before validating details new");
 
-                    Boolean ContactExists = CheckIfRecordExists(FromEntityContact);
                     Boolean AccountExists = CheckIfRecordExists(ToEntityAccount);
                     localcontext.Trace("after validating");
 
@@ -85,14 +92,14 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                         #region Getting connection role IDs
 
                         List<String> RoleNames = new List<string>();
-                        if (contactPayload.relations.fromrole != null)
+                        if (ConnectContact.relations.fromrole != null)
                         {
-                            RoleNames.Add(contactPayload.relations.fromrole);
+                            RoleNames.Add(ConnectContact.relations.fromrole);
                             RoleCountToCheck = RoleCountToCheck + 1;
                         }
-                        if (contactPayload.relations.torole != null)
+                        if (ConnectContact.relations.torole != null)
                         {
-                            RoleNames.Add(contactPayload.relations.torole);
+                            RoleNames.Add(ConnectContact.relations.torole);
                             RoleCountToCheck = RoleCountToCheck + 1;
 
                         }
@@ -108,13 +115,13 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
 
                         foreach (Entity ConnectionRoles in RolesList)
                         {
-                            if (contactPayload.relations.fromrole == (string)ConnectionRoles[SCS.Connection.NAME])
+                            if (ConnectContact.relations.fromrole == (string)ConnectionRoles[SCS.Connection.NAME])
                             {
                                 localcontext.Trace("received from role id");
                                 FromEntityRole = new EntityReference(ConnectionRoles.LogicalName, ConnectionRoles.Id);
                             }
 
-                            if (contactPayload.relations.torole == (string)ConnectionRoles[SCS.Connection.NAME])
+                            if (ConnectContact.relations.torole == (string)ConnectionRoles[SCS.Connection.NAME])
                             {
                                 localcontext.Trace("received to role id");
                                 ToEntityRole = new EntityReference(ConnectionRoles.LogicalName, ConnectionRoles.Id);
@@ -127,18 +134,18 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                             }
                         } 
 
-                        if(!String.IsNullOrEmpty(contactPayload.relations.fromrole) && FromEntityRole == null)
+                        if(!String.IsNullOrEmpty(ConnectContact.relations.fromrole) && FromEntityRole == null)
                         {
                             //from role not found
                             ErrorCode = 404;
-                            _ErrorMessage = String.Format( "From role {0} not found.", contactPayload.relations.fromrole);
+                            _ErrorMessage = String.Format( "From role {0} not found.", ConnectContact.relations.fromrole);
                         }
 
                         if (ToEntityRole == null)
                         {
                             //to role not found
                             ErrorCode = 404;
-                            _ErrorMessage = String.Format("To role {0} not found.", contactPayload.relations.torole);
+                            _ErrorMessage = String.Format("To role {0} not found.", ConnectContact.relations.torole);
                         }
 
                         if (PrimaryUserRole == null)
@@ -206,7 +213,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                                 else
                                 {
                                     _ErrorMessage = String.Format("From role {0} and reverse role {1} combination doesn't exists.",
-                                    contactPayload.relations.fromrole, contactPayload.relations.torole);
+                                    ConnectContact.relations.fromrole, ConnectContact.relations.torole);
                                 }
 
                             }
@@ -256,18 +263,18 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                         {
                             ErrorCode = 404;
                             _ErrorMessage = String.Format(@"Contact id {0} does not exists
-                                and Account id{1} does not exists", contactPayload.contactid, contactPayload.organisationid);
+                                and Account id{1} does not exists", ConnectContact.fromrecordid, ConnectContact.torecordid);
                         }
                         else
                         if (!ContactExists)
                         {
                             ErrorCode = 404;
-                            _ErrorMessage = String.Format("Contact id {0} does not exists", contactPayload.contactid);
+                            _ErrorMessage = String.Format("Contact id {0} does not exists", ConnectContact.fromrecordid);
                         }
                         else if(!AccountExists)
                         {
                             ErrorCode = 404;
-                            _ErrorMessage = String.Format("Account id {0} does not exists", contactPayload.organisationid);
+                            _ErrorMessage = String.Format("Account id {0} does not exists", ConnectContact.torecordid);
                         }
                     }
                 }
@@ -282,7 +289,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                     {
                         ErrorMessage.Append(vr.ErrorMessage + " ");
                     }
-                    if (contactPayload.relations != null)
+                    if (ConnectContact.relations != null)
                         foreach (ValidationResult vr in ValidationResultsRoles)
                         {
                             ErrorMessage.Append(vr.ErrorMessage + " ");
