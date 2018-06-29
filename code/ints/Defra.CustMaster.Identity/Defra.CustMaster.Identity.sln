@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27428.2037
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Defra.CustMaster.Identity.CoreApp", "IdCoreApp\Defra.CustMaster.Identity.CoreApp.csproj", "{A1B36366-2DFC-4657-B3BE-F9CE77DFDCC0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Defra.CustMaster.Identity.CoreApp.UTests", "IdCoreAppTests\Defra.CustMaster.Identity.CoreApp.UTests.csproj", "{2BFECAEF-529D-4A21-A5A2-F660AB2E7A81}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Defra.CustMaster.Identity.CoreApp.UTest", "IdCoreAppTests\Defra.CustMaster.Identity.CoreApp.UTest.csproj", "{2BFECAEF-529D-4A21-A5A2-F660AB2E7A81}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
