@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Defra.CustomerMaster.Identity.Api.Dynamics;
+﻿using Defra.CustMaster.Identity.CoreApp.Dynamics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
-namespace Defra.CustomerMaster.Identity.Api
+namespace Defra.CustMaster.Identity.CoreApp
 {
     public class Startup
     {

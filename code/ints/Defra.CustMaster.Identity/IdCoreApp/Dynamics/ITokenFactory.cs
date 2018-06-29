@@ -1,4 +1,4 @@
-﻿namespace Defra.CustomerMaster.Identity.Api.Dynamics
+﻿namespace Defra.CustMaster.Identity.CoreApp.Dynamics
 {
     public interface ITokenFactory
     {

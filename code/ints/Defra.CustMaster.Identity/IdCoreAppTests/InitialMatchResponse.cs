@@ -1,11 +1,9 @@
 ﻿using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Net;
 using System.Runtime.Serialization;
 
-namespace Defra.CustomerMaster.Identity.Api.UnitTests
+namespace Defra.CustMaster.Identity.CoreApp.UnitTests
 {
 
     [DataContract]

@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Runtime.Serialization;
 
 
-namespace Defra.CustomerMaster.Identity.Api.Model
+namespace Defra.CustMaster.Identity.CoreApp.Model
 {
     [DataContract]
     public class InitialMatchResponse

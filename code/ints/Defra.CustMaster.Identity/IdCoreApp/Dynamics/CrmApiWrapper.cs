@@ -1,11 +1,10 @@
-﻿using Defra.CustomerMaster.Identity.Api.Model;
+﻿using Defra.CustMaster.Identity.CoreApp.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
 
-namespace Defra.CustomerMaster.Identity.Api.Dynamics
+namespace Defra.CustMaster.Identity.CoreApp.Dynamics
 {
     public class CrmApiWrapper : ICrmApiWrapper
     {

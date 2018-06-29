@@ -1,4 +1,4 @@
-﻿namespace Defra.CustomerMaster.Identity.Api.Dynamics
+﻿namespace Defra.CustMaster.Identity.CoreApp.Dynamics
 {
     using System.Net.Http;
 

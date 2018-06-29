@@ -1,10 +1,9 @@
-﻿using System;
-using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using RestSharp;
+using System.Threading;
 
-namespace Defra.CustomerMaster.Identity.Api.UnitTests
+namespace Defra.CustMaster.Identity.CoreApp.UnitTests
 {
     [TestClass]
     public class UnitTest1

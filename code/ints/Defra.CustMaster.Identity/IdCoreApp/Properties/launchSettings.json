@@ -16,7 +16,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "Defra.CustomerMaster.Identity.Api": {
+    "Defra.CustMaster.Identity.CoreApp": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "api/contact",

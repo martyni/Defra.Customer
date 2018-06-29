@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Web;
 
-namespace Defra.CustomerMaster.Identity.Api.Model
+namespace Defra.CustMaster.Identity.CoreApp.Model
 {
     public class WebFaultException:Exception
     {

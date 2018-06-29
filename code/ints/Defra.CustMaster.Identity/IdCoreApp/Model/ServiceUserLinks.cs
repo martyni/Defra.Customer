@@ -1,10 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Web;
-using Newtonsoft.Json;
-namespace Defra.CustomerMaster.Identity.Api.Model
+namespace Defra.CustMaster.Identity.CoreApp.Model
 {
     [DataContract]
     public class ServiceUserLink

@@ -1,6 +1,6 @@
-﻿using Defra.CustomerMaster.Identity.Api.Model;
+﻿using Defra.CustMaster.Identity.CoreApp.Model;
 
-namespace Defra.CustomerMaster.Identity.Api.Dynamics
+namespace Defra.CustMaster.Identity.CoreApp.Dynamics
 {
 
     public interface ICrmApiWrapper

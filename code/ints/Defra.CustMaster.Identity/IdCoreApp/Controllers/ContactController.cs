@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using Defra.CustomerMaster.Identity.Api.Dynamics;
-using Defra.CustomerMaster.Identity.Api.Model;
+﻿using Defra.CustMaster.Identity.CoreApp.Dynamics;
+using Defra.CustMaster.Identity.CoreApp.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
 
-namespace Defra.CustomerMaster.Identity.Api.Controllers
+namespace Defra.CustMaster.Identity.CoreApp.Controllers
 {
-
-
     [Produces("application/json")]
     // [Route("api/[controller]")]
     [Route("api/")]
@@ -26,8 +24,6 @@ namespace Defra.CustomerMaster.Identity.Api.Controllers
             iHttpClient = iHttpClientFactory;
             _crmApiWrapper = crmApiWrapper;
         }
-
-
 
         // GET api/values
         [Route("InitialMatch/{b2cobjectid}")]
@@ -51,7 +47,6 @@ namespace Defra.CustomerMaster.Identity.Api.Controllers
                 return BadRequest(new ServiceObject { ErrorCode = 500, ErrorMsg = ex.InnerException.Message });
             }
         }
-
 
         //[Route("Authz")]
         [HttpGet]
@@ -155,11 +150,10 @@ namespace Defra.CustomerMaster.Identity.Api.Controllers
 
         }
 
-
         // POST api/values
         [Route("CreateContact")]
         [HttpPost]
-        public Object CreateContact([FromBody]Defra.CustomerMaster.Identity.Api.Model.ContactModel contact)
+        public Object CreateContact([FromBody]Defra.CustMaster.Identity.CoreApp.Model.ContactModel contact)
         {
             try
             {
@@ -176,6 +170,7 @@ namespace Defra.CustomerMaster.Identity.Api.Controllers
                 return BadRequest(new ContactModel { Code = 400, Message = ex.Message, MessageDetail = ex.InnerException.Message });
             }
         }
+
         // DELETE api/values/5
         [HttpDelete("{id}")]
         public void Delete(int id)

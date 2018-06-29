@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Runtime.Serialization;
-using System.ComponentModel.DataAnnotations;
-using Newtonsoft.Json;
-namespace Defra.CustomerMaster.Identity.Api.Model
+namespace Defra.CustMaster.Identity.CoreApp.Model
 {
     [DataContract]
     public class ContactModel

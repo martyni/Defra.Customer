@@ -1,8 +1,8 @@
-﻿using System;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System;
 
-namespace Defra.CustomerMaster.Identity.Api.Dynamics
+namespace Defra.CustMaster.Identity.CoreApp.Dynamics
 {
     public class TokenFactory : ITokenFactory
     {
