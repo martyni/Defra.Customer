@@ -6,58 +6,51 @@ using Microsoft.Xrm.Sdk.Workflow;
 using System.Activities;
 using Microsoft.Xrm.Sdk;
 
+using Defra.CustMaster.Identity.WfActivities;
+using static Defra.CustMaster.Identity.WfActivities.WorkFlowActivityBase;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using FakeXrmEasy;
+using Defra.CustMaster.D365.Common.Ints.Idm;
+using Defra.CustMaster.D365.Common.Ints.Idm.Resp;
+
 namespace PluginUnitTest
 {
     [TestClass]
     public class ConnectContact_Test
     {
+        
         [TestMethod]
-        public void CoonectContactTestJason_Success()
+        public void CoonectContactCheckRequiredFields_Success()
         {
-            /*
-            Mock<IContactsDateOfBirthQuery> query = new Mock<IContactsDateOfBirthQuery>();
+            var fakedContext = new XrmFakedContext();
+            //input object does not contain to record id which is mandatory.
+            string InputLoad = @"{
+                  'fromrecordid': '369d71cf-c874-e811-a83b-000d3ab4f7af',
+                  'fromrecordtype': 'contact',
+                  'relations': {
+                    'torole': 'Agent',
+                    'fromrole': 'Agent Customer'
+                  }
+                }
+                ";
 
-            query.Setup(q => q.GetContactsDateOfBirth(It.IsAny<Guid>()))
-                .Returns((Guid id) => new Contact()
-                {
-                    sms_IsOver18 = false,
-                    BirthDate = DateTime.Today.AddYears(-18).AddDays(-1),
-                    ContactId = id
-                });
+            //Inputs
+            var inputs = new Dictionary<string, object>() {
+                { "PayLoad", InputLoad },
+                };
+            var result = fakedContext.ExecuteCodeActivity<ConnectContact>(inputs);
+            String ReturnMessage = (String)result["ReturnMessageDetails"];
+            ContactResponse ContactResponseObject = JsonConvert.DeserializeObject<ContactResponse>(ReturnMessage);
 
-            Mock<ISetContactOverEighteenCommand> command = new Mock<ISetContactOverEighteenCommand>();
+            Assert.IsNotNull(ContactResponseObject, "Response object should present");
+            // Aseseting code 200 returned
+            Assert.AreEqual(400, ContactResponseObject.code, String.Format( @"Return must contain 400 error code. 
+                it contains {0}", ContactResponseObject.code));
 
-            Mock<IAgeCalculator> calculator = new Mock<IAgeCalculator>();
-            calculator.Setup(c => c.Is18OrOver(It.IsAny<DateTime>())).Returns(true);
-
-            var service = new IsOverEighteenService(command.Object, query.Object, calculator.Object);
-
-            service.ConfrimContactIsOverEighteen(new Guid());
-
-            command.Verify(c => c.SetIsOverEgihteen(It.IsAny<Guid>(), It.IsAny<bool>()), Times.Once);
-
-
-            var classObj = new ConnectContact();
-
-            WorkflowContext = MockRepository<IWorkflowContext>();
-
-            WorkflowContext.Stub(x => x.Depth).Return(depth);
-
-            // Workflow Invoker
-
-            WorkFlowInvoker = new WorkflowInvoker(wf);
-
-            WorkFlowInvoker.Extensions.Add<ITracingService>(() => TracingService);
-
-            WorkFlowInvoker.Extensions.Add<IOrganizationServiceFactory>(() => Factory);
-
-            WorkFlowInvoker.Extensions.Add<IWorkflowContext>(() => WorkflowContext);
-
-            string json = @"{""deviceid"":""G7BF20DB2060"",""readingtype"":""Status"",""reading"":""Status"",""eventtoken"":null,""description"":""Engine speed"",""parameters"":{""VehicleName"":""Jeep Wrangler"",""VehicleSerialNumber"":""G7BF20DB2060"",""VIN"":""1J4FA69S74P704699"",""Date"":""10 / 2 / 2017 3:35:48 AM"",""DiagnosticName"":""Engine speed"",""DiagnosticCode"":""107"",""SourceName"":"" * *Go"",""Value"":""1363"",""Unit"":""Engine.UnitOfMeasureRevolutionsPerMinute""},""time"":""2017 - 10 - 02T03: 37:18.863Z""}";
-
-            classObj.PayLoad  = json;
-            classObj.ExecuteCRMWorkFlowActivity()
-            */
+            StringAssert.Contains("To record id is mandatory. ", ContactResponseObject.message);
+            StringAssert.Contains("To record type required. ", ContactResponseObject.message);
+            
         }
     }
 }
