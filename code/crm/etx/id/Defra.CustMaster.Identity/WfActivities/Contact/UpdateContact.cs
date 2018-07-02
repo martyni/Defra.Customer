@@ -19,10 +19,10 @@ namespace Defra.CustMaster.Identity.WfActivities
     {
         #region "Parameter Definition"
         [RequiredArgument]
-        [Input("PayLoad")]
-        public InArgument<String> PayLoad { get; set; }
-        [Output("OutPutJson")]
-        public OutArgument<string> ReturnMessageDetails { get; set; }
+        [Input("request")]
+        public InArgument<String> request { get; set; }
+        [Output("response")]
+        public OutArgument<string> response { get; set; }
         #endregion
         #region Local Properties
         SCII.Helper objCommon;
@@ -51,7 +51,7 @@ namespace Defra.CustMaster.Identity.WfActivities
             
             try
             {
-                string jsonPayload = this.PayLoad.Get(context);
+                string jsonPayload = this.request.Get(context);
                 SCII.UpdateContactRequest contactPayload = JsonConvert.DeserializeObject<SCII.UpdateContactRequest>(jsonPayload);
                 Boolean duplicateRecordExist = false;
                 Entity contact;
@@ -276,7 +276,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                 };
 
                 string resPayload = JsonConvert.SerializeObject(responsePayload);
-                ReturnMessageDetails.Set(context, resPayload);
+                response.Set(context, resPayload);
                 localcontext.Trace("finally block end");
             }
 

@@ -75,6 +75,12 @@ namespace Defra.Test
             String ReturnMessage = (String)result["Response"];
             ContactResponse ContactResponseObject = JsonConvert.DeserializeObject<ContactResponse>(ReturnMessage);
 
+            // checking 500 code as the workflow will not genrate uniqure refenrece
+            //so id was checked along with response code.
+            Assert.AreEqual(ContactResponseObject.code, 500, "Response code check" );
+            Assert.IsNotNull(ContactResponseObject.data.contactid);
+
+
         }
         [TestMethod]
         public void CreateContactCheckRequiredFields_Success()

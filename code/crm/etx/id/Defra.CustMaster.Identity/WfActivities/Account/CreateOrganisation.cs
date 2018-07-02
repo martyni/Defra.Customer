@@ -20,10 +20,10 @@ namespace Defra.CustMaster.Identity.WfActivities
 
         #region "Parameter Definition"
         [RequiredArgument]
-        [Input("PayLoad")]
-        public InArgument<String> PayLoad { get; set; }
-        [Output("OutPutJson")]
-        public OutArgument<string> ReturnMessageDetails { get; set; }
+        [Input("request")]
+        public InArgument<String> request { get; set; }
+        [Output("response")]
+        public OutArgument<string> response { get; set; }
 
         #endregion
 
@@ -33,7 +33,7 @@ namespace Defra.CustMaster.Identity.WfActivities
         public override void ExecuteCRMWorkFlowActivity(CodeActivityContext executionContext, LocalWorkflowContext crmWorkflowContext)
         {
 
-            String PayloadDetails = PayLoad.Get(executionContext);
+            String PayloadDetails = request.Get(executionContext);
             int? optionSetValue;
             int ErrorCode = 400; //400 -- bad request
             String _ErrorMessage = string.Empty;
@@ -221,7 +221,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                 ErrorMessage.Append (ex.Message);
                 _ErrorMessageDetail = ex.Message;
                 ErrorCode = 400;
-                this.ReturnMessageDetails.Set(executionContext, _ErrorMessageDetail);
+                this.response.Set(executionContext, _ErrorMessageDetail);
                 objCommon.tracingService.Trace(ex.Message);
 
             }
@@ -248,7 +248,7 @@ namespace Defra.CustMaster.Identity.WfActivities
 
                 string json = JsonConvert.SerializeObject(responsePayload);
 
-                ReturnMessageDetails.Set(executionContext, json);
+                response.Set(executionContext, json);
                 // OutputCode.Set(executionContext, _errorCode);
 
                 objCommon.tracingService.Trace("json {0}", json);
