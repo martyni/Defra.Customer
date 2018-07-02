@@ -27,6 +27,7 @@ namespace Defra.CustMaster.Identity.CoreApp.Controllers
 
         // GET api/values
         [Route("InitialMatch/{b2cobjectid}")]
+        //http://defra-cm-dev-id-app.azurewebsites.net/api/InitialMatch/7b1ad2d0-7946-11e8-8d36-851e870eee8a
         //[Route("InitialMatch")]
         [HttpGet]
        // public object InitialMatch([FromBody] InitialMatchRequest requestPayload)
@@ -50,6 +51,7 @@ namespace Defra.CustMaster.Identity.CoreApp.Controllers
 
         //[Route("Authz")]
         [HttpGet]
+        //http://defra-cm-dev-id-app.azurewebsites.net/api/Authz/ServiceID=534BA555-037A-E811-A95B-000D3A2BC547&B2CObjectId=7b1ad2d0-7946-11e8-8d36-851e870eee8a
         //[Route("Authz/ServiceID={serviceid}/{b2cobjectid}")]
         [Route("Authz/ServiceID={serviceid}&B2CObjectId={b2cobjectid}")]
        // public AuthzResponse Authz([FromBody] AuthzRequest requestPayload)
