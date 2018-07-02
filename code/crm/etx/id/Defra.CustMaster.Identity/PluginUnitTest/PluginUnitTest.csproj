@@ -6,7 +6,7 @@
     <ProjectGuid>{67CB215D-9E87-47F8-8B3F-A5E874D134CC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PluginUnitTest</RootNamespace>
+    <RootNamespace>Defra.PluginUnitTest</RootNamespace>
     <AssemblyName>PluginUnitTest</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -124,8 +124,16 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Address_Test.cs" />
     <Compile Include="ConnectContact_Test.cs" />
+    <Compile Include="Constants\ContactErrorMessageConstants.cs" />
+    <Compile Include="CreateContact_Test.cs" />
+    <Compile Include="Entities.cs" />
+    <Compile Include="OptionSets.cs" />
+    <Compile Include="CreateOrgnaisation_Test.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UpdateContact_Test.cs" />
+    <Compile Include="UpdateOrganisation_Test.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
