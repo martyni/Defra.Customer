@@ -177,14 +177,14 @@ namespace PluginUnitTest
             var result = fakedContext.ExecuteCodeActivity<UpdateOrganisation>(inputs);
 
             #region ErrorMessagesToCheck
+            String ReturnMessage = (String)result["ResPayload"];
 
 
-            AccountResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AccountResponse>(result.);
+            AccountResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AccountResponse>(ReturnMessage);
 
 
             #endregion
 
-            String ReturnMessage = (String)result["ResPayload"];
             
             String ErrorDetails = ContactResponseObject.message;
             Assert.IsNotNull(ContactResponseObject.data.accountid);
