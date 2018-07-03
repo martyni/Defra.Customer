@@ -14,7 +14,9 @@ using FakeXrmEasy;
 using Defra.CustMaster.D365.Common.Ints.Idm;
 using Defra.CustMaster.D365.Common.Ints.Idm.Resp;
 using CrmEarlyBound;
-
+/// <summary>
+/// TODO: 03/07/2018 This unit test is not complete because process of connecting account and organisation will change.
+/// </summary>
 namespace Defra.Test
 {
     [TestClass]

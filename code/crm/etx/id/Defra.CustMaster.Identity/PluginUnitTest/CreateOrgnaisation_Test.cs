@@ -79,7 +79,7 @@ namespace Defra.Test
 
             //Inputs
             var inputs = new Dictionary<string, object>() {
-                { "PayLoad", InputLoad },
+                { "request", InputLoad },
                 };
 
             var connection = fakedContext.CreateQuery<Account>();
@@ -93,7 +93,7 @@ namespace Defra.Test
 
             #endregion
 
-            String ReturnMessage = (String)result["ReturnMessageDetails"];
+            String ReturnMessage = (String)result["response"];
             AccountResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AccountResponse>(ReturnMessage);
             String ErrorDetails = ContactResponseObject.message;
             bool ContainsErrorMessageToRole = ErrorDetails.Contains("To role is mandatory validation failed.");
@@ -153,7 +153,7 @@ namespace Defra.Test
 
             //Inputs
             var inputs = new Dictionary<string, object>() {
-                { "PayLoad", InputLoad },
+                { "request", InputLoad },
                 };
 
             var connection = fakedContext.CreateQuery<Account>();
@@ -167,7 +167,7 @@ namespace Defra.Test
 
             #endregion
 
-            String ReturnMessage = (String)result["ReturnMessageDetails"];
+            String ReturnMessage = (String)result["response"];
             AccountResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AccountResponse>(ReturnMessage);
             String ErrorDetails = ContactResponseObject.message;
             bool ContainsErrorMessageToRole = ErrorDetails.Contains("To role is mandatory.");
@@ -184,6 +184,69 @@ namespace Defra.Test
             StringAssert.Contains(ErrorDetails, TownLengthErrorMsg, "Town length validation not working.");
             StringAssert.Contains(ErrorDetails, PostCodeLengthErrorMsg, "Post code length validation failed.");
             StringAssert.Contains(ErrorDetails, ISOCodeLengthErrMsg, "ISO code field length validation failed.");
+
+        }
+
+        [TestMethod]
+        public void DuplicateCheck_Success()
+        {
+            var fakedContext = new XrmFakedContext();
+            //input object does not contain to record id which is mandatory.
+            string InputLoad = @"
+                  {
+                       'organisationid': 'b7293664-e46a-e811-a83c-000d3ab4f967',
+                      'name': 'orgname',
+                      'type': '910400000',
+                      'crn': '142923',
+                      'email': 'email@email.com',
+                      'address': {
+                        'type': '3',
+                        'uprn': '12345',
+                        'buildingname': 'test',
+                        'buildingnumber': '1234',
+                        'street': 'street',
+                        'locality': 'local',
+                        'town': 'town',
+                        'postcode': 'HA9 7AH',
+                        'country': 'ABC',
+                        'fromcompanieshouse': 'true'
+                      },
+                      'telephone': '004412345678',
+                      'hierarchylevel': '910400000',
+                     
+                    }
+                ";
+
+
+            //Inputs
+            var inputs = new Dictionary<string, object>() {
+                { "request", InputLoad },
+                };
+
+            var account = fakedContext.CreateQuery<Account>();
+
+            Account AccountObject = new Account {AccountId = new Guid("b7293664-e46a-e811-a83c-000d3ab4f967")
+                                             ,defra_companyhouseid = "142923"
+            };
+
+            fakedContext.Initialize(new List<Entity>()
+            {   AccountObject
+            });
+
+            var result = fakedContext.ExecuteCodeActivity<CreateOrganisation>(inputs);
+
+            #region ErrorMessagesToCheck
+
+
+
+
+            #endregion
+
+            String ReturnMessage = (String)result["response"];
+            AccountResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AccountResponse>(ReturnMessage);
+            StringAssert.Contains(ContactResponseObject.code.ToString(), "412");
+
+
 
         }
     }
