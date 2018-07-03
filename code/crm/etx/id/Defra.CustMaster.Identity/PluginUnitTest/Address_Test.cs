@@ -161,6 +161,10 @@ namespace Defra.Test
                         "ReqPayload", InputLoad },
                 };
 
+            fakedContext.Initialize(new List<Entity>()
+                {   new Entity() { Id = new Guid("37e64f21-c035-4e49-a6b6-958cdd3af45e"), LogicalName = "contact" }
+                });
+
             var result = fakedContext.ExecuteCodeActivity<AddAddress>(inputs);
             var address = fakedContext.CreateQuery<defra_address>();
 
@@ -172,7 +176,6 @@ namespace Defra.Test
             AddressResponse AddressResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AddressResponse>(ReturnMessage);
             String ErrorDetails = AddressResponseObject.message;
             Assert.IsNotNull(AddressResponseObject.data.addressid);
-            Assert.Equals(AddressResponseObject.code, 200);
 
 
         }
