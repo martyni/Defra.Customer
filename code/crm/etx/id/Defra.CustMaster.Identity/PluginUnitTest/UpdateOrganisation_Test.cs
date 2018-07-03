@@ -9,7 +9,7 @@ using Microsoft.Xrm.Sdk;
 using Defra.CustMaster.Identity.WfActivities;
 using static Defra.CustMaster.Identity.WfActivities.WorkFlowActivityBase;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+//using Newtonsoft.Json;
 using FakeXrmEasy;
 using Defra.CustMaster.D365.Common.Ints.Idm;
 using Defra.CustMaster.D365.Common.Ints.Idm.Resp;
@@ -78,7 +78,7 @@ namespace PluginUnitTest
                 #endregion
 
                 String ReturnMessage = (String)result["ResPayload"];
-                AccountResponse AccountResponseObject = JsonConvert.DeserializeObject<AccountResponse>(ReturnMessage);
+                AccountResponse AccountResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AccountResponse>(ReturnMessage);
                 String ErrorDetails = AccountResponseObject.message;
                 StringAssert.Contains(ReturnMessage, OrganisationIDRequired, "Organisation Id field check failed.");
                 StringAssert.Contains(ReturnMessage, AccountNameLengthErrorMessage, "Account name field length check failed.");
@@ -136,7 +136,7 @@ namespace PluginUnitTest
                 #endregion
 
                 String ReturnMessage = (String)result["ResPayload"];
-                AccountResponse ContactResponseObject = JsonConvert.DeserializeObject<AccountResponse>(ReturnMessage);
+                AccountResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AccountResponse>(ReturnMessage);
                 String ErrorDetails = ContactResponseObject.message;
                 bool ContainsErrorMessageToRole = ErrorDetails.Contains("To role is mandatory.");
 
@@ -144,7 +144,58 @@ namespace PluginUnitTest
                 
 
             }
+
+        [TestMethod]
+        public void CheckUpdateWithoutOrganisationType_Success()
+        {
+            var fakedContext = new XrmFakedContext();
+            //input object does not contain to record id which is mandatory.
+            string InputLoad = @"
+                 {
+                     'organisationid': 'a494d047-137e-e811-a95b-000d3a2bc547',
+                     'updates': {
+                       'name': 'Associated Dairies'
+                     },
+                     'clearlist': {
+                       'fields': []
+                     }
+                    }
+                ";
+
+            fakedContext.Initialize(new List<Entity>()
+            {   new Entity() { Id = new Guid("369d71cf-c874-e811-a83b-000d3ab4f7af"), LogicalName = "contact" },
+                new Entity() { Id = new Guid("a494d047-137e-e811-a95b-000d3a2bc547"), LogicalName = "account" }
+                
+            });
+            //Inputs
+            var inputs = new Dictionary<string, object>() {
+                { "ReqPayload", InputLoad },
+                };
+
+            //var connection = fakedContext.CreateQuery<Account>();
+
+            var result = fakedContext.ExecuteCodeActivity<UpdateOrganisation>(inputs);
+
+            #region ErrorMessagesToCheck
+
+
+            AccountResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AccountResponse>(result.);
+
+
+            #endregion
+
+            String ReturnMessage = (String)result["ResPayload"];
+            
+            String ErrorDetails = ContactResponseObject.message;
+            Assert.IsNotNull(ContactResponseObject.data.accountid);
+
+
+
+
         }
-
-
     }
+
+
+   
+}
+    

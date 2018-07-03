@@ -96,11 +96,11 @@
   <Import Project="..\..\..\..\common\Defra.CustMaster.D365.Common\Defra.CustMaster.D365.Common.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>$(SolutionDir)packages\ilmerge.2.14.1208\tools\ILMerge.exe /keyfile:$(SolutionDir)/Defra.CustMaster.snk /target:"library" /copyattrs /out:$(TargetDir)$(TargetName)$(TargetExt) $(ProjectDir)$(IntermediateOutputPath)$(TargetName)$(TargetExt) $(SolutionDir)packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
+    <PreBuildEvent>$(SolutionDir)packages\ilmerge.2.14.1208\tools\ILMerge.exe /keyfile:$(SolutionDir)/Defra.CustMaster.snk /target:"library" /copyattrs /out:$(TargetDir)$(TargetName)$(TargetExt) $(ProjectDir)$(IntermediateOutputPath)$(TargetName)$(TargetExt) $(SolutionDir)packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -9,7 +9,7 @@ using Microsoft.Xrm.Sdk;
 using Defra.CustMaster.Identity.WfActivities;
 using static Defra.CustMaster.Identity.WfActivities.WorkFlowActivityBase;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+//;
 using FakeXrmEasy;
 using Defra.CustMaster.D365.Common.Ints.Idm;
 using Defra.CustMaster.D365.Common.Ints.Idm.Resp;
@@ -94,7 +94,7 @@ namespace Defra.Test
             #endregion
 
             String ReturnMessage = (String)result["ReturnMessageDetails"];
-            AccountResponse ContactResponseObject = JsonConvert.DeserializeObject<AccountResponse>(ReturnMessage);
+            AccountResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AccountResponse>(ReturnMessage);
             String ErrorDetails = ContactResponseObject.message;
             bool ContainsErrorMessageToRole = ErrorDetails.Contains("To role is mandatory validation failed.");
             //StringAssert.Contains(ErrorDetails, AccountNameLengthErrorMessage, "Account name length validation failed.");
@@ -168,7 +168,7 @@ namespace Defra.Test
             #endregion
 
             String ReturnMessage = (String)result["ReturnMessageDetails"];
-            AccountResponse ContactResponseObject = JsonConvert.DeserializeObject<AccountResponse>(ReturnMessage);
+            AccountResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AccountResponse>(ReturnMessage);
             String ErrorDetails = ContactResponseObject.message;
             bool ContainsErrorMessageToRole = ErrorDetails.Contains("To role is mandatory.");
 

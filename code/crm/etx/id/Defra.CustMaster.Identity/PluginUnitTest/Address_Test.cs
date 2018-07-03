@@ -9,7 +9,7 @@ using Microsoft.Xrm.Sdk;
 using Defra.CustMaster.Identity.WfActivities;
 using static Defra.CustMaster.Identity.WfActivities.WorkFlowActivityBase;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+//;
 using FakeXrmEasy;
 using Defra.CustMaster.D365.Common.Ints.Idm;
 using Defra.CustMaster.D365.Common.Ints.Idm.Resp;
@@ -69,7 +69,7 @@ namespace Defra.Test
             #endregion
 
             String ReturnMessage = (String)result["ResPayload"];
-            AddressResponse AddressResponseObject = JsonConvert.DeserializeObject<AddressResponse>(ReturnMessage);
+            AddressResponse AddressResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AddressResponse>(ReturnMessage);
             String ErrorDetails = AddressResponseObject.message;
 
            // StringAssert.Contains(ErrorDetails, RecordTypeCannotBeEmpty, "Record type cannot be empty validation failed.");
@@ -120,7 +120,7 @@ namespace Defra.Test
             #endregion
 
             String ReturnMessage = (String)result["ResPayload"];
-            AddressResponse AddressResponseObject = JsonConvert.DeserializeObject<AddressResponse>(ReturnMessage);
+            AddressResponse AddressResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AddressResponse>(ReturnMessage);
             String ErrorDetails = AddressResponseObject.message;
 
             // StringAssert.Contains(ErrorDetails, RecordTypeCannotBeEmpty, "Record type cannot be empty validation failed.");
@@ -169,7 +169,7 @@ namespace Defra.Test
             #endregion
 
             String ReturnMessage = (String)result["ResPayload"];
-            AddressResponse AddressResponseObject = JsonConvert.DeserializeObject<AddressResponse>(ReturnMessage);
+            AddressResponse AddressResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AddressResponse>(ReturnMessage);
             String ErrorDetails = AddressResponseObject.message;
             Assert.IsNotNull(AddressResponseObject.data.addressid);
             Assert.Equals(AddressResponseObject.code, 200);

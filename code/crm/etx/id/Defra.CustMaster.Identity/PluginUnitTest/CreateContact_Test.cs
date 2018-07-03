@@ -9,7 +9,7 @@ using Microsoft.Xrm.Sdk;
 using Defra.CustMaster.Identity.WfActivities;
 using static Defra.CustMaster.Identity.WfActivities.WorkFlowActivityBase;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+//;
 using FakeXrmEasy;
 using Defra.CustMaster.D365.Common.Ints.Idm;
 using Defra.CustMaster.D365.Common.Ints.Idm.Resp;
@@ -73,7 +73,7 @@ namespace Defra.Test
                          select t).ToList();
 
             String ReturnMessage = (String)result["Response"];
-            ContactResponse ContactResponseObject = JsonConvert.DeserializeObject<ContactResponse>(ReturnMessage);
+            ContactResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<ContactResponse>(ReturnMessage);
 
             // checking 500 code as the workflow will not genrate uniqure refenrece
             //so id was checked along with response code.
@@ -118,7 +118,7 @@ namespace Defra.Test
             var result = fakedContext.ExecuteCodeActivity<CreateContact>(inputs);
 
             String ReturnMessage = (String)result["Response"];
-            ContactResponse ContactResponseObject = JsonConvert.DeserializeObject<ContactResponse>(ReturnMessage);
+            ContactResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<ContactResponse>(ReturnMessage);
             String ErrorDetails = ContactResponseObject.message;
             StringAssert.Contains(ReturnMessage, RequiredFirstNameCheck, "First name required field check failed");
             StringAssert.Contains(ReturnMessage, RequiredLastNameCheck, "Last name required field check failed");
@@ -164,7 +164,7 @@ namespace Defra.Test
             var result = fakedContext.ExecuteCodeActivity<CreateContact>(inputs);
 
             String ReturnMessage = (String)result["Response"];
-            ContactResponse ContactResponseObject = JsonConvert.DeserializeObject<ContactResponse>(ReturnMessage);
+            ContactResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<ContactResponse>(ReturnMessage);
             String ErrorDetails = ContactResponseObject.message;
             StringAssert.Contains(ErrorDetails, ObjectIdLengthCheck, "Oject ID field length field check failed.");
             StringAssert.Contains(ErrorDetails, FirstNameFieldLengthCheck, "First name field lenght check failed.");

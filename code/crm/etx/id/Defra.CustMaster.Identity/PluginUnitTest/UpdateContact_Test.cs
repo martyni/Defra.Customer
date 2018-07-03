@@ -9,7 +9,7 @@ using Microsoft.Xrm.Sdk;
 using Defra.CustMaster.Identity.WfActivities;
 using static Defra.CustMaster.Identity.WfActivities.WorkFlowActivityBase;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+//;
 using FakeXrmEasy;
 using Defra.CustMaster.D365.Common.Ints.Idm;
 using Defra.CustMaster.D365.Common.Ints.Idm.Resp;
@@ -96,7 +96,7 @@ namespace PluginUnitTest
             #endregion
 
             String ReturnMessage = (String)result["ReturnMessageDetails"];
-            ContactResponse ContactResponseObject = JsonConvert.DeserializeObject<ContactResponse>(ReturnMessage);
+            ContactResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<ContactResponse>(ReturnMessage);
             String ErrorDetails = ContactResponseObject.message;
             StringAssert.Contains(ReturnMessage, ContactIdMaxLenErrorMsg, "Contact ID validation failed.");
             StringAssert.Contains(ReturnMessage, FirstNameMaxLengthErrorMsg, "First name validation failed.");
