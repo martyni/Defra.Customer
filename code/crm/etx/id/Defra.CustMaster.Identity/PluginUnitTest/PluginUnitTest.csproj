@@ -125,7 +125,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Address_Test.cs" />
-    <Compile Include="ConnectContact_Test.cs" />
+    <Compile Include="CreateRelashionship_Test.cs" />
     <Compile Include="Constants\ContactErrorMessageConstants.cs" />
     <Compile Include="CreateContact_Test.cs" />
     <Compile Include="Entities.cs" />

@@ -2,7 +2,7 @@
 
 namespace Defra.CustMaster.D365.Common.Ints.Idm
 {
-    public partial class ConnectContactRequest
+    public partial class CreateRelationshipRequest
     {
         [DataType(DataType.Text)]
         [MaxLength(36, ErrorMessage = "From record id cannont be more than 36 chacters.")]

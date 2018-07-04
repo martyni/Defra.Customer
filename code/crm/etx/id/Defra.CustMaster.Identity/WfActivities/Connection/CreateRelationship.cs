@@ -16,14 +16,14 @@ using Microsoft.Xrm.Sdk.Query;
 
 namespace Defra.CustMaster.Identity.WfActivities.Connection
 {
-    public class ConnectContact : WorkFlowActivityBase
+    public class CreateRelationship : WorkFlowActivityBase
     {
         #region "Parameter Definition"
         [RequiredArgument]
-        [Input("PayLoad")]
-        public InArgument<String> PayLoad { get; set; }
-        [Output("OutPutJson")]
-        public OutArgument<string> ReturnMessageDetails { get; set; }
+        [Input("request")]
+        public InArgument<String> request { get; set; }
+        [Output("response")]
+        public OutArgument<string> response { get; set; }
 
         #endregion
 
@@ -33,7 +33,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
         public override void ExecuteCRMWorkFlowActivity(CodeActivityContext executionContext, LocalWorkflowContext crmWorkflowContext)
         {
             localcontext = crmWorkflowContext;
-            String PayloadDetails = PayLoad.Get(executionContext);
+            String PayloadDetails = request.Get(executionContext);
             int ErrorCode = 400; //400 -- bad request
             int RoleCountToCheck = 0;
             String _ErrorMessage = string.Empty;
@@ -48,7 +48,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
             {
 
                 localcontext.Trace("before seriallising1");
-                SCII.ConnectContactRequest ConnectContact = JsonConvert.DeserializeObject<SCII.ConnectContactRequest>(PayloadDetails);
+                SCII.CreateRelationshipRequest ConnectContact = JsonConvert.DeserializeObject<SCII.CreateRelationshipRequest>(PayloadDetails);
                 localcontext.Trace("after seriallising");
 
                 EntityReference FromEntityContact = null;
@@ -103,7 +103,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                             RoleCountToCheck = RoleCountToCheck + 1;
 
                         }
-                        RoleNames.Add(SCS.Connection.PRIMARYUSERROLENAME);
+                       // RoleNames.Add(SCS.Connection.PRIMARYUSERROLENAME);
                         localcontext.Trace("before getting role name");
 
                         List<Entity> RolesList = GetRoles(RoleNames);
@@ -111,7 +111,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
 
                         EntityReference FromEntityRole = null;
                         EntityReference ToEntityRole = null;
-                        EntityReference PrimaryUserRole = null;
+                        //EntityReference PrimaryUserRole = null;
 
                         foreach (Entity ConnectionRoles in RolesList)
                         {
@@ -127,11 +127,11 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                                 ToEntityRole = new EntityReference(ConnectionRoles.LogicalName, ConnectionRoles.Id);
                             }
 
-                            if (SCS.Connection.PRIMARYUSERROLENAME == (string)ConnectionRoles[SCS.Connection.NAME])
-                            {
-                                localcontext.Trace("received to primary role id");
-                                PrimaryUserRole = new EntityReference(ConnectionRoles.LogicalName, ConnectionRoles.Id);
-                            }
+                            //if (SCS.Connection.PRIMARYUSERROLENAME == (string)ConnectionRoles[SCS.Connection.NAME])
+                            //{
+                            //    localcontext.Trace("received to primary role id");
+                            //    PrimaryUserRole = new EntityReference(ConnectionRoles.LogicalName, ConnectionRoles.Id);
+                            //}
                         } 
 
                         if(!String.IsNullOrEmpty(ConnectContact.relations.fromrole) && FromEntityRole == null)
@@ -148,12 +148,12 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                             _ErrorMessage = String.Format("To role {0} not found.", ConnectContact.relations.torole);
                         }
 
-                        if (PrimaryUserRole == null)
-                        {
-                            //primary role not found
-                            ErrorCode = 404;
-                            _ErrorMessage = String.Format("Primary rolenot found.") ;
-                        }
+                        //if (PrimaryUserRole == null)
+                        //{
+                        //    //primary role not found
+                        //    ErrorCode = 404;
+                        //    _ErrorMessage = String.Format("Primary rolenot found.") ;
+                        //}
 
                         #endregion
 
@@ -185,12 +185,12 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                                     {
                                         //check if there is any other contact as a primary user for the same account
                                         localcontext.Trace("before primary check");
-                                        if (!CheckifSingleRoleAlreadyExists(ToEntityAccount, PrimaryUserRole.Id))
-                                        {
-                                            //create primary connection
-                                            localcontext.Trace("before creating primary connection");
-                                            CreateSingleConnection(FromEntityContact, ToEntityAccount, PrimaryUserRole.Id);
-                                        }
+                                        //if (!CheckifSingleRoleAlreadyExists(ToEntityAccount, PrimaryUserRole.Id))
+                                        //{
+                                        //    //create primary connection
+                                        //    localcontext.Trace("before creating primary connection");
+                                        //    //CreateSingleConnection(FromEntityContact, ToEntityAccount, PrimaryUserRole.Id);
+                                        //}
 
                                         if(FromEntityRole != null && ToEntityRoleID != null)
                                         {
@@ -235,11 +235,11 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                                 {
                                     //check if there are any other contact as a primary user for the same account
 
-                                    if (!CheckifSingleRoleAlreadyExists( ToEntityAccount, PrimaryUserRole.Id))
-                                    {
-                                        //create primary connection
-                                        CreateSingleConnection(FromEntityContact, ToEntityAccount, PrimaryUserRole.Id);
-                                    }
+                                    //if (!CheckifSingleRoleAlreadyExists( ToEntityAccount, PrimaryUserRole.Id))
+                                    //{
+                                    //    //create primary connection
+                                    //    CreateSingleConnection(FromEntityContact, ToEntityAccount, PrimaryUserRole.Id);
+                                    //}
 
                                     ToConnectId = CreateSingleConnection( FromEntityContact, ToEntityAccount,  ToEntityRole.Id);
                                     ErrorCode = 200;
@@ -302,7 +302,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                // crmWorkflowContext.Trace(String.Format("message details {0}", ex.Message));
                 //_ErrorMessageDetail = ex.Message ;
                 ErrorCode = 400;
-                this.ReturnMessageDetails.Set(executionContext, _ErrorMessageDetail);
+                this.response.Set(executionContext, _ErrorMessageDetail);
                 //throw ex;
             }
             #endregion
@@ -327,7 +327,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                 };
 
                 string resPayload = JsonConvert.SerializeObject(responsePayload);
-                ReturnMessageDetails.Set(executionContext, resPayload);
+                response.Set(executionContext, resPayload);
                 localcontext.Trace("finally block end");
 
             } 
