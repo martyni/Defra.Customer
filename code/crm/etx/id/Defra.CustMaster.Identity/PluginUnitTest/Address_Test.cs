@@ -78,6 +78,53 @@ namespace Defra.Test
 
         }
 
+        [TestMethod]
+        public void UPNNotMandatoryCheck_Success()
+        {
+            var fakedContext = new XrmFakedContext();
+            //input object does not contain to record id which is mandatory.
+            string InputLoad = @"
+                 {
+                      recordtype: 'contact',
+                      recordid: '37e64f21-c035-4e49-a6b6-958cdd3af45e',
+                      'address': {
+                        'type': 1,                        
+                        'buildingname': 'Horizon',
+                        'buildingnumber': '3',
+                        'street': 'Road',
+                        'locality': '',
+                        'town': '',
+                        'postcode': '12345678',
+                        'country': 'gbr',
+                        'fromcompanieshouse': ''
+                      }
+                    }
+
+                ";
+
+
+            //Inputs
+            var inputs = new Dictionary<string, object>() {
+                {
+                        "ReqPayload", InputLoad },
+                };
+
+            fakedContext.Initialize(new List<Entity>()
+                {   new Entity() { Id = new Guid("37e64f21-c035-4e49-a6b6-958cdd3af45e"), LogicalName = "contact" }
+                });
+
+            var result = fakedContext.ExecuteCodeActivity<AddAddress>(inputs);
+            var address = fakedContext.CreateQuery<defra_address>();
+
+            #region ErrorMessagesToCheck
+
+            #endregion
+
+            String ReturnMessage = (String)result["ResPayload"];
+            AddressResponse AddressResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AddressResponse>(ReturnMessage);
+            String ErrorDetails = AddressResponseObject.message;
+            Assert.IsNotNull(AddressResponseObject.data.addressid);
+        }
 
         [TestMethod]
         public void RecordIdMaxLengthValidation()
