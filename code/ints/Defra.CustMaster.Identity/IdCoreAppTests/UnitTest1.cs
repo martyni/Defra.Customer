@@ -8,7 +8,7 @@ namespace Defra.CustMaster.Identity.CoreApp.UnitTests
     [TestClass]
     public class UnitTest1
     {
-        const string URL = "http://defra-cm-dev-id-app.azurewebsites.net/api/";// "http://localhost:54670/api/";
+        const string URL = "http://localhost:54670/api/";// "http://localhost:54670/api/";
         const string CONTACTID = "97063ff4-f479-e811-a963-000d3a2bccc5";
          string _b2cobjectId = "7b1ad2d0-7946-11e8-8d36-851e870eee8a";
          string _serviceId = "534BA555-037A-E811-A95B-000D3A2BC547";

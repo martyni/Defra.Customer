@@ -87,48 +87,48 @@ namespace Defra.Test
         }
 
 
-        [TestMethod]
-        public void CoonectContactCheckRequiredFields_Failed()
-        {
-            var fakedContext = new XrmFakedContext();
-            //input object does not contain to record id which is mandatory.
-            string InputLoad = @"{
-                  'fromrecordid': '369d71cf-c874-e811-a83b-000d3ab4f7af',
-                  'fromrecordtype': 'contact',
-                  'relations': {
-                    'fromrole': 'Agent Customer'
-                  }
-                }
-                ";
+        //[TestMethod]
+        //public void CoonectContactCheckRequiredFields_Failed()
+        //{
+        //    var fakedContext = new XrmFakedContext();
+        //    //input object does not contain to record id which is mandatory.
+        //    string InputLoad = @"{
+        //          'fromrecordid': '369d71cf-c874-e811-a83b-000d3ab4f7af',
+        //          'fromrecordtype': 'contact',
+        //          'relations': {
+        //            'fromrole': 'Agent Customer'
+        //          }
+        //        }
+        //        ";
 
-            //Inputs
-            var inputs = new Dictionary<string, object>() {
-                { "request", InputLoad },
-                };
-            var result = fakedContext.ExecuteCodeActivity<CreateRelationship>(inputs);
+        //    //Inputs
+        //    var inputs = new Dictionary<string, object>() {
+        //        { "request", InputLoad },
+        //        };
+        //    var result = fakedContext.ExecuteCodeActivity<CreateRelationship>(inputs);
 
-            fakedContext.Initialize(new List<Entity>()
-                                 { new Entity() { Id = new Guid(), LogicalName = "contact" }
-                     });
-            fakedContext.Initialize(new List<Entity>()
-                                 { new Entity() { Id = new Guid(), LogicalName = "contact" }
-                     });
-            var connection = fakedContext.CreateQueryFromEntityName("connection");
-
-
-            String ReturnMessage = (String)result["response"];
-            ContactResponse ContactResponseObject = JsonConvert.DeserializeObject<ContactResponse>(ReturnMessage);
-
-            Assert.IsNotNull(ContactResponseObject, "Response object should present");
-            // Aseseting code 200 returned
-            Assert.AreEqual(400, ContactResponseObject.code, String.Format(@"Return must contain 400 error code. 
-                it contains {0}", ContactResponseObject.code));
-
-            String ErrorDetails = ContactResponseObject.message;
-            bool ContainsErrorMessageToRole = ErrorDetails.Contains("To role is mandatory.");
-            Assert.AreEqual(true, ContainsErrorMessageToRole, "To role is required");
+        //    fakedContext.Initialize(new List<Entity>()
+        //                         { new Entity() { Id = new Guid(), LogicalName = "contact" }
+        //             });
+        //    fakedContext.Initialize(new List<Entity>()
+        //                         { new Entity() { Id = new Guid(), LogicalName = "contact" }
+        //             });
+        //    var connection = fakedContext.CreateQueryFromEntityName("connection");
 
 
-        }
+        //    String ReturnMessage = (String)result["response"];
+        //    ContactResponse ContactResponseObject = JsonConvert.DeserializeObject<ContactResponse>(ReturnMessage);
+
+        //    Assert.IsNotNull(ContactResponseObject, "Response object should present");
+        //    // Aseseting code 200 returned
+        //    Assert.AreEqual(400, ContactResponseObject.code, String.Format(@"Return must contain 400 error code. 
+        //        it contains {0}", ContactResponseObject.code));
+
+        //    String ErrorDetails = ContactResponseObject.message;
+        //    bool ContainsErrorMessageToRole = ErrorDetails.Contains("To role is mandatory.");
+        //    Assert.AreEqual(true, ContainsErrorMessageToRole, "To role is required");
+
+
+        //}
     }
 }
