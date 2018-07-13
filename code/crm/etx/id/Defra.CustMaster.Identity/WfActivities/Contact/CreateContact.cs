@@ -139,6 +139,10 @@ namespace Defra.CustMaster.Identity.WfActivities
                                     contact[SCS.Contact.TACSACCEPTEDON] = (resultDate);
                                 }
                             }
+                            //else if (contactPayload.tacsacceptedversion != null)
+                            //{
+                            //    contact[SCS.Contact.TACSACCEPTEDON] = DateTime.Now;
+                            //}
 
                             //set birthdate
                             if (!string.IsNullOrEmpty(contactPayload.dob) && !string.IsNullOrWhiteSpace(contactPayload.dob))
