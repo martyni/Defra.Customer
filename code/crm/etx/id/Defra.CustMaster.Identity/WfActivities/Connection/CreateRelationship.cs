@@ -103,7 +103,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                             RoleCountToCheck = RoleCountToCheck + 1;
 
                         }
-                       // RoleNames.Add(SCS.Connection.PRIMARYUSERROLENAME);
+                       RoleNames.Add(SCS.Connection.PRIMARYUSERROLENAME);
                         localcontext.Trace("before getting role name");
 
                         List<Entity> RolesList = GetRoles(RoleNames);
@@ -111,7 +111,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
 
                         EntityReference FromEntityRole = null;
                         EntityReference ToEntityRole = null;
-                        //EntityReference PrimaryUserRole = null;
+                        EntityReference PrimaryUserRole = null;
 
                         foreach (Entity ConnectionRoles in RolesList)
                         {
@@ -127,11 +127,11 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                                 ToEntityRole = new EntityReference(ConnectionRoles.LogicalName, ConnectionRoles.Id);
                             }
 
-                            //if (SCS.Connection.PRIMARYUSERROLENAME == (string)ConnectionRoles[SCS.Connection.NAME])
-                            //{
-                            //    localcontext.Trace("received to primary role id");
-                            //    PrimaryUserRole = new EntityReference(ConnectionRoles.LogicalName, ConnectionRoles.Id);
-                            //}
+                            if (SCS.Connection.PRIMARYUSERROLENAME == (string)ConnectionRoles[SCS.Connection.NAME])
+                            {
+                                localcontext.Trace("received to primary role id");
+                                PrimaryUserRole = new EntityReference(ConnectionRoles.LogicalName, ConnectionRoles.Id);
+                            }
                         } 
 
                         if(!String.IsNullOrEmpty(ConnectContact.relations.fromrole) && FromEntityRole == null)
@@ -148,12 +148,12 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                             _ErrorMessage = String.Format("To role {0} not found.", ConnectContact.relations.torole);
                         }
 
-                        //if (PrimaryUserRole == null)
-                        //{
-                        //    //primary role not found
-                        //    ErrorCode = 404;
-                        //    _ErrorMessage = String.Format("Primary rolenot found.") ;
-                        //}
+                        if (PrimaryUserRole == null)
+                        {
+                            //primary role not found
+                            ErrorCode = 404;
+                            _ErrorMessage = String.Format("Primary rolenot found.");
+                        }
 
                         #endregion
 
@@ -185,14 +185,14 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                                     {
                                         //check if there is any other contact as a primary user for the same account
                                         localcontext.Trace("before primary check");
-                                        //if (!CheckifSingleRoleAlreadyExists(ToEntityAccount, PrimaryUserRole.Id))
-                                        //{
-                                        //    //create primary connection
-                                        //    localcontext.Trace("before creating primary connection");
-                                        //    //CreateSingleConnection(FromEntityContact, ToEntityAccount, PrimaryUserRole.Id);
-                                        //}
+                                        if (!CheckifSingleRoleAlreadyExists(ToEntityAccount, PrimaryUserRole.Id))
+                                        {
+                                            //create primary connection
+                                            localcontext.Trace("before creating primary connection");
+                                            CreateSingleConnection(FromEntityContact, ToEntityAccount, PrimaryUserRole.Id);
+                                        }
 
-                                        if(FromEntityRole != null && ToEntityRoleID != null)
+                                        if (FromEntityRole != null && ToEntityRoleID != null)
                                         {
                                             ToConnectId = CreateDoubleConnection(FromEntityContact, ToEntityAccount, FromEntityRole.Id, ToEntityRole.Id);
                                         }
@@ -235,11 +235,11 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                                 {
                                     //check if there are any other contact as a primary user for the same account
 
-                                    //if (!CheckifSingleRoleAlreadyExists( ToEntityAccount, PrimaryUserRole.Id))
-                                    //{
-                                    //    //create primary connection
-                                    //    CreateSingleConnection(FromEntityContact, ToEntityAccount, PrimaryUserRole.Id);
-                                    //}
+                                    if (!CheckifSingleRoleAlreadyExists(ToEntityAccount, PrimaryUserRole.Id))
+                                    {
+                                        //create primary connection
+                                        CreateSingleConnection(FromEntityContact, ToEntityAccount, PrimaryUserRole.Id);
+                                    }
 
                                     ToConnectId = CreateSingleConnection( FromEntityContact, ToEntityAccount,  ToEntityRole.Id);
                                     ErrorCode = 200;
@@ -316,7 +316,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                     message = _ErrorMessage,
                     datetime = DateTime.UtcNow,
                     version = "1.0.0.2",
-                    program = "Connect Contact",
+                    program = "Create relatioship",
                     status = ErrorCode == 200 || ErrorCode == 412 ? "success" : "failure",
                     data = new SCIIR.ConnectContactData()
                     {
@@ -540,7 +540,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                     [SCS.Connection.RECORD2ID] = ToEntity,
                     [SCS.Connection.RECORD1ROLEID] = new EntityReference(SCS.Connection.CONNECTIONROLE,
                                FromConnectionRoleId.Value),
-                    [SCS.Connection.RECORD2ROLEID] = new EntityReference("connectionrole",
+                    [SCS.Connection.RECORD2ROLEID] = new EntityReference(SCS.Connection.CONNECTIONROLE,
                                ToConnectionRoleId.Value)
                 };
                 }
