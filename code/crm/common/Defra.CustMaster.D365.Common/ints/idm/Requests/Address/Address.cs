@@ -10,8 +10,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         [Required(ErrorMessage = "type can not be empty")]
         public int? type { get; set; }
 
-        [DataMember]
-        [Required(ErrorMessage = "UPRN can not be empty")]
+        [DataMember]        
         [MaxLength(20, ErrorMessage = "UPRN cannot be greater than 20;")]
         [DataType(DataType.Text)]
         public string uprn { get; set; }
