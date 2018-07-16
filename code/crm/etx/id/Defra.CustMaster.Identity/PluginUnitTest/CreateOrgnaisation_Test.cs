@@ -117,7 +117,101 @@ namespace Defra.Test
             //StringAssert.Contains(ErrorDetails, ISOCodeLengthErrMsg, "ISO code field length validation failed.");
 
         }
+        [TestMethod]
+        public void CheckHirachyLevelErrorMessage_Success()
+        {
+            var fakedContext = new XrmFakedContext();
+            //input object does not contain to record id which is mandatory.
+            string InputLoad = @"
+                  {
+                      'name': 'Acme Limited',
+                      'type': 910400001, 
+                      'crn': '1230234', 
+                      'email': 'acme@acme.com',  
+                      'telephone': '004412345678', 
+                      'validatedwithcompanieshouse': true,
+                      'address': { 
+                        'type': 1,
+                        'uprn': '200010019924', 
+                        'buildingname': 'Horizon House', 
+                        'buildingnumber': '123', 
+                        'street': 'Deanery Road',
+                        'locality': 'new',
+                        'town': 'test', 
+                        'postcode': 'HA9 7AH', 
+                        'country': 'UK', 
+                        'fromcompanieshouse': 'true' 
+                       },
+                       'hierarchylevel': 910400, 
+                       'parentorganisation': {
+                         'parentorganisationcrmid': '194bc6f6-1685-e811-a845-000d3ab4fddf'
+                       }
+                    }
+                ";
 
+
+            //Inputs
+            var inputs = new Dictionary<string, object>() {
+                { "request", InputLoad },
+                };
+
+            var connection = fakedContext.CreateQuery<Account>();
+
+            var result = fakedContext.ExecuteCodeActivity<CreateOrganisation>(inputs);
+            String ReturnMessage = (String)result["response"];
+            AccountResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AccountResponse>(ReturnMessage);
+            String ErrorDetails = ContactResponseObject.message;
+            StringAssert.Contains(ErrorDetails,  String.Format("Option set value {0} for orgnisation hirarchy level not found.", 910400));
+
+        }
+
+        [TestMethod]
+        public void CheckOrgnistaionTypeErrorMessage_Success()
+        {
+            var fakedContext = new XrmFakedContext();
+            //input object does not contain to record id which is mandatory.
+            string InputLoad = @"
+                  {
+                      'name': 'Acme Limited',
+                      'type': 910400001, 
+                      'crn': '1230234', 
+                      'email': 'acme@acme.com',  
+                      'telephone': '004412345678', 
+                      'validatedwithcompanieshouse': true,
+                      'address': { 
+                        'type': 1,
+                        'uprn': '200010019924', 
+                        'buildingname': 'Horizon House', 
+                        'buildingnumber': '123', 
+                        'street': 'Deanery Road',
+                        'locality': 'new',
+                        'town': 'test', 
+                        'postcode': 'HA9 7AH', 
+                        'country': 'UK', 
+                        'fromcompanieshouse': 'true' 
+                       },
+                       'hierarchylevel': 910400000, 
+                       'parentorganisation': {
+                         'parentorganisationcrmid': '194bc6f6-1685-e811-a845-000d3ab4fddf'
+                       }
+                    }
+                ";
+
+
+            //Inputs
+            var inputs = new Dictionary<string, object>() {
+                { "request", InputLoad },
+                };
+
+            var connection = fakedContext.CreateQuery<Account>();
+
+            var result = fakedContext.ExecuteCodeActivity<CreateOrganisation>(inputs);
+            String ReturnMessage = (String)result["response"];
+            AccountResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AccountResponse>(ReturnMessage);
+            String ErrorDetails = ContactResponseObject.message;
+            StringAssert.Contains(ErrorDetails, 
+                String.Format("Option set value {0} for orgnisation type does not exists.", 910400001));
+        }
 
         [TestMethod]
         public void CheckFieldLength_Success()

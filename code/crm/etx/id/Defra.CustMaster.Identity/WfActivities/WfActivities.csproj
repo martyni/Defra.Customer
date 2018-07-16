@@ -106,7 +106,8 @@
   <Import Project="..\..\..\..\common\Defra.CustMaster.D365.Common\Defra.CustMaster.D365.Common.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>$(SolutionDir)packages\ilmerge.2.14.1208\tools\ILMerge.exe /keyfile:$(SolutionDir)/Defra.CustMaster.snk /target:"library" /copyattrs /out:$(TargetDir)$(TargetName)$(TargetExt) $(ProjectDir)$(IntermediateOutputPath)$(TargetName)$(TargetExt) $(SolutionDir)packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>

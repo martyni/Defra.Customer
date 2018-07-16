@@ -178,7 +178,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                         {
                             ErrorCode = 400;
                             ErrorMessage = ErrorMessage.Append(String.Format("Option set value {0} for orgnisation hirarchy level not found.",
-                            Defra.CustMaster.D365.Common.schema.AccountContants.HIERARCHYLEVEL.ToString()));
+                            AccountPayload.hierarchylevel));
                         }
                     }
 
