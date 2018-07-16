@@ -11,6 +11,7 @@
         public const string TOWN = "defra_towntext";
         public const string COUNTRY = "defra_country";
         public const string POSTCODE = "defra_postcode";
+        public const string INTERNATIONALPOSTCODE = "defra_internationalpostalcode";
         public const string FROMCOMPANIESHOUSE = "defra_fromcompanieshouse";
         public const string TACSACCEPTEDVERSION = "defra_tacsacceptedversion";
     }

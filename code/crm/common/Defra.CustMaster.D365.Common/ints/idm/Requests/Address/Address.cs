@@ -10,16 +10,16 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         [Required(ErrorMessage = "type can not be empty")]
         public int? type { get; set; }
 
-        [DataMember]        
+        [DataMember]
         [MaxLength(20, ErrorMessage = "UPRN cannot be greater than 20;")]
         [DataType(DataType.Text)]
         public string uprn { get; set; }
 
-        [DataMember]        
+        [DataMember]
         [MaxLength(450, ErrorMessage = "Building Name cannot be greater than 450;")]
         public string buildingname { get; set; }
 
-        [DataMember]    
+        [DataMember]
         [MaxLength(20, ErrorMessage = "Building Number cannot be greater than 20;")]
         public string buildingnumber { get; set; }
 
@@ -36,9 +36,11 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         public string town { get; set; }
 
         [DataMember]
-        [Required(ErrorMessage = "postcode can not be empty")]
         [MaxLength(8, ErrorMessage = "Postcode cannot be greater than 8;")]
         public string postcode { get; set; }
+
+        [DataMember]
+        public string internationalpostalcode { get; set; }
 
         [DataMember]
         [Required(ErrorMessage = "country can not be empty")]
@@ -49,5 +51,4 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         [DataType(DataType.Text)]
         public bool? fromcompanieshouse { get; set; }
     }
-   
 }
