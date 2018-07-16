@@ -15,8 +15,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         [DataType(DataType.Text)]
         public string uprn { get; set; }
 
-        [DataMember]
-        [Required(ErrorMessage = "building name can not be empty")]
+        [DataMember]        
         [MaxLength(450, ErrorMessage = "Building Name cannot be greater than 450;")]
         public string buildingname { get; set; }
 
