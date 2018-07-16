@@ -24,7 +24,8 @@ namespace Defra.Test
 
 
         const String RecordTypeCannotBeEmpty = "record type can not be empty";
-
+        const string PostCodeOrPostalCodeCannotBeEmpty = "internationalpostalcode can not be empty if the country is non-UK;";
+        const string BuilingNumberOrNameCannotBeEmpty = "Provide either building name or building number, Building name is mandatory if the building number is empty;";
         const String RecordIdCannotBeEmpty = "recordid can not be empty";
         const String RecordIDMaxLengthCheck = "record id exceeded the max length(36);";
 
@@ -79,7 +80,7 @@ namespace Defra.Test
         }
 
         [TestMethod]
-        public void UPNNotMandatoryCheck_Success()
+        public void UPRN_NotMandatoryCheck_Success()
         {
             var fakedContext = new XrmFakedContext();
             //input object does not contain to record id which is mandatory.
@@ -125,7 +126,98 @@ namespace Defra.Test
             String ErrorDetails = AddressResponseObject.message;
             Assert.IsNotNull(AddressResponseObject.data.addressid);
         }
+        [TestMethod]
+        public void BuildingNameOrBuildingNumber_Required()
+        {
+            var fakedContext = new XrmFakedContext();
+            //input object does not contain to record id which is mandatory.
+            string InputLoad = @"
+                 {
+                      recordtype: 'contact',
+                      recordid: '37e64f21-c035-4e49-a6b6-958cdd3af45e',
+                      'address': {
+                        'type': 1,                  
+                        'street': 'Road',
+                        'locality': '',
+                        'town': '',
+                        'postcode': '12345678',
+                        'country': 'gbr',
+                        'fromcompanieshouse': ''
+                      }
+                    }
 
+                ";
+
+
+            //Inputs
+            var inputs = new Dictionary<string, object>() {
+                {
+                        "ReqPayload", InputLoad },
+                };
+
+            fakedContext.Initialize(new List<Entity>()
+                {   new Entity() { Id = new Guid("37e64f21-c035-4e49-a6b6-958cdd3af45e"), LogicalName = "contact" }
+                });
+
+            var result = fakedContext.ExecuteCodeActivity<AddAddress>(inputs);
+            var address = fakedContext.CreateQuery<defra_address>();
+
+            #region ErrorMessagesToCheck
+
+            #endregion
+
+            String ReturnMessage = (String)result["ResPayload"];
+            AddressResponse AddressResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AddressResponse>(ReturnMessage);
+            String ErrorDetails = AddressResponseObject.message;
+            StringAssert.Contains(ErrorDetails, BuilingNumberOrNameCannotBeEmpty, "Provide either building name or building number, Building name is mandatory if the building number is empty;");
+        }
+
+        [TestMethod]
+        public void PostCode_Required_IfTheCountryIsUK()
+        {
+            var fakedContext = new XrmFakedContext();
+            //input object does not contain to record id which is mandatory.
+            string InputLoad = @"
+                 {
+                      recordtype: 'contact',
+                      recordid: '37e64f21-c035-4e49-a6b6-958cdd3af45e',
+                      'address': {
+                        'type': 1,
+                        'buildingname': 'Horizon',
+                        'buildingnumber': '3',                  
+                        'street': 'Road',
+                        'locality': '',
+                        'town': '',                        
+                        'country': 'USA',
+                        'fromcompanieshouse': ''
+                      }
+                    }
+
+                ";
+
+
+            //Inputs
+            var inputs = new Dictionary<string, object>() {
+                {
+                        "ReqPayload", InputLoad },
+                };
+
+            fakedContext.Initialize(new List<Entity>()
+                {   new Entity() { Id = new Guid("37e64f21-c035-4e49-a6b6-958cdd3af45e"), LogicalName = "contact" }
+                });
+
+            var result = fakedContext.ExecuteCodeActivity<AddAddress>(inputs);
+            var address = fakedContext.CreateQuery<defra_address>();
+
+            #region ErrorMessagesToCheck
+
+            #endregion
+
+            String ReturnMessage = (String)result["ResPayload"];
+            AddressResponse AddressResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AddressResponse>(ReturnMessage);
+            String ErrorDetails = AddressResponseObject.message;
+            StringAssert.Contains(ErrorDetails, PostCodeOrPostalCodeCannotBeEmpty, "internationalpostalcode can not be empty if the country is non-UK;");
+        }
         [TestMethod]
         public void RecordIdMaxLengthValidation()
         {

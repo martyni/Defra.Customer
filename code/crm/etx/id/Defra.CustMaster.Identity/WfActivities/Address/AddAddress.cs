@@ -1,30 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Workflow;
-using System.Activities;
-using System.Text;
-using System.Linq;
-using System.ComponentModel.DataAnnotations;
-using Newtonsoft.Json;
-using SCS = Defra.CustMaster.D365.Common.schema;
-using SCII = Defra.CustMaster.D365.Common.Ints.Idm;
-using SCIIR = Defra.CustMaster.D365.Common.Ints.Idm.Resp;
-using Defra.CustMaster.D365.Common.Ints.Idm.resp;
-using Microsoft.Xrm.Sdk.Client;
-
-namespace Defra.CustMaster.Identity.WfActivities
+﻿namespace Defra.CustMaster.Identity.WfActivities
 {
+    using System;
+    using System.Activities;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.Linq;
+    using System.Text;
+    using D365.Common.Ints.Idm.resp;
+    using Microsoft.Xrm.Sdk;
+    using Microsoft.Xrm.Sdk.Client;
+    using Microsoft.Xrm.Sdk.Workflow;
+    using Newtonsoft.Json;
+    using SCII = Defra.CustMaster.D365.Common.Ints.Idm;
+    using SCIIR = Defra.CustMaster.D365.Common.Ints.Idm.Resp;
+    using SCS = Defra.CustMaster.D365.Common.schema;
+
     public class AddAddress : WorkFlowActivityBase
     {
         #region "Parameter Definition"
 
         [RequiredArgument]
         [Input("request")]
-        public InArgument<String> ReqPayload { get; set; }
+        public InArgument<string> ReqPayload { get; set; }
 
         [Output("response")]
-        public OutArgument<String> ResPayload { get; set; }
+        public OutArgument<string> ResPayload { get; set; }
 
         #endregion
 
@@ -33,18 +33,19 @@ namespace Defra.CustMaster.Identity.WfActivities
         protected override void Execute(CodeActivityContext executionContext)
         {
             #region local variables
-            SCII.Helper _objCommon;
-            //EntityReference _Contact;
-            int _errorCode = 400; //Bad Request
-            string _errorMessageDetail = string.Empty;
-            Guid _customerId = Guid.Empty;
-            Entity _existingAccountRecord = new Entity();
-            StringBuilder _errorMessage = new StringBuilder();
-            bool _isRecordIdExists = false;
+            SCII.Helper objCommon;
+
+            // EntityReference _Contact;
+            int errorCode = 400; // Bad Request
+            string errorMessageDetail = string.Empty;
+            Guid customerId = Guid.Empty;
+            Entity existingAccountRecord = new Entity();
+            StringBuilder errorMessage = new StringBuilder();
+            bool isRecordIdExists = false;
             AddressData createdAddress = new AddressData() { addressid = Guid.Empty, contactdetailsid = Guid.Empty };
             #endregion
             LocalWorkflowContext localcontext = new LocalWorkflowContext(executionContext);
-            _objCommon = new SCII.Helper(executionContext);
+            objCommon = new SCII.Helper(executionContext);
             try
             {
                 localcontext.Trace("started execution");
@@ -52,134 +53,140 @@ namespace Defra.CustMaster.Identity.WfActivities
 
                 string jsonPayload = ReqPayload.Get(executionContext);
                 SCII.AddressRequest addressPayload = JsonConvert.DeserializeObject<SCII.AddressRequest>(jsonPayload);
-
-
                 if (addressPayload.address == null)
                 {
-                    _errorMessage = _errorMessage.Append("Address can not be empty");
+                    errorMessage = errorMessage.Append("Address can not be empty");
                 }
                 else
                 {
-                    _objCommon = new SCII.Helper(executionContext);
-                    ValidationContext ValidationContext = new ValidationContext(addressPayload, serviceProvider: null, items: null);
-                    ICollection<ValidationResult> ValidationResults = null;
-                    ICollection<ValidationResult> ValidationResultsAddress = null;
+                    objCommon = new SCII.Helper(executionContext);
+                    ValidationContext validationContext = new ValidationContext(addressPayload, serviceProvider: null, items: null);
+                    ICollection<ValidationResult> validationResults = null;
+                    ICollection<ValidationResult> validationResultsAddress = null;
 
-                    bool isValid = _objCommon.Validate(addressPayload, out ValidationResults);
-                    bool isValidAddress = _objCommon.Validate(addressPayload.address, out ValidationResultsAddress);
+                    bool isValid = objCommon.Validate(addressPayload, out validationResults);
+                    bool isValidAddress = objCommon.Validate(addressPayload.address, out validationResultsAddress);
 
                     localcontext.Trace("TRACE TO valid:" + isValid);
                     string customerEntity = addressPayload.recordtype == SCII.RecordType.contact ? SCS.Contact.ENTITY : SCS.AccountContants.ENTITY_NAME;
                     string customerEntityId = addressPayload.recordtype == SCII.RecordType.contact ? SCS.Contact.CONTACTID : SCS.AccountContants.ACCOUNTID;
-                    //check for building name, it should be mandatory only if the building number is empty
-                    if(string.IsNullOrEmpty(addressPayload.address.buildingname))
+
+                    // check for building name, it should be mandatory only if the building number is empty
+                    if (string.IsNullOrEmpty(addressPayload.address.buildingname))
                     {
-                        if(string.IsNullOrEmpty(addressPayload.address.buildingnumber))
+                        if (string.IsNullOrEmpty(addressPayload.address.buildingnumber))
                         {
-                            _errorMessage.Append("Provide either building name or building number, Building name is mandatory if the building number is empty");
+                            errorMessage.Append("Provide either building name or building number, Building name is mandatory if the building number is empty;");
                         }
                     }
-                    if (isValid && isValidAddress&& _errorMessage.Length==0)
+
+                    // check for postcode, it should be mandatory only if the country is UK
+                    if (isValidAddress && (string.IsNullOrEmpty(addressPayload.address.postcode) && string.IsNullOrEmpty(addressPayload.address.internationalpostalcode)))
                     {
-                        //check recordid exists
+                        if (addressPayload.address.country.Trim().ToUpper() == "GBR")
+                        {
+                            errorMessage.Append("postcode can not be empty if the country is UK;");
+                        }
+                        else
+                        {
+                            errorMessage.Append("internationalpostalcode can not be empty if the country is non-UK;");
+                        }
+                    }
+
+                    if (isValid && isValidAddress&& errorMessage.Length == 0)
+                    {
+                        // check recordid exists
                         if (!string.IsNullOrEmpty(addressPayload.recordid) && !string.IsNullOrWhiteSpace(addressPayload.recordid))
                         {
-
-                            if (Guid.TryParse(addressPayload.recordid, out _customerId))
+                            if (Guid.TryParse(addressPayload.recordid, out customerId))
                             {
-
-                                localcontext.Trace("record id:" + customerEntity + ":" + _customerId);
-                                OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(_objCommon.service);
+                                localcontext.Trace("record id:" + customerEntity + ":" + customerId);
+                                OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
                                 var checkRecordExists = from c in orgSvcContext.CreateQuery(customerEntity)
-                                                        where (string)c[customerEntityId] == _customerId.ToString()
+                                                        where (string)c[customerEntityId] == customerId.ToString()
                                                         select new { recordId = c.Id };
 
                                 if (checkRecordExists != null && checkRecordExists.FirstOrDefault() != null)
                                 {
-                                    _customerId = checkRecordExists.FirstOrDefault().recordId;
-                                    _isRecordIdExists = true;
+                                    customerId = checkRecordExists.FirstOrDefault().recordId;
+                                    isRecordIdExists = true;
                                 }
-
                             }
                         }
 
                         // if record exists then go on to add address
-                        if (_isRecordIdExists)
+                        if (isRecordIdExists)
                         {
                             localcontext.Trace("length:" + addressPayload.recordid);
-                            EntityReference customer = new EntityReference(customerEntity, _customerId);
+                            EntityReference customer = new EntityReference(customerEntity, customerId);
                             if (addressPayload.address != null)
-                                createdAddress = _objCommon.CreateAddress(addressPayload.address, customer);
-                            localcontext.Trace("after adding address:");
-                            _errorCode = 200;
+                            {
+                                createdAddress = objCommon.CreateAddress(addressPayload.address, customer);
+                            }
 
+                            localcontext.Trace("after adding address:");
+                            errorCode = 200;
                         }
-                        //if the organisation does not exists
+
+                        // if the organisation does not exists
                         else
                         {
-                            _errorCode = 404;
-                            _errorMessage = _errorMessage.Append(String.Format("recordid with id {0} does not exists.",
-                            addressPayload.recordid));
+                            errorCode = 404;
+                            errorMessage = errorMessage.Append(string.Format("recordid with id {0} does not exists.", addressPayload.recordid));
                         }
                     }
                     else
                     {
                         localcontext.Trace("inside validation result");
-                        //_errorMessage = new StringBuilder();
-                        //this will throw an error
-                        foreach (ValidationResult vr in ValidationResults)
-                        {
-                            _errorMessage.Append(vr.ErrorMessage + " ");
-                        }
-                        foreach (ValidationResult vr in ValidationResultsAddress)
-                        {
-                            _errorMessage.Append(vr.ErrorMessage + " ");
-                        }
-                        _errorCode = 400;
 
+                         // _errorMessage = new StringBuilder();
+
+                        // this will throw an error
+                        foreach (ValidationResult vr in validationResults)
+                        {
+                            errorMessage.Append(vr.ErrorMessage + " ");
+                        }
+                        foreach (ValidationResult vr in validationResultsAddress)
+                        {
+                            errorMessage.Append(vr.ErrorMessage + " ");
+                         }
+
+                        errorCode = 400;
                     }
                 }
 
             }
-
             catch (Exception ex)
             {
                 localcontext.Trace("inside exception");
-                _errorCode = 500;
-                _errorMessage = _errorMessage.Append(" Error occured while processing request");
-                _errorMessageDetail = ex.Message;
+                errorCode = 500;
+                errorMessage = errorMessage.Append(" Error occured while processing request");
+                errorMessageDetail = ex.Message;
                 localcontext.Trace(ex.Message);
-
             }
             finally
             {
-
-
                 localcontext.Trace("finally block start");
                 AddressResponse responsePayload = new AddressResponse()
                 {
-                    code = _errorCode,
-                    message = _errorMessage.ToString(),
+                    code = errorCode,
+                    message = errorMessage.ToString(),
                     datetime = DateTime.UtcNow,
                     version = "1.0.0.2",
 
-                    status = _errorCode == 200 ? "success" : "failure",
+                    status = errorCode == 200 ? "success" : "failure",
                     data = new AddressData()
                     {
                         contactdetailsid = createdAddress.contactdetailsid,
                         addressid = createdAddress.addressid,
-                        error = new SCIIR.ResponseErrorBase() { details = _errorMessageDetail == string.Empty ? _errorMessage.ToString() : _errorMessageDetail }
+                        error = new SCIIR.ResponseErrorBase() { details = errorMessageDetail == string.Empty ? errorMessage.ToString() : errorMessageDetail }
                     }
-
                 };
 
                 string resPayload = JsonConvert.SerializeObject(responsePayload);
                 ResPayload.Set(executionContext, resPayload);
                 localcontext.Trace("finally block end");
-
-
             }
-
         }
         #endregion
     }
