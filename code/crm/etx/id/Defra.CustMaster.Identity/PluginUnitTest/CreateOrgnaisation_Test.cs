@@ -172,28 +172,22 @@ namespace Defra.Test
             //input object does not contain to record id which is mandatory.
             string InputLoad = @"
                   {
-                      'name': 'Acme Limited',
-                      'type': 910400001, 
-                      'crn': '1230234', 
-                      'email': 'acme@acme.com',  
-                      'telephone': '004412345678', 
-                      'validatedwithcompanieshouse': true,
-                      'address': { 
-                        'type': 1,
-                        'uprn': '200010019924', 
-                        'buildingname': 'Horizon House', 
-                        'buildingnumber': '123', 
-                        'street': 'Deanery Road',
-                        'locality': 'new',
-                        'town': 'test', 
-                        'postcode': 'HA9 7AH', 
-                        'country': 'UK', 
-                        'fromcompanieshouse': 'true' 
-                       },
-                       'hierarchylevel': 910400000, 
-                       'parentorganisation': {
-                         'parentorganisationcrmid': '194bc6f6-1685-e811-a845-000d3ab4fddf'
-                       }
+                    'name': 'Sainsburys',
+                    'type': 910400001,
+                    'crn': '23274286',
+                    'email': 'c0f4d100-86c1-11e8-8d0b-17eda72fe0d2@idm-test.example.com',
+                    'telephone': '+447812555555',
+                    'validatedwithcompanieshouse': true,
+                    'address': {
+                      'type': 1,
+                      'uprn': '200010019924',
+                      'buildingname': 'Horizon House',
+                      'street': 'Lombard Street',
+                      'town': 'Bristol',
+                      'postcode': 'BH0 0HB',
+                      'country': 'GBR',
+                      'fromcompanieshouse': true
+                    }
                     }
                 ";
 

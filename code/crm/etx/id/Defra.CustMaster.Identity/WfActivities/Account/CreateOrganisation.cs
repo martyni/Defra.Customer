@@ -64,19 +64,20 @@ namespace Defra.CustMaster.Identity.WfActivities
                 {
 
                     objCommon.tracingService.Trace("length{0}", AccountPayload.name.Length);
-                    if (AccountPayload.hierarchylevel != 0)
-                    {
+                    
                         objCommon.tracingService.Trace("hierarchylevel level: {0}", AccountPayload.hierarchylevel);
 
-                        if (!String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.defra_OrganisationHierarchyLevel), AccountPayload.hierarchylevel)))
+                        if (!String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.defra_OrganisationHierarchyLevel), AccountPayload.hierarchylevel)) 
+                        && AccountPayload.hierarchylevel > 0)
                         {
 
                             objCommon.tracingService.Trace("before assinging value");
 
+                        if (AccountPayload.hierarchylevel != 0)
+                        {
                             AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.HIERARCHYLEVEL] = new OptionSetValue(AccountPayload.hierarchylevel);
+                        }
                             objCommon.tracingService.Trace("after assinging value");
-
-
                             if (!String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.defra_OrganisationType), AccountPayload.type)))
                             {
                                 //check if crn exists
@@ -180,14 +181,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                             ErrorMessage = ErrorMessage.Append(String.Format("Option set value {0} for orgnisation hirarchy level not found.",
                             AccountPayload.hierarchylevel));
                         }
-                    }
-
-                    else
-                    {
-                        ErrorCode = 400;
-                        ErrorMessage = ErrorMessage.Append(String.Format("Option set value {0} for orgnisation type does not exists.",
-                        AccountPayload.type));
-                    }
+            
 
 
                 }
