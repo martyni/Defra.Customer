@@ -67,8 +67,8 @@ namespace Defra.CustMaster.Identity.WfActivities
                     
                         objCommon.tracingService.Trace("hierarchylevel level: {0}", AccountPayload.hierarchylevel);
 
-                        if (!String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.defra_OrganisationHierarchyLevel), AccountPayload.hierarchylevel)) 
-                        && AccountPayload.hierarchylevel > 0)
+                        if (AccountPayload.hierarchylevel == 0 || !String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.defra_OrganisationHierarchyLevel), AccountPayload.hierarchylevel)) 
+                        )
                         {
 
                             objCommon.tracingService.Trace("before assinging value");

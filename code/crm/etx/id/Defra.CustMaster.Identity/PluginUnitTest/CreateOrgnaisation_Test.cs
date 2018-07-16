@@ -142,7 +142,7 @@ namespace Defra.Test
                         'country': 'UK', 
                         'fromcompanieshouse': 'true' 
                        },
-                       'hierarchylevel': 910400, 
+                       
                        'parentorganisation': {
                          'parentorganisationcrmid': '194bc6f6-1685-e811-a845-000d3ab4fddf'
                        }
@@ -172,23 +172,23 @@ namespace Defra.Test
             //input object does not contain to record id which is mandatory.
             string InputLoad = @"
                   {
-                    'name': 'Sainsburys',
-                    'type': 910400001,
-                    'crn': '23274286',
-                    'email': 'c0f4d100-86c1-11e8-8d0b-17eda72fe0d2@idm-test.example.com',
-                    'telephone': '+447812555555',
-                    'validatedwithcompanieshouse': true,
-                    'address': {
-                      'type': 1,
-                      'uprn': '200010019924',
-                      'buildingname': 'Horizon House',
-                      'street': 'Lombard Street',
-                      'town': 'Bristol',
-                      'postcode': 'BH0 0HB',
-                      'country': 'GBR',
-                      'fromcompanieshouse': true
-                    }
-                    }
+                'name': 'Sainsburys',
+                'type': 91040,
+                'crn': '23274286',
+                'email': 'c0f4d100-86c1-11e8-8d0b-17eda72fe0d2@idm-test.example.com',
+                'telephone': '+447812555555',
+                'validatedwithcompanieshouse': true,
+                'address': {
+                  'type': 1,
+                  'uprn': '200010019924',
+                  'buildingname': 'Horizon House',
+                  'street': 'Lombard Street',
+                  'town': 'Bristol',
+                  'postcode': 'BH0 0HB',
+                  'country': 'GBR',
+                  'fromcompanieshouse': true
+                }
+                }
                 ";
 
 
@@ -204,7 +204,7 @@ namespace Defra.Test
             AccountResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AccountResponse>(ReturnMessage);
             String ErrorDetails = ContactResponseObject.message;
             StringAssert.Contains(ErrorDetails, 
-                String.Format("Option set value {0} for orgnisation type does not exists.", 910400001));
+                String.Format("Option set value {0} for orgnisation type does not exists.", 91040));
         }
 
         [TestMethod]
