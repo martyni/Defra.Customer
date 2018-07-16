@@ -71,7 +71,15 @@ namespace Defra.CustMaster.Identity.WfActivities
                     localcontext.Trace("TRACE TO valid:" + isValid);
                     string customerEntity = addressPayload.recordtype == SCII.RecordType.contact ? SCS.Contact.ENTITY : SCS.AccountContants.ENTITY_NAME;
                     string customerEntityId = addressPayload.recordtype == SCII.RecordType.contact ? SCS.Contact.CONTACTID : SCS.AccountContants.ACCOUNTID;
-                    if (isValid && isValidAddress)
+                    //check for building name, it should be mandatory only if the building number is empty
+                    if(string.IsNullOrEmpty(addressPayload.address.buildingname))
+                    {
+                        if(string.IsNullOrEmpty(addressPayload.address.buildingnumber))
+                        {
+                            _errorMessage.Append("Provide either building name or building number, Building name is mandatory if the building number is empty");
+                        }
+                    }
+                    if (isValid && isValidAddress&& _errorMessage.Length==0)
                     {
                         //check recordid exists
                         if (!string.IsNullOrEmpty(addressPayload.recordid) && !string.IsNullOrWhiteSpace(addressPayload.recordid))
@@ -117,7 +125,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                     else
                     {
                         localcontext.Trace("inside validation result");
-                        _errorMessage = new StringBuilder();
+                        //_errorMessage = new StringBuilder();
                         //this will throw an error
                         foreach (ValidationResult vr in ValidationResults)
                         {
