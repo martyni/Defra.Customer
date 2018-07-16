@@ -101,13 +101,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
                 {
                     Entity contactDetails = new Entity(SCS.ContactDetails.ENTITY);
                     contactDetails[SCS.Address.ENTITY] = new EntityReference(SCS.ContactDetails.ENTITY, addressId);
-
-
-                    //Check whether addressType is found in Dynamics defra_addresstypeEnum mapping
-                    string addressType = Enum.GetName(typeof(AddressTypes), addressDetails.type);
-
-                    defra_AddressType dynamicsAddressType = (defra_AddressType)Enum.Parse(typeof(defra_AddressType), addressType);
-                    contactDetails[SCS.ContactDetails.ADDRESSTYPE] = new OptionSetValue((int)dynamicsAddressType);
+                    contactDetails[SCS.ContactDetails.ADDRESSTYPE] = new OptionSetValue((int)addressDetails.type);
 
                     contactDetails[SCS.ContactDetails.CUSTOMER] = customer;
                     contactDetailId = this.service.Create(contactDetails);

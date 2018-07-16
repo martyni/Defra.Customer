@@ -162,6 +162,10 @@
                 errorCode = 500;
                 errorMessage = errorMessage.Append(" Error occured while processing request");
                 errorMessageDetail = ex.Message;
+                if(ex.Message.Contains("Contact details of same type already exist for this customer"))
+                {
+                    errorCode = 412;
+                }
                 localcontext.Trace(ex.Message);
             }
             finally
