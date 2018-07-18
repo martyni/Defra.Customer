@@ -64,7 +64,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                 {
                     if (!Enum.IsDefined(typeof(SCII.AddressTypes), AccountPayload.address.type))
                     {
-                        ErrorMessage.Append("Option set value for address of type not found;" + AccountPayload.address.type + ";");
+                        ErrorMessage.Append("Option set value for address of type not found" + AccountPayload.address.type + ";");
                     }
                 }
 
