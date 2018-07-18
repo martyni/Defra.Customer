@@ -217,7 +217,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                 else
                 {
                     objCommon.tracingService.Trace("inside validation result");
-                    ErrorMessage = new StringBuilder();
+                    //ErrorMessage = new StringBuilder();
                     //this will throw an error
                     foreach (System.ComponentModel.DataAnnotations.ValidationResult vr in ValidationResults)
                     {

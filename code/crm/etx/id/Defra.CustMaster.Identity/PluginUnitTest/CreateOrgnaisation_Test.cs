@@ -399,8 +399,12 @@ namespace Defra.Test
 
             String ReturnMessage = (String)result["response"];
             AccountResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AccountResponse>(ReturnMessage);
-            StringAssert.Contains(ContactResponseObject.message, "412");
+            String ErrorDetails = ContactResponseObject.message;
+
+            StringAssert.Contains(ErrorDetails, "Option set value for address of type not found;");
         }
+
+
     }
 
 
