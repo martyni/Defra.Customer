@@ -165,12 +165,18 @@ namespace Defra.CustMaster.Identity.WfActivities
                                 //create contactdetail record for primary contact details
                                 if (AccountPayload.email != null)
                                 {
+                                    objCommon.tracingService.Trace("email id before upsert contact");
                                     objCommon.UpsertContactDetails((int)SCII.EmailTypes.PrincipalEmailAddress, AccountPayload.email, new EntityReference(SCS.AccountContants.ENTITY_NAME, CrmGuid), false, false);
+                                    objCommon.tracingService.Trace("email id after upsert contact");
+
 
                                 }
                                 if (AccountPayload.telephone != null)
                                 {
+                                    objCommon.tracingService.Trace("telephone before upsert contact");
+
                                     objCommon.UpsertContactDetails((int)SCII.PhoneTypes.PrincipalPhoneNumber, AccountPayload.telephone, new EntityReference(SCS.AccountContants.ENTITY_NAME, CrmGuid), false, false);
+                                    objCommon.tracingService.Trace("telephone after upsert contact");
 
                                 }
 
