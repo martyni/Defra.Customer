@@ -43,6 +43,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
                                            select new { AddressId = c.Id };
                     addressId = propertyWithUPRN != null && propertyWithUPRN.FirstOrDefault() != null ? propertyWithUPRN.FirstOrDefault().AddressId : Guid.Empty;
                 }
+
             }
             if (addressId == Guid.Empty && addressDetails.street != null && addressDetails.postcode != null && addressDetails.buildingnumber != null)
             {
@@ -55,8 +56,11 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
             if (addressId == Guid.Empty)
             {
                 Entity address = new Entity(SCS.Address.ENTITY);
-                if (addressDetails.uprn != null)
-                    address[SCS.Address.UPRN] = addressDetails.uprn;
+                if (addressDetails.country.Trim().ToUpper() == "GBR")
+                {
+                    if (addressDetails.uprn != null)
+                        address[SCS.Address.UPRN] = addressDetails.uprn;
+                }
                 if (addressDetails.buildingname != null)
                     address[SCS.Address.NAME] = addressDetails.buildingname;
                 if (addressDetails.buildingnumber != null)
