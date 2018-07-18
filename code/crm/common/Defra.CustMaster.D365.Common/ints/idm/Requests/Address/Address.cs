@@ -36,7 +36,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         public string town { get; set; }
 
         [DataMember]
-        [MaxLength(8, ErrorMessage = "Postcode cannot be greater than 8;")]
+        [Required(ErrorMessage = "postcode can not be empty")]
         public string postcode { get; set; }
 
         [DataMember]

@@ -65,7 +65,17 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
                 if (addressDetails.town != null)
                     address[SCS.Address.TOWN] = addressDetails.town;
                 if (addressDetails.postcode != null)
-                    address[SCS.Address.POSTCODE] = addressDetails.postcode;
+                {
+                    if (addressDetails.country.Trim().ToUpper() == "GBR")
+                    {
+                        address[SCS.Address.POSTCODE] = addressDetails.postcode;
+                    }
+                    else
+                    {
+                        address[SCS.Address.INTERNATIONALPOSTCODE] = addressDetails.postcode;
+                    }
+                }
+
                 bool resultedCompanyHouse;
                 if (addressDetails.fromcompanieshouse != null)
                     if (Boolean.TryParse(addressDetails.fromcompanieshouse.ToString(), out resultedCompanyHouse))

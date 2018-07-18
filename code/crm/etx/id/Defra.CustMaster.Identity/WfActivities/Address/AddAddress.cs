@@ -80,16 +80,22 @@
                         }
                     }
 
-                    // check for postcode, it should be mandatory only if the country is UK
-                    if (isValidAddress && (string.IsNullOrEmpty(addressPayload.address.postcode) && string.IsNullOrEmpty(addressPayload.address.internationalpostalcode)))
+                    // check for postcode lengths, it should be 8 for UK and 25 for NON-UK
+                    if (isValidAddress && isValid)
                     {
                         if (addressPayload.address.country.Trim().ToUpper() == "GBR")
                         {
-                            errorMessage.Append("postcode can not be empty if the country is UK;");
+                            if (addressPayload.address.postcode.Length > 8)
+                            {
+                                errorMessage.Append("postcode length can not be greater than 8 for UK countries;");
+                            }
                         }
                         else
                         {
-                            errorMessage.Append("internationalpostalcode can not be empty if the country is non-UK;");
+                            if (addressPayload.address.postcode.Length > 25)
+                            {
+                                errorMessage.Append("postcode length can not be greater than 25 for NON-UK countries;");
+                            }
                         }
                     }
 
