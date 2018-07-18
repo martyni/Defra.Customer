@@ -152,11 +152,11 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
                 Entity contactDetails = new Entity(SCS.ContactDetails.ENTITY);
                 // contactDetails[SCS.Address.ENTITY] = new EntityReference(SCS.ContactDetails.ENTITY, addressId);
                 contactDetails[SCS.ContactDetails.ADDRESSTYPE] = new OptionSetValue((int)type);
-                if (!Enum.IsDefined(typeof(EmailTypes), type))
+                if (Enum.IsDefined(typeof(EmailTypes), type))
                 {
                     contactDetails[SCS.ContactDetails.EMAILADDRESS] = typeValue;
                 }
-                else if (!Enum.IsDefined(typeof(PhoneTypes), type))
+                else if (Enum.IsDefined(typeof(PhoneTypes), type))
                 {
                     contactDetails[SCS.ContactDetails.PHONE] = typeValue;
                 }
