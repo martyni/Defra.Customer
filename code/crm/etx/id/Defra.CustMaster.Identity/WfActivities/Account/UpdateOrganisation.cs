@@ -291,19 +291,24 @@ namespace Defra.CustMaster.Identity.WfActivities
                         localcontext.Trace("outside validated with companies house:" + accountPayload.updates.validatedwithcompanieshouse);
                         localcontext.Trace("before updating guid:" + AccountObject.Id.ToString());
                         objCommon.service.Update(AccountObject);
-                        if (accountPayload.updates.email != null)
+                        EntityReference AccountEntityReference = new EntityReference(SCS.AccountContants.ENTITY_NAME, AccountObject.Id);
+                        if (clearRequired && accountPayload.clearlist.fields.Contains(SCII.OrganisationClearFields.email))
                         {
-                            objCommon.UpsertContactDetails((int)SCII.EmailTypes.PrincipalEmailAddress, accountPayload.updates.email, new EntityReference(SCS.AccountContants.ENTITY_NAME, AccountObject.Id), true, false);
+                            objCommon.UpsertContactDetails((int)SCII.EmailTypes.PrincipalEmailAddress, accountPayload.updates.email, AccountEntityReference, false, true);
+                        }
+                        else if (accountPayload.updates.email != null)
+                        {
+                            objCommon.UpsertContactDetails((int)SCII.EmailTypes.PrincipalEmailAddress, accountPayload.updates.email, AccountEntityReference, true, false);
                         }
                         //if phone is in clear list then deactivate the contact details record of principalphonenumber
                         if (clearRequired && accountPayload.clearlist.fields.Contains(SCII.OrganisationClearFields.telephone))
                         {
-                            objCommon.UpsertContactDetails((int)SCII.PhoneTypes.PrincipalPhoneNumber, accountPayload.updates.telephone, new EntityReference(SCS.AccountContants.ENTITY_NAME, AccountObject.Id), false, true);
+                            objCommon.UpsertContactDetails((int)SCII.PhoneTypes.PrincipalPhoneNumber, accountPayload.updates.telephone, AccountEntityReference, false, true);
                         }
 
                         else if (accountPayload.updates.telephone != null)
                         {
-                            objCommon.UpsertContactDetails((int)SCII.PhoneTypes.PrincipalPhoneNumber, accountPayload.updates.telephone, new EntityReference(SCS.AccountContants.ENTITY_NAME, AccountObject.Id), true, false);
+                            objCommon.UpsertContactDetails((int)SCII.PhoneTypes.PrincipalPhoneNumber, accountPayload.updates.telephone, AccountEntityReference, true, false);
                         }
                         localcontext.Trace("after updating guid:" + AccountObject.Id.ToString());
 

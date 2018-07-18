@@ -337,6 +337,70 @@ namespace Defra.Test
 
 
         }
+
+
+        [TestMethod]
+        public void AddressTypeCheck_Success()
+        {
+            var fakedContext = new XrmFakedContext();
+            //input object does not contain to record id which is mandatory.
+            string InputLoad = @"
+                  {
+                       'organisationid': 'b7293664-e46a-e811-a83c-000d3ab4f967',
+                      'name': 'orgname',
+                      'type': '910400000',
+                      'crn': '142923',
+                      'email': 'email@email.com',
+                      'address': {
+                        'type': '5',
+                        'uprn': '12345',
+                        'buildingname': 'test',
+                        'buildingnumber': '1234',
+                        'street': 'street',
+                        'locality': 'local',
+                        'town': 'town',
+                        'postcode': 'HA9 7AH',
+                        'country': 'ABC',
+                        'fromcompanieshouse': 'true'
+                      },
+                      'telephone': '004412345678',
+                      'hierarchylevel': '910400000',
+                     
+                    }
+                ";
+
+
+            //Inputs
+            var inputs = new Dictionary<string, object>() {
+                { "request", InputLoad },
+                };
+
+            var account = fakedContext.CreateQuery<Account>();
+
+            Account AccountObject = new Account
+            {
+                AccountId = new Guid("b7293664-e46a-e811-a83c-000d3ab4f967")
+                                             ,
+                defra_companyhouseid = "142923"
+            };
+
+            fakedContext.Initialize(new List<Entity>()
+            {   AccountObject
+            });
+
+            var result = fakedContext.ExecuteCodeActivity<CreateOrganisation>(inputs);
+
+            #region ErrorMessagesToCheck
+
+
+
+
+            #endregion
+
+            String ReturnMessage = (String)result["response"];
+            AccountResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AccountResponse>(ReturnMessage);
+            StringAssert.Contains(ContactResponseObject.message, "412");
+        }
     }
 
 
