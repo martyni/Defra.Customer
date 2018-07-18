@@ -14,7 +14,7 @@
     using SCII = Defra.CustMaster.D365.Common.Ints.Idm;
     using SCIIR = Defra.CustMaster.D365.Common.Ints.Idm.Resp;
     using SCS = Defra.CustMaster.D365.Common.schema;
-
+    using SCSE = Defra.CustMaster.D365.Common.Schema.ExtEnums;
     public class AddAddress : WorkFlowActivityBase
     {
         #region "Parameter Definition"
@@ -97,64 +97,73 @@
                                 errorMessage.Append("postcode length can not be greater than 25 for NON-UK countries;");
                             }
                         }
-                    }
 
-                    if (isValid && isValidAddress&& errorMessage.Length == 0)
-                    {
-                        // check recordid exists
-                        if (!string.IsNullOrEmpty(addressPayload.recordid) && !string.IsNullOrWhiteSpace(addressPayload.recordid))
+                        if (addressPayload.address.type != null)
                         {
-                            if (Guid.TryParse(addressPayload.recordid, out customerId))
+                            if (!Enum.IsDefined(typeof(SCII.AddressTypes), addressPayload.address.type))
                             {
-                                localcontext.Trace("record id:" + customerEntity + ":" + customerId);
-                                OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
-                                var checkRecordExists = from c in orgSvcContext.CreateQuery(customerEntity)
-                                                        where (Guid)c[customerEntityId] == customerId
-                                                        select new { recordId = c.Id };
-                                if (checkRecordExists != null && checkRecordExists.FirstOrDefault() != null)
+                                errorMessage.Append("Option set value for address of type not found;" + addressPayload.address.type);
+                            }
+                        }
+
+                        if (errorMessage.Length == 0)
+                        {
+                            // check recordid exists
+                            if (!string.IsNullOrEmpty(addressPayload.recordid) && !string.IsNullOrWhiteSpace(addressPayload.recordid))
+                            {
+                                if (Guid.TryParse(addressPayload.recordid, out customerId))
                                 {
-                                    customerId = checkRecordExists.FirstOrDefault().recordId;
-                                    isRecordIdExists = true;
+                                    localcontext.Trace("record id:" + customerEntity + ":" + customerId);
+                                    OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
+                                    var checkRecordExists = from c in orgSvcContext.CreateQuery(customerEntity)
+                                                            where (Guid)c[customerEntityId] == customerId
+                                                            select new { recordId = c.Id };
+                                    if (checkRecordExists != null && checkRecordExists.FirstOrDefault() != null)
+                                    {
+                                        customerId = checkRecordExists.FirstOrDefault().recordId;
+                                        isRecordIdExists = true;
+                                    }
                                 }
                             }
-                        }
 
-                        // if record exists then go on to add address
-                        if (isRecordIdExists)
-                        {
-                            localcontext.Trace("length:" + addressPayload.recordid);
-                            EntityReference customer = new EntityReference(customerEntity, customerId);
-                            if (addressPayload.address != null)
+                            // if record exists then go on to add address
+                            if (isRecordIdExists)
                             {
-                                createdAddress = objCommon.CreateAddress(addressPayload.address, customer);
+                                localcontext.Trace("length:" + addressPayload.recordid);
+                                EntityReference customer = new EntityReference(customerEntity, customerId);
+                                if (addressPayload.address != null)
+                                {
+                                    createdAddress = objCommon.CreateAddress(addressPayload.address, customer);
+                                }
+
+                                localcontext.Trace("after adding address:");
+                                errorCode = 200;
                             }
 
-                            localcontext.Trace("after adding address:");
-                            errorCode = 200;
-                        }
-
-                        // if the organisation does not exists
-                        else
-                        {
-                            errorCode = 404;
-                            errorMessage = errorMessage.Append(string.Format("recordid with id {0} does not exists.", addressPayload.recordid));
+                            // if the organisation does not exists
+                            else
+                            {
+                                errorCode = 404;
+                                errorMessage = errorMessage.Append(string.Format("recordid with id {0} does not exists.", addressPayload.recordid));
+                            }
                         }
                     }
                     else
                     {
                         localcontext.Trace("inside validation result");
 
-                         // _errorMessage = new StringBuilder();
+                        // _errorMessage = new StringBuilder();
 
                         // this will throw an error
                         foreach (ValidationResult vr in validationResults)
                         {
                             errorMessage.Append(vr.ErrorMessage + " ");
                         }
+
                         foreach (ValidationResult vr in validationResultsAddress)
                         {
                             errorMessage.Append(vr.ErrorMessage + " ");
-                         }
+                        }
 
                         errorCode = 400;
                     }
@@ -167,7 +176,7 @@
                 errorCode = 500;
                 errorMessage = errorMessage.Append(" Error occured while processing request");
                 errorMessageDetail = ex.Message;
-                if(ex.Message.Contains("Contact details of same type already exist for this customer"))
+                if (ex.Message.Contains("Contact details of same type already exist for this customer"))
                 {
                     errorCode = 412;
                 }

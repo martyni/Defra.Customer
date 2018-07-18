@@ -33,13 +33,16 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
             Guid addressId = Guid.Empty;
             Guid contactDetailId = Guid.Empty;
             OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(this.service);
-            if (addressDetails.uprn != null)
+            if (addressDetails.country.Trim().ToUpper() == "GBR")
             {
-                tracingService.Trace("UPRN search:started..");
-                var propertyWithUPRN = from c in orgSvcContext.CreateQuery(SCS.Address.ENTITY)
-                                       where ((string)c[SCS.Address.UPRN]).Equals((addressDetails.uprn.Trim()))
-                                       select new { AddressId = c.Id };
-                addressId = propertyWithUPRN != null && propertyWithUPRN.FirstOrDefault() != null ? propertyWithUPRN.FirstOrDefault().AddressId : Guid.Empty;
+                if (addressDetails.uprn != null)
+                {
+                    tracingService.Trace("UPRN search:started..");
+                    var propertyWithUPRN = from c in orgSvcContext.CreateQuery(SCS.Address.ENTITY)
+                                           where ((string)c[SCS.Address.UPRN]).Equals((addressDetails.uprn.Trim()))
+                                           select new { AddressId = c.Id };
+                    addressId = propertyWithUPRN != null && propertyWithUPRN.FirstOrDefault() != null ? propertyWithUPRN.FirstOrDefault().AddressId : Guid.Empty;
+                }
             }
             if (addressId == Guid.Empty && addressDetails.street != null && addressDetails.postcode != null && addressDetails.buildingnumber != null)
             {
@@ -130,6 +133,50 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
             addressData.contactdetailsid = contactDetailId;
             return addressData;
 
+        }
+
+        public void UpsertContactDetails(int type, string typeValue, EntityReference customer, bool isUpdate, bool isClear)
+        {
+            Guid contactDetailId = Guid.Empty;
+            OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(this.service);
+            try
+            {
+
+                if (isUpdate || isClear)
+                {
+                    var contactDetailsWithType = from c in orgSvcContext.CreateQuery(SCS.ContactDetails.ENTITY)
+                                                 where ((string)c[SCS.ContactDetails.ADDRESSTYPE]).Equals((type)) && (((EntityReference)c[SCS.ContactDetails.CUSTOMER]).Id.Equals(customer.Id)) && (int)c[SCS.ContactDetails.STATECODE] == 0
+                                                 select new { contactDetailsId = c.Id };
+                    contactDetailId = contactDetailsWithType != null && contactDetailsWithType.FirstOrDefault() != null ? contactDetailsWithType.FirstOrDefault().contactDetailsId : Guid.Empty;
+                }
+                Entity contactDetails = new Entity(SCS.ContactDetails.ENTITY);
+                // contactDetails[SCS.Address.ENTITY] = new EntityReference(SCS.ContactDetails.ENTITY, addressId);
+                contactDetails[SCS.ContactDetails.ADDRESSTYPE] = new OptionSetValue((int)type);
+                if (!Enum.IsDefined(typeof(EmailTypes), type))
+                {
+                    contactDetails[SCS.ContactDetails.EMAILADDRESS] = typeValue;
+                }
+                else if (!Enum.IsDefined(typeof(PhoneTypes), type))
+                {
+                    contactDetails[SCS.ContactDetails.PHONE] = typeValue;
+                }
+
+                contactDetails[SCS.ContactDetails.CUSTOMER] = customer;
+                if (contactDetailId == Guid.Empty)
+                    contactDetailId = this.service.Create(contactDetails);
+                else
+                {
+                    contactDetails.Id = contactDetailId;
+                    if (isClear)
+                        contactDetails[SCS.ContactDetails.STATECODE] = new OptionSetValue((int)1);
+                    this.service.Update(contactDetails);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public bool Validate<T>(T obj, out ICollection<ValidationResult> results)

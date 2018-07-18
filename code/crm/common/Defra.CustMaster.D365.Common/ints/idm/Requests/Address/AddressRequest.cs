@@ -23,6 +23,15 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
     {
         RegisteredAddress = 1, BusinessActivityAddress = 2, CorrespondenceAddress = 3, BillingorPaymentAddress = 4
     }
+    public enum EmailTypes
+    {
+        PrincipalEmailAddress = 6, AdditionalEmailAddress = 10 
+    }
+
+    public enum PhoneTypes
+    {
+        PrincipalPhoneNumber = 7, AdditionalPhoneNumber = 11
+    }
     public enum RecordType
     {
         organisation = 1, contact = 2

@@ -31,7 +31,7 @@ namespace Defra.CustMaster.Identity.WfActivities
         public OutArgument<String> Response { get; set; }
 
         #endregion
-       
+
         public override void ExecuteCRMWorkFlowActivity(CodeActivityContext executionContext, LocalWorkflowContext crmWorkflowContext)
         {
             #region Local Properties
@@ -50,7 +50,7 @@ namespace Defra.CustMaster.Identity.WfActivities
 
             try
             {
-               
+
                 objCommon.tracingService.Trace("CreateContact activity:Load CRM Service from context --- OK");
                 string jsonPayload = Payload.Get(executionContext);
                 SCII.ContactRequest contactPayload = JsonConvert.DeserializeObject<SCII.ContactRequest>(jsonPayload);
@@ -119,6 +119,8 @@ namespace Defra.CustMaster.Identity.WfActivities
                                 contact[SCS.Contact.MIDDLENAME] = contactPayload.middlename;
                             if (contactPayload.email != null)
                                 contact[SCS.Contact.EMAILADDRESS1] = contactPayload.email;
+
+
                             if (contactPayload.b2cobjectid != null)
                                 contact[SCS.Contact.B2COBJECTID] = contactPayload.b2cobjectid;
                             if (contactPayload.tacsacceptedversion != null)
@@ -133,7 +135,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                             {
                                 objCommon.tracingService.Trace("date accepted on in string" + contactPayload.tacsacceptedon);
                                 DateTime resultDate;
-                                if (DateTime.TryParseExact(contactPayload.tacsacceptedon, "dd/MM/yyyy HH:mm tt", new CultureInfo("en-Uk"),DateTimeStyles.None, out resultDate))
+                                if (DateTime.TryParseExact(contactPayload.tacsacceptedon, "dd/MM/yyyy HH:mm tt", new CultureInfo("en-Uk"), DateTimeStyles.None, out resultDate))
                                 {
                                     objCommon.tracingService.Trace("date accepted on in dateformat" + resultDate);
                                     contact[SCS.Contact.TACSACCEPTEDON] = (resultDate);
@@ -148,7 +150,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                             if (!string.IsNullOrEmpty(contactPayload.dob) && !string.IsNullOrWhiteSpace(contactPayload.dob))
                             {
                                 DateTime resultDob;
-                                if (DateTime.TryParseExact(contactPayload.dob,"dd/MM/yyyy", new CultureInfo("en-Uk"),DateTimeStyles.None, out resultDob))
+                                if (DateTime.TryParseExact(contactPayload.dob, "dd/MM/yyyy", new CultureInfo("en-Uk"), DateTimeStyles.None, out resultDob))
                                     contact[SCS.Contact.BIRTHDATE] = resultDob;
                             }
 
@@ -159,6 +161,18 @@ namespace Defra.CustMaster.Identity.WfActivities
 
                             objCommon.tracingService.Trace("CreateContact activity:started..");
                             _contactId = objCommon.service.Create(contact);
+
+                            //create contactdetail record for primary contact details
+                            if (contactPayload.email != null)
+                            {
+                                objCommon.UpsertContactDetails((int)SCII.EmailTypes.PrincipalEmailAddress, contactPayload.email, new EntityReference(D365.Common.schema.Contact.ENTITY, _contactId), false,false);
+
+                            }
+                            if (contactPayload.telephone != null)
+                            {
+                                objCommon.UpsertContactDetails((int)SCII.PhoneTypes.PrincipalPhoneNumber, contactPayload.telephone, new EntityReference(D365.Common.schema.Contact.ENTITY, _contactId), false,false);
+
+                            }
                             Entity contactRecord = objCommon.service.Retrieve(SCS.Contact.ENTITY, _contactId, new Microsoft.Xrm.Sdk.Query.ColumnSet(true));//Defra.CustMaster.D365.Common.schema.ReqContact.UNIQUEREFERENCE));
                             objCommon.tracingService.Trace((string)contactRecord[SCS.Contact.UNIQUEREFERENCE]);
                             _uniqueReference = (string)contactRecord[SCS.Contact.UNIQUEREFERENCE];
@@ -300,7 +314,7 @@ namespace Defra.CustMaster.Identity.WfActivities
             }
             if (ContactRequest.address != null && ContactRequest.address.type != null)
             {
-                if (!Enum.IsDefined(typeof(SCSE.defra_AddressType), ContactRequest.address.type))
+                if (!Enum.IsDefined(typeof(SCII.AddressTypes), ContactRequest.address.type))
                 {
                     _ErrorMessage = String.Format("Option set value for address of type {0} not found;", ContactRequest.address.type);
                 }
