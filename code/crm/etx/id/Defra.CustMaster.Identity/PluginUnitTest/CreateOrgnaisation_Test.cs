@@ -401,7 +401,7 @@ namespace Defra.Test
             AccountResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AccountResponse>(ReturnMessage);
             String ErrorDetails = ContactResponseObject.message;
 
-            StringAssert.Contains(ErrorDetails, "Option set value for address of type not found;");
+            StringAssert.Contains(ErrorDetails, "Option set value for address of type 5 not found");
         }
 
 
