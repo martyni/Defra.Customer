@@ -300,12 +300,22 @@ namespace Defra.Test
                         "ReqPayload", InputLoad },
                 };
 
-            fakedContext.Initialize(new List<Entity>()
-                {   new Entity() { Id = new Guid("37e64f21-c035-4e49-a6b6-958cdd3af45e"), LogicalName = "contact" }
-                });
+            Contact fakeContact = new Contact();
+            fakeContact.ContactId = new Guid("37e64f21-c035-4e49-a6b6-958cdd3af45e");
+            fakeContact.Id = new Guid("37e64f21-c035-4e49-a6b6-958cdd3af45e");
 
+            defra_country Country = new defra_country();
+            Country.defra_isocodealpha3 = "GBR";
+            Country.Id = Guid.NewGuid();
+            fakedContext.Initialize(new List<Entity>()
+            {
+                Country,fakeContact
+
+            });
             var result = fakedContext.ExecuteCodeActivity<AddAddress>(inputs);
             var address = fakedContext.CreateQuery<defra_address>();
+
+            
 
             #region ErrorMessagesToCheck
 

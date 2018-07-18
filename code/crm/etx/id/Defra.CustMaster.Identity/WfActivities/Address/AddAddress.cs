@@ -103,9 +103,8 @@
                                 localcontext.Trace("record id:" + customerEntity + ":" + customerId);
                                 OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
                                 var checkRecordExists = from c in orgSvcContext.CreateQuery(customerEntity)
-                                                        where (string)c[customerEntityId] == customerId.ToString()
+                                                        where (Guid)c[customerEntityId] == customerId
                                                         select new { recordId = c.Id };
-
                                 if (checkRecordExists != null && checkRecordExists.FirstOrDefault() != null)
                                 {
                                     customerId = checkRecordExists.FirstOrDefault().recordId;
