@@ -204,17 +204,27 @@ namespace Defra.CustMaster.Identity.WfActivities
                                 objCommon.service.Update(contact);
                                 if (contactPayload.updates.email != null)
                                 {
+
+                                    localcontext.Trace("before memail upsert");
                                     objCommon.UpsertContactDetails((int)SCII.EmailTypes.PrincipalEmailAddress, contactPayload.updates.email, new EntityReference(D365.Common.schema.Contact.ENTITY, _contactId), true, false);
+                                    localcontext.Trace("after email upsert");
                                 }
                                 //if phone is in clear list then deactivate the contact details record of principalphonenumber
                                 if (clearRequired && contactPayload.clearlist.fields.Contains(SCII.ContactClearFields.telephone1))
                                 {
+                                    localcontext.Trace("clear telephone1");
+
                                     objCommon.UpsertContactDetails((int)SCII.PhoneTypes.PrincipalPhoneNumber, contactPayload.updates.telephone, new EntityReference(D365.Common.schema.Contact.ENTITY, _contactId), false, true);
+                                    localcontext.Trace("after clear telephone1");
+
                                 }
 
                                 else if (contactPayload.updates.telephone != null)
                                 {
+                                    localcontext.Trace("before  telephone1 update");
                                     objCommon.UpsertContactDetails((int)SCII.PhoneTypes.PrincipalPhoneNumber, contactPayload.updates.telephone, new EntityReference(D365.Common.schema.Contact.ENTITY, _contactId), true, false);
+                                    localcontext.Trace("after  telephone1 update");
+
                                 }
                                 _errorCode = 200;//Success
                                 localcontext.Trace("CreateContact activity:ended. " + _contactId.ToString());
