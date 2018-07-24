@@ -2,6 +2,7 @@
 using Defra.CustMaster.D365.Common.Schema.ExtEnums;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
+using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Sdk.Workflow;
 using System;
 using System.Activities;
@@ -183,6 +184,36 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
             }
         }
 
+        public EntityCollection RetrieveMultipleWithAdvancedFind(string advancedFindXml, string replaceString, string bREAK_CHAR)
+        {
+            string[] replaceValues;
+            OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(this.service);
+            if (!string.IsNullOrEmpty(replaceString))
+            {
+                //replaceValues = replaceString.Split(BREAK_CHAR.ToCharArray());
+                replaceValues = replaceString.Split(new string[] { bREAK_CHAR }, StringSplitOptions.RemoveEmptyEntries);
+                if (replaceValues.Length <= 0)
+                {
+                    throw new InvalidPluginExecutionException("Please provide a valid replace string in the format {value0}{SEP}{value1}{SEP}{value2}.");
+                }
+
+                int iLoop = 0;
+                foreach (string replaceValue in replaceValues)
+                {
+                    tracingService.Trace(string.Format("SearchRecords: Value{0} = {1}", iLoop, replaceValue));
+                    advancedFindXml = advancedFindXml.Replace("{" + iLoop++ + "}", replaceValue);
+                }
+            }
+
+            tracingService.Trace("SearchRecords: Replaced query = " + advancedFindXml);
+
+            tracingService.Trace("SearchRecords: Value Replacement finished!");
+
+            tracingService.Trace("SearchRecords: Calling Retrieve Multiple...");
+
+            EntityCollection results = service.RetrieveMultiple(new FetchExpression(advancedFindXml));
+            return results;
+        }
         public bool Validate<T>(T obj, out ICollection<ValidationResult> results)
         {
             results = new List<ValidationResult>();
