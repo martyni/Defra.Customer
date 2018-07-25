@@ -14,7 +14,6 @@ using FakeXrmEasy;
 using Defra.CustMaster.D365.Common.Ints.Idm;
 using Defra.CustMaster.D365.Common.Ints.Idm.Resp;
 using CrmEarlyBound;
-using Defra.CustMaster.Identity.WfActivities.Common;
 
 namespace Defra.PluginUnitTest
 {

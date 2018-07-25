@@ -83,7 +83,7 @@ namespace Defra.Test
             String ReturnMessage = (String)result["response"];
             ContactResponse ContactResponseObject = JsonConvert.DeserializeObject<ContactResponse>(ReturnMessage);
             String ErrorDetails = ContactResponseObject.message;
-            StringAssert.Contains(ErrorDetails, "From role Agent Customer and reverse role Agent combination doesn't exists.");
+            StringAssert.Contains(ErrorDetails, "Primary rolenot found.");
         }
 
 

@@ -24,7 +24,7 @@ namespace Defra.Test
 
 
         const String RecordTypeCannotBeEmpty = "record type can not be empty";
-        const string PostCodeOrPostalCodeCannotBeEmpty = "internationalpostalcode can not be empty if the country is non-UK;";
+        const string PostCodeOrPostalCodeCannotBeEmpty = "postcode can not be empty";
         const string BuilingNumberOrNameCannotBeEmpty = "Provide either building name or building number, Building name is mandatory if the building number is empty;";
         const String RecordIdCannotBeEmpty = "recordid can not be empty";
         const String RecordIDMaxLengthCheck = "record id exceeded the max length(36);";
@@ -216,7 +216,7 @@ namespace Defra.Test
             String ReturnMessage = (String)result["ResPayload"];
             AddressResponse AddressResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AddressResponse>(ReturnMessage);
             String ErrorDetails = AddressResponseObject.message;
-            StringAssert.Contains(ErrorDetails, PostCodeOrPostalCodeCannotBeEmpty, "internationalpostalcode can not be empty if the country is non-UK;");
+            StringAssert.Contains(ErrorDetails, PostCodeOrPostalCodeCannotBeEmpty);
         }
         [TestMethod]
         public void RecordIdMaxLengthValidation()
