@@ -13,5 +13,6 @@ namespace Defra.CustMaster.D365.Common.schema
         public const string EMAILADDRESS = "emailaddress";
         public const string PHONE = "defra_phone";
         public const string STATECODE = "statecode";
+        public const string ContactDetailsId = "defra_addressdetailsid";
     }
 }

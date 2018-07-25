@@ -55,24 +55,45 @@ namespace Defra.CustMaster.Identity.WfActivities
             Guid addressId = Guid.Empty;
             Guid contactDetailId = Guid.Empty;
             OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
+            if (!string.IsNullOrEmpty(country))
+            {
+                string countryValue = country.ToUpper();
+                crmWorkflowContext.Trace("Country search started" + country);
+
+                var CountryRecord = from c in orgSvcContext.CreateQuery(SCS.Address.COUNTRY)
+                                    where (((string)c["defra_isocodealpha3"]) == countryValue) && (int)c[SCS.ContactDetails.STATECODE] == 0
+                                    select new { CountryId = c.Id };
+                Guid countryGuid = CountryRecord != null && CountryRecord.FirstOrDefault() != null ? CountryRecord.FirstOrDefault().CountryId : Guid.Empty;
+                crmWorkflowContext.Trace("country found" + countryGuid);
+                if (countryGuid != Guid.Empty)
+                {
+                    EntityReference entityRef = new EntityReference(SCS.Address.COUNTRY, countryGuid);
+                    OutCountryEntityRef.Set(executionContext, entityRef);
+                }
+
+                crmWorkflowContext.Trace("Finished: Defra.CustMaster.Identity.WfActivities.ExecuteCRMWorkFlowActivity.CustomerAddress");
+            }
+
             if (country.Trim().ToUpper() == "GBR")
             {
                 if (uprn != null)
                 {
                     crmWorkflowContext.Trace("UPRN search:started..");
                     var propertyWithUPRN = from c in orgSvcContext.CreateQuery(SCS.Address.ENTITY)
-                                           where ((string)c[SCS.Address.UPRN]).Equals(uprn.Trim())
+                                           where ((string)c[SCS.Address.UPRN]).Equals(uprn.Trim()) && (int)c[SCS.ContactDetails.STATECODE] == 0
                                            select new { AddressId = c.Id };
-                    addressId = propertyWithUPRN != null && propertyWithUPRN.FirstOrDefault() != null ? propertyWithUPRN.FirstOrDefault().AddressId : Guid.Empty;
+                    addressId = propertyWithUPRN != null && propertyWithUPRN.FirstOrDefault() != null ? propertyWithUPRN.FirstOrDefault().AddressId : Guid.Empty;                    
+                    crmWorkflowContext.Trace("UK UPRN Address:"+ addressId);
                 }
 
                 if (addressId == Guid.Empty && street != null && postcode != null && buildingnumber != null)
                 {
                     crmWorkflowContext.Trace("postcode and street search:started");
                     var propertyWithDuplicate = from c in orgSvcContext.CreateQuery(SCS.Address.ENTITY)
-                                                where ((string)c[SCS.Address.STREET]).Equals(street.Trim()) && ((string)c[SCS.Address.POSTCODE]).Equals(postcode.Trim()) && ((string)c[SCS.Address.PREMISES]).Equals(buildingnumber.Trim())
+                                                where ((string)c[SCS.Address.STREET]).Equals(street.Trim()) && ((string)c[SCS.Address.POSTCODE]).Equals(postcode.Trim()) && ((string)c[SCS.Address.PREMISES]).Equals(buildingnumber.Trim()) && (int)c[SCS.ContactDetails.STATECODE] == 0
                                                 select new { AddressId = c.Id };
                     addressId = propertyWithDuplicate != null && propertyWithDuplicate.FirstOrDefault() != null ? propertyWithDuplicate.FirstOrDefault().AddressId : Guid.Empty;
+                    crmWorkflowContext.Trace("UK PostCode address:" + addressId);
                 }
             }
 
@@ -80,9 +101,10 @@ namespace Defra.CustMaster.Identity.WfActivities
             {
                 crmWorkflowContext.Trace("postcode and street search:started");
                 var propertyWithDuplicate = from c in orgSvcContext.CreateQuery(SCS.Address.ENTITY)
-                                            where ((string)c[SCS.Address.STREET]).Equals(street.Trim()) && ((string)c[SCS.Address.INTERNATIONALPOSTCODE]).Equals(postcode.Trim()) && ((string)c[SCS.Address.PREMISES]).Equals(buildingnumber.Trim())
+                                            where ((string)c[SCS.Address.STREET]).Equals(street.Trim()) && ((string)c[SCS.Address.INTERNATIONALPOSTCODE]).Equals(postcode.Trim()) && ((string)c[SCS.Address.PREMISES]).Equals(buildingnumber.Trim()) && (int)c[SCS.ContactDetails.STATECODE] == 0
                                             select new { AddressId = c.Id };
                 addressId = propertyWithDuplicate != null && propertyWithDuplicate.FirstOrDefault() != null ? propertyWithDuplicate.FirstOrDefault().AddressId : Guid.Empty;
+                crmWorkflowContext.Trace("Non UK Internaltional PostCode address:" + addressId);
             }
 
             if (addressId != Guid.Empty)
@@ -90,26 +112,6 @@ namespace Defra.CustMaster.Identity.WfActivities
                 EntityReference entityRef = new EntityReference("defra_address", addressId);
                 OutAddressEntityRef.Set(executionContext, entityRef);
             }
-
-            if (!string.IsNullOrEmpty(country))
-            {
-                string countryValue = country.ToUpper();
-                crmWorkflowContext.Trace("Country search started" + country);
-
-                var CountryRecord = from c in orgSvcContext.CreateQuery(SCS.Address.COUNTRY)
-                                    where (((string)c["defra_isocodealpha3"]) == countryValue)
-                                    select new { CountryId = c.Id };
-                Guid countryGuid = CountryRecord != null && CountryRecord.FirstOrDefault() != null ? CountryRecord.FirstOrDefault().CountryId : Guid.Empty;
-                crmWorkflowContext.Trace("country found" + countryGuid);
-                if (countryGuid != Guid.Empty)
-                {
-                    EntityReference entityRef = new EntityReference(SCS.Address.COUNTRY, countryGuid);
-                    OutAddressEntityRef.Set(executionContext, entityRef);
-                }
-
-                crmWorkflowContext.Trace("Finished: Defra.CustMaster.Identity.WfActivities.ExecuteCRMWorkFlowActivity.CustomerAddress");
-            }
         }
     }
-    
 }
