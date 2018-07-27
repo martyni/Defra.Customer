@@ -50,7 +50,7 @@
                 foreach (string replaceValue in replaceValues)
                 {
                     crmWorkflowContext.Trace(string.Format("SearchRecords: Value{0} = {1}", iLoop, replaceValue));
-                    advancedFindXml = advancedFindXml.Replace("{" + iLoop++ + "}", replaceValue);
+                    advancedFindXml = advancedFindXml.Replace("{" + iLoop++ + "}", replaceValue.Trim());
                 }
             }
 
