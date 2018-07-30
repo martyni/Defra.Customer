@@ -50,9 +50,10 @@
                 foreach (string replaceValue in replaceValues)
                 {
                     crmWorkflowContext.Trace(string.Format("SearchRecords: Value{0} = {1}", iLoop, replaceValue));
-                    advancedFindXml = advancedFindXml.Replace("{" + iLoop++ + "}", replaceValue);
+                    advancedFindXml = advancedFindXml.Replace("{" + iLoop++ + "}", replaceValue.Trim());
                 }
             }
+
 
             crmWorkflowContext.Trace("SearchRecords: Replaced query = " + advancedFindXml);
 
@@ -61,11 +62,13 @@
             crmWorkflowContext.Trace("SearchRecords: Calling Retrieve Multiple...");
 
             EntityCollection results = crmWorkflowContext.OrganizationService.RetrieveMultiple(new FetchExpression(advancedFindXml));
-
+            crmWorkflowContext.Trace("count from entity collection count" + results.Entities.Count);
+            crmWorkflowContext.Trace("count from entity collection total record count" + results.TotalRecordCount);
             int recourdCount = 0;
             if (results != null)
             {
                 recourdCount = results.TotalRecordCount;
+                //recourdCount = results.Entities.Count;
             }
 
             crmWorkflowContext.TracingService.Trace(string.Format("SearchRecords: Found {0} records.", recourdCount));
