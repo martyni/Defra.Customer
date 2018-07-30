@@ -243,3 +243,7 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/code/crm/etx/id/Defra.CustMaster.Identity/Defra.Customer.WebPIUnitTest
+/code/crm/etx/id/Defra.CustMaster.Identity/Defra.Customer.UnitTest
+/code/crm/etx/id/Defra.CustMaster.Identity/CustomActionsUnitTest
+/WebApiUnitTest/
