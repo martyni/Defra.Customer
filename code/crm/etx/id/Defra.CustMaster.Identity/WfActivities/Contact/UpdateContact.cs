@@ -19,10 +19,10 @@ namespace Defra.CustMaster.Identity.WfActivities
     {
         #region "Parameter Definition"
         [RequiredArgument]
-        [Input("PayLoad")]
-        public InArgument<String> PayLoad { get; set; }
-        [Output("OutPutJson")]
-        public OutArgument<string> ReturnMessageDetails { get; set; }
+        [Input("request")]
+        public InArgument<String> request { get; set; }
+        [Output("response")]
+        public OutArgument<string> response { get; set; }
         #endregion
         #region Local Properties
         SCII.Helper objCommon;
@@ -48,10 +48,10 @@ namespace Defra.CustMaster.Identity.WfActivities
             #endregion
 
             #region "Create Execution"
-            
+
             try
             {
-                string jsonPayload = this.PayLoad.Get(context);
+                string jsonPayload = this.request.Get(context);
                 SCII.UpdateContactRequest contactPayload = JsonConvert.DeserializeObject<SCII.UpdateContactRequest>(jsonPayload);
                 Boolean duplicateRecordExist = false;
                 Entity contact;
@@ -61,7 +61,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                 var isValid = objCommon.Validate(contactPayload, out ValidationResults);
                 localcontext.Trace("just after validation");
 
-                if (isValid )
+                if (isValid)
                 {
                     if (_errorMessage == string.Empty)
                     {
@@ -102,7 +102,7 @@ namespace Defra.CustMaster.Identity.WfActivities
 
                                 #region Cannot be cleared
                                 //Flag to check if the clearing of data is required for the selected OrganisationRequest fields
-                               
+
 
 
                                 if (contactPayload.updates.firstname != null)
@@ -133,8 +133,8 @@ namespace Defra.CustMaster.Identity.WfActivities
                                                                             contactPayload.clearlist.fields != null
                                                                             && contactPayload.clearlist.fields.Length > 0;
 
-                                localcontext.Trace(String.Format("printing clear required value: {0}" , clearRequired));
-                                localcontext.Trace(String.Format("title value: {0}", contactPayload.updates.title.HasValue ));
+                                localcontext.Trace(String.Format("printing clear required value: {0}", clearRequired));
+                                localcontext.Trace(String.Format("title value: {0}", contactPayload.updates.title.HasValue));
 
                                 if (clearRequired && contactPayload.clearlist.fields.Contains(SCII.ContactClearFields.title))
                                 {
@@ -164,8 +164,8 @@ namespace Defra.CustMaster.Identity.WfActivities
 
                                 }
                                 else if (contactPayload.updates.telephone != null)
-                                { 
-                                        contact[SCS.Contact.TELEPHONE1] = contactPayload.updates.telephone;
+                                {
+                                    contact[SCS.Contact.TELEPHONE1] = contactPayload.updates.telephone;
                                 }
 
 
@@ -197,11 +197,35 @@ namespace Defra.CustMaster.Identity.WfActivities
                                             SCSE.Contact_GenderCode dynamicsGenderCode = (SCSE.Contact_GenderCode)Enum.Parse(typeof(SCSE.Contact_GenderCode), genderCode);
                                             contact[SCS.Contact.GENDERCODE] = new OptionSetValue((int)dynamicsGenderCode);
                                         }
-                                    } 
+                                    }
                                     #endregion
                                 }
                                 localcontext.Trace("contactid: " + _contactId);
                                 objCommon.service.Update(contact);
+                                if (contactPayload.updates.email != null)
+                                {
+
+                                    localcontext.Trace("before memail upsert");
+                                    objCommon.UpsertContactDetails((int)SCII.EmailTypes.PrincipalEmailAddress, contactPayload.updates.email, new EntityReference(D365.Common.schema.Contact.ENTITY, _contactId), true, false);
+                                    localcontext.Trace("after email upsert");
+                                }
+                                //if phone is in clear list then deactivate the contact details record of principalphonenumber
+                                if (clearRequired && contactPayload.clearlist.fields.Contains(SCII.ContactClearFields.telephone1))
+                                {
+                                    localcontext.Trace("clear telephone1");
+
+                                    objCommon.UpsertContactDetails((int)SCII.PhoneTypes.PrincipalPhoneNumber, contactPayload.updates.telephone, new EntityReference(D365.Common.schema.Contact.ENTITY, _contactId), false, true);
+                                    localcontext.Trace("after clear telephone1");
+
+                                }
+
+                                else if (contactPayload.updates.telephone != null)
+                                {
+                                    localcontext.Trace("before  telephone1 update");
+                                    objCommon.UpsertContactDetails((int)SCII.PhoneTypes.PrincipalPhoneNumber, contactPayload.updates.telephone, new EntityReference(D365.Common.schema.Contact.ENTITY, _contactId), true, false);
+                                    localcontext.Trace("after  telephone1 update");
+
+                                }
                                 _errorCode = 200;//Success
                                 localcontext.Trace("CreateContact activity:ended. " + _contactId.ToString());
                             }
@@ -276,7 +300,7 @@ namespace Defra.CustMaster.Identity.WfActivities
                 };
 
                 string resPayload = JsonConvert.SerializeObject(responsePayload);
-                ReturnMessageDetails.Set(context, resPayload);
+                response.Set(context, resPayload);
                 localcontext.Trace("finally block end");
             }
 

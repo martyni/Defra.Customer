@@ -23,6 +23,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>ca.ruleset</CodeAnalysisRuleSet>
+    <NoWarn>1701;1702</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -37,6 +39,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>Defra.CustMaster.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Crm.Sdk.Proxy, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -81,7 +86,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Address\AddAddress.cs" />
-    <Compile Include="Connection\ConnectContact.cs" />
+    <Compile Include="Common\CustomerAddress.cs" />
+    <Compile Include="ContactDetail\GetContactDetailsTypeOptionSetValue.cs" />
+    <Compile Include="LOBServiceUserLink\EnrolmentStatusType.cs" />
+    <Compile Include="Common\SearchRecords.cs" />
+    <Compile Include="Connection\CreateRelationship.cs" />
+    <Compile Include="ContactDetail\ContactDetailType.cs" />
     <Compile Include="Contact\CreateContact.cs" />
     <Compile Include="Account\CreateOrganisation.cs" />
     <Compile Include="Contact\UpdateContact.cs" />
@@ -90,17 +100,22 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ca.ruleset" />
     <None Include="Defra.CustMaster.snk" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <Import Project="..\..\..\..\common\Defra.CustMaster.D365.Common\Defra.CustMaster.D365.Common.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>$(SolutionDir)packages\ilmerge.2.14.1208\tools\ILMerge.exe /keyfile:$(SolutionDir)/Defra.CustMaster.snk /target:"library" /copyattrs /out:$(TargetDir)$(TargetName)$(TargetExt) $(ProjectDir)$(IntermediateOutputPath)$(TargetName)$(TargetExt) $(SolutionDir)packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>$(SolutionDir)packages\ilmerge.2.14.1208\tools\ILMerge.exe /keyfile:$(SolutionDir)/Defra.CustMaster.snk /target:"library" /copyattrs /out:$(TargetDir)$(TargetName)$(TargetExt) $(ProjectDir)$(IntermediateOutputPath)$(TargetName)$(TargetExt) $(SolutionDir)packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

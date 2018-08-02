@@ -2,6 +2,7 @@
 using Defra.CustMaster.D365.Common.Schema.ExtEnums;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
+using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Sdk.Workflow;
 using System;
 using System.Activities;
@@ -33,13 +34,17 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
             Guid addressId = Guid.Empty;
             Guid contactDetailId = Guid.Empty;
             OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(this.service);
-            if (addressDetails.uprn != null)
+            if (addressDetails.country.Trim().ToUpper() == "GBR")
             {
-                tracingService.Trace("UPRN search:started..");
-                var propertyWithUPRN = from c in orgSvcContext.CreateQuery(SCS.Address.ENTITY)
-                                       where ((string)c[SCS.Address.UPRN]).Equals((addressDetails.uprn.Trim()))
-                                       select new { AddressId = c.Id };
-                addressId = propertyWithUPRN != null && propertyWithUPRN.FirstOrDefault() != null ? propertyWithUPRN.FirstOrDefault().AddressId : Guid.Empty;
+                if (addressDetails.uprn != null)
+                {
+                    tracingService.Trace("UPRN search:started..");
+                    var propertyWithUPRN = from c in orgSvcContext.CreateQuery(SCS.Address.ENTITY)
+                                           where ((string)c[SCS.Address.UPRN]).Equals((addressDetails.uprn.Trim()))
+                                           select new { AddressId = c.Id };
+                    addressId = propertyWithUPRN != null && propertyWithUPRN.FirstOrDefault() != null ? propertyWithUPRN.FirstOrDefault().AddressId : Guid.Empty;
+                }
+
             }
             if (addressId == Guid.Empty && addressDetails.street != null && addressDetails.postcode != null && addressDetails.buildingnumber != null)
             {
@@ -52,8 +57,11 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
             if (addressId == Guid.Empty)
             {
                 Entity address = new Entity(SCS.Address.ENTITY);
-                if (addressDetails.uprn != null)
-                    address[SCS.Address.UPRN] = addressDetails.uprn;
+                if (addressDetails.country.Trim().ToUpper() == "GBR")
+                {
+                    if (addressDetails.uprn != null)
+                        address[SCS.Address.UPRN] = addressDetails.uprn;
+                }
                 if (addressDetails.buildingname != null)
                     address[SCS.Address.NAME] = addressDetails.buildingname;
                 if (addressDetails.buildingnumber != null)
@@ -65,7 +73,17 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
                 if (addressDetails.town != null)
                     address[SCS.Address.TOWN] = addressDetails.town;
                 if (addressDetails.postcode != null)
-                    address[SCS.Address.POSTCODE] = addressDetails.postcode;
+                {
+                    if (addressDetails.country.Trim().ToUpper() == "GBR")
+                    {
+                        address[SCS.Address.POSTCODE] = addressDetails.postcode;
+                    }
+                    else
+                    {
+                        address[SCS.Address.INTERNATIONALPOSTCODE] = addressDetails.postcode;
+                    }
+                }
+
                 bool resultedCompanyHouse;
                 if (addressDetails.fromcompanieshouse != null)
                     if (Boolean.TryParse(addressDetails.fromcompanieshouse.ToString(), out resultedCompanyHouse))
@@ -101,13 +119,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
                 {
                     Entity contactDetails = new Entity(SCS.ContactDetails.ENTITY);
                     contactDetails[SCS.Address.ENTITY] = new EntityReference(SCS.ContactDetails.ENTITY, addressId);
-
-
-                    //Check whether addressType is found in Dynamics defra_addresstypeEnum mapping
-                    string addressType = Enum.GetName(typeof(AddressTypes), addressDetails.type);
-
-                    defra_AddressType dynamicsAddressType = (defra_AddressType)Enum.Parse(typeof(defra_AddressType), addressType);
-                    contactDetails[SCS.ContactDetails.ADDRESSTYPE] = new OptionSetValue((int)dynamicsAddressType);
+                    contactDetails[SCS.ContactDetails.ADDRESSTYPE] = new OptionSetValue((int)addressDetails.type);
 
                     contactDetails[SCS.ContactDetails.CUSTOMER] = customer;
                     contactDetailId = this.service.Create(contactDetails);
@@ -128,6 +140,80 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
 
         }
 
+        public void UpsertContactDetails(int type, string typeValue, EntityReference customer, bool isUpdate, bool isClear)
+        {
+            Guid contactDetailId = Guid.Empty;
+            OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(this.service);
+            try
+            {
+
+                if (isUpdate || isClear)
+                {
+                    var contactDetailsWithType = from c in orgSvcContext.CreateQuery(SCS.ContactDetails.ENTITY)
+                                                 where ((string)c[SCS.ContactDetails.ADDRESSTYPE]).Equals((type)) && (((EntityReference)c[SCS.ContactDetails.CUSTOMER]).Id.Equals(customer.Id)) && (int)c[SCS.ContactDetails.STATECODE] == 0
+                                                 select new { contactDetailsId = c.Id };
+                    contactDetailId = contactDetailsWithType != null && contactDetailsWithType.FirstOrDefault() != null ? contactDetailsWithType.FirstOrDefault().contactDetailsId : Guid.Empty;
+                }
+                Entity contactDetails = new Entity(SCS.ContactDetails.ENTITY);
+                // contactDetails[SCS.Address.ENTITY] = new EntityReference(SCS.ContactDetails.ENTITY, addressId);
+                contactDetails[SCS.ContactDetails.ADDRESSTYPE] = new OptionSetValue((int)type);
+                if (Enum.IsDefined(typeof(EmailTypes), type))
+                {
+                    contactDetails[SCS.ContactDetails.EMAILADDRESS] = typeValue;
+                }
+                else if (Enum.IsDefined(typeof(PhoneTypes), type))
+                {
+                    contactDetails[SCS.ContactDetails.PHONE] = typeValue;
+                }
+
+                contactDetails[SCS.ContactDetails.CUSTOMER] = customer;
+                if (contactDetailId == Guid.Empty)
+                    contactDetailId = this.service.Create(contactDetails);
+                else
+                {
+                    contactDetails.Id = contactDetailId;
+                    if (isClear)
+                        contactDetails[SCS.ContactDetails.STATECODE] = new OptionSetValue((int)1);
+                    this.service.Update(contactDetails);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public EntityCollection RetrieveMultipleWithAdvancedFind(string advancedFindXml, string replaceString, string bREAK_CHAR)
+        {
+            string[] replaceValues;
+            OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(this.service);
+            if (!string.IsNullOrEmpty(replaceString))
+            {
+                //replaceValues = replaceString.Split(BREAK_CHAR.ToCharArray());
+                replaceValues = replaceString.Split(new string[] { bREAK_CHAR }, StringSplitOptions.RemoveEmptyEntries);
+                if (replaceValues.Length <= 0)
+                {
+                    throw new InvalidPluginExecutionException("Please provide a valid replace string in the format {value0}{SEP}{value1}{SEP}{value2}.");
+                }
+
+                int iLoop = 0;
+                foreach (string replaceValue in replaceValues)
+                {
+                    tracingService.Trace(string.Format("SearchRecords: Value{0} = {1}", iLoop, replaceValue));
+                    advancedFindXml = advancedFindXml.Replace("{" + iLoop++ + "}", replaceValue);
+                }
+            }
+
+            tracingService.Trace("SearchRecords: Replaced query = " + advancedFindXml);
+
+            tracingService.Trace("SearchRecords: Value Replacement finished!");
+
+            tracingService.Trace("SearchRecords: Calling Retrieve Multiple...");
+
+            EntityCollection results = service.RetrieveMultiple(new FetchExpression(advancedFindXml));
+            return results;
+        }
         public bool Validate<T>(T obj, out ICollection<ValidationResult> results)
         {
             results = new List<ValidationResult>();
