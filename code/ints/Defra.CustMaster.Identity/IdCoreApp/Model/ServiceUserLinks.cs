@@ -1,12 +1,12 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
-namespace Defra.CustMaster.Identity.CoreApp.Model
+﻿namespace Defra.CustMaster.Identity.CoreApp.Model
 {
+    using System.Collections.Generic;
+    using System.Runtime.Serialization;
+    using Newtonsoft.Json;
+    
     [DataContract]
     public class ServiceUserLink
-    {
-        
+    {        
 
         [DataMember]
         [JsonProperty("serviceLinkContact.fullname")]
@@ -27,6 +27,16 @@ namespace Defra.CustMaster.Identity.CoreApp.Model
         [DataMember]
         [JsonProperty("serviceLinkOrganisation.name")]
         public string OrganisationName;
+
+
+        [DataMember]
+        [JsonProperty("defra_enrolmentstatus")]
+        public string EnrolmentStatus;
+
+        [DataMember]
+        [JsonProperty("defra_enrolmentstatus@OData.Community.Display.V1.FormattedValue")]
+        public string EnrolmentStatusText;
+        
 
     }
 

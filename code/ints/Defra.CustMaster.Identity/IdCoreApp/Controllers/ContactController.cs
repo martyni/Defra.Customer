@@ -1,12 +1,12 @@
-﻿using Defra.CustMaster.Identity.CoreApp.Dynamics;
-using Defra.CustMaster.Identity.CoreApp.Model;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-
-namespace Defra.CustMaster.Identity.CoreApp.Controllers
+﻿namespace Defra.CustMaster.Identity.CoreApp.Controllers
 {
+    using System;
+    using System.Collections.Generic; 
+    using Defra.CustMaster.Identity.CoreApp.Dynamics;
+    using Defra.CustMaster.Identity.CoreApp.Model;   
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Configuration;
+
     [Produces("application/json")]
     // [Route("api/[controller]")]
     [Route("api/")]
@@ -27,9 +27,9 @@ namespace Defra.CustMaster.Identity.CoreApp.Controllers
 
         // GET api/values
         [Route("InitialMatch/{b2cobjectid}")]
-        //http://defra-cm-dev-id-app.azurewebsites.net/api/InitialMatch/7b1ad2d0-7946-11e8-8d36-851e870eee8a
-        //http://defra-cm-dev-id-app.azurewebsites.net/api/InitialMatch/14faa6c0-7bdd-11e8-bc93-67f83a37356f
-        //[Route("InitialMatch")]
+        // http://defra-cm-dev-id-app.azurewebsites.net/api/InitialMatch/7b1ad2d0-7946-11e8-8d36-851e870eee8a
+        // http://defra-cm-dev-id-app.azurewebsites.net/api/InitialMatch/14faa6c0-7bdd-11e8-bc93-67f83a37356f
+        // [Route("InitialMatch")]
         [HttpGet]
        // public object InitialMatch([FromBody] InitialMatchRequest requestPayload)
         public object InitialMatch(string b2cobjectid)
@@ -52,14 +52,13 @@ namespace Defra.CustMaster.Identity.CoreApp.Controllers
 
         //[Route("Authz")]
         [HttpGet]
-        //http://defra-cm-dev-id-app.azurewebsites.net/api/Authz/ServiceID=534BA555-037A-E811-A95B-000D3A2BC547&B2CObjectId=7b1ad2d0-7946-11e8-8d36-851e870eee8a
-        //http://defra-cm-dev-id-app.azurewebsites.net/api/Authz/ServiceID=46048F69-037A-E811-A95B-000D3A2BC547&B2CObjectId=14faa6c0-7bdd-11e8-bc93-67f83a37356f
-        //[Route("Authz/ServiceID={serviceid}/{b2cobjectid}")]
+        // http://defra-cm-dev-id-app.azurewebsites.net/api/Authz/ServiceID=534BA555-037A-E811-A95B-000D3A2BC547&B2CObjectId=7b1ad2d0-7946-11e8-8d36-851e870eee8a
+        // http://defra-cm-dev-id-app.azurewebsites.net/api/Authz/ServiceID=46048F69-037A-E811-A95B-000D3A2BC547&B2CObjectId=14faa6c0-7bdd-11e8-bc93-67f83a37356f
+        // [Route("Authz/ServiceID={serviceid}/{b2cobjectid}")]
         [Route("Authz/ServiceID={serviceid}&B2CObjectId={b2cobjectid}")]
        // public AuthzResponse Authz([FromBody] AuthzRequest requestPayload)
         public AuthzResponse Authz(string serviceid, string b2cobjectid)
         {
-
             List<string> rolesList = new List<string>();
             List<string> mappingsList = new List<string>();
             try
@@ -72,7 +71,7 @@ namespace Defra.CustMaster.Identity.CoreApp.Controllers
                         //return serviceUserLinks.value;                
                         foreach (ServiceUserLink serviceUserLink in serviceUserLinks.serviceUserLinks)
                         {
-                            string roleListItem = serviceUserLink.OrganisationId + ":" + serviceUserLink.RoleId;
+                            string roleListItem = serviceUserLink.OrganisationId + ":" + serviceUserLink.RoleId+ ":" +serviceUserLink.EnrolmentStatus;
                             if (!rolesList.Contains(roleListItem))
                                 rolesList.Add(roleListItem);
                             string mappingListOrgItem = serviceUserLink.OrganisationId + ":" + serviceUserLink.OrganisationName;
@@ -81,13 +80,18 @@ namespace Defra.CustMaster.Identity.CoreApp.Controllers
                             string mappingListRoleItem = serviceUserLink.RoleId + ":" + serviceUserLink.RoleName;
                             if (!mappingsList.Contains(mappingListRoleItem))
                                 mappingsList.Add(mappingListRoleItem);
+                            string mappingListStatus = serviceUserLink.EnrolmentStatus + ":" + serviceUserLink.EnrolmentStatusText;
+                            //if (!mappingsList.Contains(mappingListStatus))
+                                mappingsList.Add(mappingListStatus);
+                           
                         }
-                        if(serviceUserLinks==null|| serviceUserLinks.serviceUserLinks==null|| serviceUserLinks.serviceUserLinks.Count==0)
+
+                        if (serviceUserLinks == null || serviceUserLinks.serviceUserLinks == null || serviceUserLinks.serviceUserLinks.Count == 0)
                         {
                             return new AuthzResponse
                             {
                                 status = 204,
-                                message="No Content",
+                                message = "No Content",
                                 version = "1.0.0.0",
                                 roles = rolesList,
                                 mappings = mappingsList
@@ -141,8 +145,8 @@ namespace Defra.CustMaster.Identity.CoreApp.Controllers
                     roles = rolesList,
                     mappings = mappingsList
                 };
-
             }
+
             return new AuthzResponse
             {
                 status = 200,
@@ -150,14 +154,12 @@ namespace Defra.CustMaster.Identity.CoreApp.Controllers
                 roles = rolesList,
                 mappings = mappingsList
             };
-
-
         }
 
         // POST api/values
-        [Route("CreateContact")]
-        [HttpPost]
-        public Object CreateContact([FromBody]Defra.CustMaster.Identity.CoreApp.Model.ContactModel contact)
+       // [Route("CreateContact")]
+       // [HttpPost]
+        public Object CreateContact([FromBody]ContactModel contact)
         {
             try
             {

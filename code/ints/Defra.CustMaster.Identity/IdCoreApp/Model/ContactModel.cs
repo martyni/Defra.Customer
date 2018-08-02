@@ -1,9 +1,11 @@
-﻿using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
-using System.Net;
-using System.Runtime.Serialization;
-namespace Defra.CustMaster.Identity.CoreApp.Model
-{
+﻿namespace Defra.CustMaster.Identity.CoreApp.Model
+{ 
+    
+    using System.ComponentModel.DataAnnotations;
+    using System.Runtime.Serialization;
+    using System.Net;
+    using Newtonsoft.Json;
+
     [DataContract]
     public class ContactModel
     {
@@ -41,7 +43,5 @@ namespace Defra.CustMaster.Identity.CoreApp.Model
 
         [JsonProperty("HttpStatusCode")]
         public HttpStatusCode HttpStatusCode;
-
-    }
-   
+    }   
 }

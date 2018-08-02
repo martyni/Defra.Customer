@@ -1,11 +1,11 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.Serialization;
-
-
-namespace Defra.CustMaster.Identity.CoreApp.Model
+﻿namespace Defra.CustMaster.Identity.CoreApp.Model
 {
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Runtime.Serialization;
+    using Newtonsoft.Json;
+  
+
     [DataContract]
     public class InitialMatchResponse
     {    

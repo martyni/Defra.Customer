@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace Defra.CustMaster.Identity.CoreApp.Model
+﻿namespace Defra.CustMaster.Identity.CoreApp.Model
 {
+    using System;
     public class WebFaultException:Exception
-    {
-        
+    {        
         public string ErrorMsg;
 
         public int HttpStatusCode;

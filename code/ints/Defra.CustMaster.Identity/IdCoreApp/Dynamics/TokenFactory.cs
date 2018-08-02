@@ -1,33 +1,24 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using System;
-
-namespace Defra.CustMaster.Identity.CoreApp.Dynamics
+﻿namespace Defra.CustMaster.Identity.CoreApp.Dynamics
 {
+    using System;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.IdentityModel.Clients.ActiveDirectory;
+
     public class TokenFactory : ITokenFactory
     {
         #region Fields
 
-        IConfiguration _iconfig;
-
 
         private readonly string _clientId;
+        private readonly string _clientSecret;
 
+        IConfiguration _iconfig;
 
         private string _resource;
 
         public string _token = string.Empty;
 
         private DateTimeOffset _tokenExpiry = DateTimeOffset.MinValue;
-
-
-        private readonly string _clientSecret;//= CloudConfigurationManager.GetSetting("Crm.Entities.ClientSecret");
-
-        //private object _lockObject;
-
-        //private ILoggingFactory _loggingFactory;
-
-        //private ILogging _logger;
 
         public TokenFactory(IConfiguration iConfig)//, ILoggingFactory loggingFactory)
         {

@@ -1,20 +1,20 @@
-﻿using Defra.CustMaster.Identity.CoreApp.Model;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-
-namespace Defra.CustMaster.Identity.CoreApp.Dynamics
+﻿namespace Defra.CustMaster.Identity.CoreApp.Dynamics
 {
+    using System.Net.Http;
+    using System.Net.Http.Headers;
+    using Defra.CustMaster.Identity.CoreApp.Model;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
+   
     public class CrmApiWrapper : ICrmApiWrapper
     {
-        IClientFactory _iHttpClient;
-        HttpClient _httpClient;
+        private IClientFactory iHttpClient;
+        private HttpClient httpClient;
 
         public CrmApiWrapper(IClientFactory iHttpClientFactory)
         {
-            _iHttpClient = iHttpClientFactory;
-            _httpClient = _iHttpClient.GetHttpClient();
+            iHttpClient = iHttpClientFactory;
+            httpClient = iHttpClient.GetHttpClient();
 
         }
 
@@ -26,11 +26,11 @@ namespace Defra.CustMaster.Identity.CoreApp.Dynamics
         public ServiceObject InitialMatch(string b2cObjectId)
         {
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, _httpClient.BaseAddress + "contacts?$select=contactid,defra_uniquereference&$filter=defra_b2cobjectid eq '" + b2cObjectId + "'");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, httpClient.BaseAddress + "contacts?$select=contactid,defra_uniquereference&$filter=defra_b2cobjectid eq '" + b2cObjectId + "'");
 
             //request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
-            var content = _httpClient.SendAsync(request).Result;
+            var content = httpClient.SendAsync(request).Result;
 
             if (!content.IsSuccessStatusCode)
             {
@@ -76,24 +76,26 @@ namespace Defra.CustMaster.Identity.CoreApp.Dynamics
         {
 
             string fetchXmlRequest = "<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'><entity name='defra_lobserviceuserlink'>" +
-              "<attribute name='defra_lobserviceuserlinkid'/><attribute name='defra_name'/>" +
+              "<attribute name='defra_lobserviceuserlinkid'/><attribute name='defra_name'/> <attribute name = 'defra_enrolmentstatus' /> " +
               "<attribute name='createdon'/><attribute name='defra_serviceuser'/><attribute name='defra_servicerole'/>" +
               "<order attribute='defra_name' descending='false'/><filter type='and'><condition attribute='statecode' operator='eq' value='0'/></filter>" +
               "<link-entity name='contact' from='contactid' to='defra_serviceuser' link-type='inner' alias='serviceLinkContact'>" +
               "<attribute name='fullname'/><filter type='and'><condition attribute='defra_b2cobjectid' operator='eq' value='" + b2cObjectId + "'/></filter>" +
               "</link-entity><link-entity name='defra_lobserivcerole' from='defra_lobserivceroleid' to='defra_servicerole' link-type='inner' alias='serviceLinkRole'>" +
-              "<attribute name='defra_rolename'/><attribute name='defra_name'/><attribute name='defra_lobserivceroleid'/><filter type='and'>" +
+              "<attribute name='defra_name'/><attribute name='defra_name'/><attribute name='defra_lobserivceroleid'/><filter type='and'>" +
               "<condition attribute='defra_lobservice' operator='eq' uitype='defra_lobservice' value='{" + serviceID + "}'/>" +
               "</filter></link-entity><link-entity name='account' from='accountid' to='defra_organisation' visible='false' link-type='outer' alias='serviceLinkOrganisation'>" +
               "<attribute name='name'/><attribute name='accountid'/></link-entity></entity></fetch>";
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, _httpClient.BaseAddress + "defra_lobserviceuserlinks?fetchXml=" + fetchXmlRequest);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, httpClient.BaseAddress + "defra_lobserviceuserlinks?fetchXml=" + fetchXmlRequest);
+
+           
 
             //HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, _resource + "api/data/v8.2/defra_InitialMatch");
             //request.Content = new StringContent(paramsContent);
             //request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
-            var content = _httpClient.SendAsync(request).Result;
+            var content = httpClient.SendAsync(request).Result;
 
             if (!content.IsSuccessStatusCode)
             {
@@ -111,7 +113,7 @@ namespace Defra.CustMaster.Identity.CoreApp.Dynamics
 
         public ContactModel CreateContact(ContactModel contact)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, _httpClient.BaseAddress + "defra_CreateContact");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, httpClient.BaseAddress + "defra_CreateContact");
             //return new ServiceObject { ServiceUserID = UPN };
 
             JObject exeAction = new JObject();
@@ -120,21 +122,26 @@ namespace Defra.CustMaster.Identity.CoreApp.Dynamics
             if (contact.firstname != null)
                 exeAction["firstname"] = contact.firstname;
             if (contact.lastname != null)
+            {
                 exeAction["lastname"] = contact.lastname;
+            }
             if (contact.emailaddress1 != null)
+            {
                 exeAction["emailaddress1"] = contact.emailaddress1;
+            }
 
             string paramsContent;
             if (exeAction.GetType().Name.Equals("JObject"))
-            { paramsContent = exeAction.ToString(); }
+            {
+                paramsContent = exeAction.ToString();
+            }
             else
             {
-                paramsContent = JsonConvert.SerializeObject(exeAction, new JsonSerializerSettings()
-                { DefaultValueHandling = DefaultValueHandling.Ignore });
+                paramsContent = JsonConvert.SerializeObject(exeAction, new JsonSerializerSettings(){ DefaultValueHandling = DefaultValueHandling.Ignore });
             }
             request.Content = new StringContent(paramsContent);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
-            var content = _httpClient.SendAsync(request).Result;
+            var content = httpClient.SendAsync(request).Result;
 
             if (!content.IsSuccessStatusCode)
             {

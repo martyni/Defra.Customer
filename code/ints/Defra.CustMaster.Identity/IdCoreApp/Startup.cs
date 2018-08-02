@@ -1,11 +1,11 @@
-﻿using Defra.CustMaster.Identity.CoreApp.Dynamics;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace Defra.CustMaster.Identity.CoreApp
+﻿namespace Defra.CustMaster.Identity.CoreApp
 {
+    using Defra.CustMaster.Identity.CoreApp.Dynamics;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -23,9 +23,6 @@ namespace Defra.CustMaster.Identity.CoreApp
             services.AddSingleton<ITokenFactory, TokenFactory>();
             services.AddSingleton<IClientFactory, HttpClientFactory>();
             services.AddScoped<ICrmApiWrapper, CrmApiWrapper>();
-
-
-            //services.AddSingleton<>
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

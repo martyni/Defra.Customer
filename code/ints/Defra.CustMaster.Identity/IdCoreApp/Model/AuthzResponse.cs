@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Runtime.Serialization;
-
-namespace Defra.CustMaster.Identity.CoreApp.Model
+﻿namespace Defra.CustMaster.Identity.CoreApp.Model
 {
+    using System.Collections.Generic;
+    using System.Runtime.Serialization;
+
     [DataContract]
     public class AuthzResponse
     {
@@ -18,6 +18,7 @@ namespace Defra.CustMaster.Identity.CoreApp.Model
         [DataMember(Order = 3)]
         //public string roles;
         public List<string> roles { get; set; }
+
         [DataMember(Order = 4)]
         public List<string> mappings { get; set; }
     }
