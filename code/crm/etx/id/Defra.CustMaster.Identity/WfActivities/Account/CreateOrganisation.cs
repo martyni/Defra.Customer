@@ -95,13 +95,14 @@ namespace Defra.CustMaster.Identity.WfActivities
                             if (AccountPayload.crn != null && AccountPayload.crn != string.Empty)
                             {
                                 ExistingID =    objCommon.CheckIfSameIdenfierExists(SCS.Identifers.COMPANYHOUSEIDENTIFIERNAME, AccountPayload.crn, null);
+                                objCommon.tracingService.Trace("company housid from identifier:" + ExistingID);
                             }
                             //var checkCRNExistis = from c in orgSvcContext.CreateQuery("account")
                             //                      where (string)c[Defra.CustMaster.D365.Common.schema.AccountContants.COMPANY_HOUSE_ID] == AccountPayload.crn
                             //                      select new { organisationid = c.Id };
 
 
-                            if (ExistingID != null && ExistingID.HasValue )
+                            if (ExistingID == null)
                             {
                                 objCommon.tracingService.Trace("After completing validation 12" + AccountPayload.type);
                                 optionSetValue = AccountPayload.type;

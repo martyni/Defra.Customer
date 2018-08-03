@@ -100,8 +100,6 @@ namespace Defra.CustMaster.Identity.WfActivities
                             {
                                 AccountObject.Id = existingAccountRecord.Id;
                                 _uniqueReference = (string)existingAccountRecord[SCS.AccountContants.UNIQUEREFERENCE];
-                                if (existingAccountRecord.Contains(SCS.AccountContants.COMPANY_HOUSE_ID))
-                                    _crn = (string)existingAccountRecord[SCS.AccountContants.COMPANY_HOUSE_ID];
                                 isOrgExists = true;
                             }
 
@@ -170,32 +168,36 @@ namespace Defra.CustMaster.Identity.WfActivities
 
                         if (clearRequired && accountPayload.clearlist.fields.Contains(SCII.OrganisationClearFields.crn))
                         {
-                            AccountObject[SCS.AccountContants.COMPANY_HOUSE_ID] = null;
+                            localcontext.Trace("before clearing identifier value");
+                            //AccountObject[SCS.AccountContants.COMPANY_HOUSE_ID] = null;
+
+                            objCommon.ClearIdentifier(SCS.Identifers.COMPANYHOUSEIDENTIFIERNAME, AccountObject.Id);
+
                         }
                         else
                         {
 
                             //check if crn exists
 
-                            if (accountPayload.updates.crn != null && _crn != accountPayload.updates.crn)
+                            if (accountPayload.updates.crn != null)
                             {
                                 orgSvcContext = new OrganizationServiceContext(objCommon.service);
                                 //var checkCRNExistis = from c in orgSvcContext.CreateQuery("account")
                                 //                      where (string)c[SCS.AccountContants.COMPANY_HOUSE_ID] == accountPayload.updates.crn
                                 //                      select new { organisationid = c.Id };
 
-                                Guid? IdentifierId = objCommon.CheckIfSameIdenfierExists(SCS.Identifers.COMPANYHOUSEIDENTIFIERNAME, accountPayload.updates.crn, orgId);
+                                Guid? IdentifierId = objCommon.CheckIfSameIdenfierExists(SCS.Identifers.COMPANYHOUSEIDENTIFIERNAME, accountPayload.updates.crn, AccountObject.Id);
 
-                                if (IdentifierId == null && !IdentifierId.HasValue)
+                                if (IdentifierId == null)
                                 {
                                     //AccountObject[SCS.AccountContants.COMPANY_HOUSE_ID] = accountPayload.updates.crn;
-
-                                    //create
+                                    localcontext.Trace("updaing identifier in update org" + IdentifierId);
+                                    objCommon.UpdateIdentifier(SCS.Identifers.COMPANYHOUSEIDENTIFIERNAME, accountPayload.updates.crn, AccountObject.Id);
                                 }
                                 else
                                 {
                                     _errorCode = 412;
-                                    _errorMessage = _errorMessage.Append(String.Format("Company house id already exists."));
+                                    throw new Exception("Company house id already exists.");
                                 }
                             }
                         }

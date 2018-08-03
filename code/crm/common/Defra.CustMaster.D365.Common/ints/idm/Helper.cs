@@ -232,9 +232,9 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
                                       && ((string)c[SCS.Identifers.IDVALUE]).Equals((IdenfierValue))
                                       && (int)c[SCS.Identifers.STATECODE] == 0
                                       select new { IdentifierID = c.Id };
-                
 
-                if(GetIdefierValue.FirstOrDefault() != null)
+
+                if (GetIdefierValue.FirstOrDefault() != null)
                 {
                     ReturnVal = GetIdefierValue.FirstOrDefault().IdentifierID;
                 }
@@ -256,7 +256,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
             return ReturnVal;
         }
 
-        public void CreateIdentifier(String IdentifierName, String IdenfierValue,  EntityReference customer)
+        public void CreateIdentifier(String IdentifierName, String IdenfierValue, EntityReference customer)
         {
             OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(this.service);
 
@@ -269,47 +269,60 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
 
         }
 
-        public void UpdateIdentifier(Guid IdentifierID, String IdentifierName, String IdenfierValue, Guid CustomerID, Boolean IsClear)
+        public void UpdateIdentifier(String IdentifierName, String IdenfierValue, Guid CustomerID)
         {
             OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(this.service);
 
-           
+
 
             var CheckIfIdentifierExists = from c in orgSvcContext.CreateQuery(SCS.Identifers.ENTITYNAME)
                                           where ((string)c[SCS.Identifers.NAME]).Equals((IdentifierName))
                                           && (int)c[SCS.Identifers.STATECODE] == 0
-                                          && ((EntityReference)c[SCS.Identifers.CUSTOMER]).Id != CustomerID
-                                          select new { IdentifierID = c.Id }; 
+                                          && ((EntityReference)c[SCS.Identifers.CUSTOMER]).Id == CustomerID
+                                          select new { IdentifierID = c.Id };
 
-            if(CheckIfIdentifierExists.FirstOrDefault() == null)
+            if (CheckIfIdentifierExists.FirstOrDefault() == null)
             {
                 //Create
 
                 this.CreateIdentifier(IdentifierName, IdenfierValue, new EntityReference(SCS.AccountContants.ENTITY_NAME, CustomerID));
-
-
                 tracingService.Trace("created idenfier");
 
             }
 
             else //update
             {
+                Entity Identifier = new Entity(SCS.Identifers.ENTITYNAME);
+                Identifier[SCS.Identifers.ENTITYID] = CheckIfIdentifierExists.FirstOrDefault().IdentifierID;
+                Identifier[SCS.Identifers.IDVALUE] = IdenfierValue;
+                Identifier[SCS.Identifers.NAME] = IdentifierName;
+                this.service.Update(Identifier);
+                tracingService.Trace("updated idenfier");
 
-                if (IsClear)
-                {
-
-                }
-                else
-                {
-                    Entity Identifier = new Entity(SCS.Identifers.ENTITYNAME);
-                    Identifier[SCS.Identifers.ENTITYID] = IdentifierID;
-                    Identifier[SCS.Identifers.IDVALUE] = IdenfierValue;
-                    Identifier[SCS.Identifers.NAME] = IdentifierName;
-                    this.service.Update(Identifier);
-                    tracingService.Trace("updated idenfier");
-                }
             }
 
+        }
+        public void ClearIdentifier(String IdentifierName,Guid CustomerID)
+        {
+            OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(this.service);
+
+
+
+            var CheckIfIdentifierExists = from c in orgSvcContext.CreateQuery(SCS.Identifers.ENTITYNAME)
+                                          where ((string)c[SCS.Identifers.NAME]).Equals((IdentifierName))
+                                          && (int)c[SCS.Identifers.STATECODE] == 0
+                                          && ((EntityReference)c[SCS.Identifers.CUSTOMER]).Id == CustomerID
+                                          select new { IdentifierID = c.Id };
+
+            if (CheckIfIdentifierExists.FirstOrDefault() != null)
+            {
+
+                Entity Identifier = new Entity(SCS.Identifers.ENTITYNAME);
+                Identifier[SCS.Identifers.ENTITYID] = CheckIfIdentifierExists.FirstOrDefault().IdentifierID;
+                Identifier[SCS.Identifers.STATECODE] = new OptionSetValue((int)1);
+                this.service.Update(Identifier);
+            }
+            tracingService.Trace("Cleared idenfier");
         }
 
 
