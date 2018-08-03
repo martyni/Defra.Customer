@@ -180,14 +180,17 @@ namespace Defra.CustMaster.Identity.WfActivities
                             if (accountPayload.updates.crn != null && _crn != accountPayload.updates.crn)
                             {
                                 orgSvcContext = new OrganizationServiceContext(objCommon.service);
-                                var checkCRNExistis = from c in orgSvcContext.CreateQuery("account")
-                                                      where (string)c[SCS.AccountContants.COMPANY_HOUSE_ID] == accountPayload.updates.crn
-                                                      select new { organisationid = c.Id };
+                                //var checkCRNExistis = from c in orgSvcContext.CreateQuery("account")
+                                //                      where (string)c[SCS.AccountContants.COMPANY_HOUSE_ID] == accountPayload.updates.crn
+                                //                      select new { organisationid = c.Id };
 
+                                Guid? IdentifierId = objCommon.CheckIfSameIdenfierExists(SCS.Identifers.COMPANYHOUSEIDENTIFIERNAME, accountPayload.updates.crn, orgId);
 
-                                if (checkCRNExistis.FirstOrDefault() == null)
+                                if (IdentifierId == null && !IdentifierId.HasValue)
                                 {
-                                    AccountObject[SCS.AccountContants.COMPANY_HOUSE_ID] = accountPayload.updates.crn;
+                                    //AccountObject[SCS.AccountContants.COMPANY_HOUSE_ID] = accountPayload.updates.crn;
+
+                                    //create
                                 }
                                 else
                                 {

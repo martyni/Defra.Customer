@@ -221,5 +221,97 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
             return Validator.TryValidateObject(obj, new ValidationContext(obj), results, true);
         }
 
+        public Guid? CheckIfSameIdenfierExists(String IdentifierName, String IdenfierValue, Guid? CurrentCustomerID = null)
+        {
+            Guid? ReturnVal = null;
+            OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(this.service);
+            if (CurrentCustomerID == null)
+            {
+                var GetIdefierValue = from c in orgSvcContext.CreateQuery(SCS.Identifers.ENTITYNAME)
+                                      where ((string)c[SCS.Identifers.NAME]).Equals((IdentifierName))
+                                      && ((string)c[SCS.Identifers.IDVALUE]).Equals((IdenfierValue))
+                                      && (int)c[SCS.Identifers.STATECODE] == 0
+                                      select new { IdentifierID = c.Id };
+                
+
+                if(GetIdefierValue.FirstOrDefault() != null)
+                {
+                    ReturnVal = GetIdefierValue.FirstOrDefault().IdentifierID;
+                }
+            }
+            else
+            {
+                var GetIdefierValue = from c in orgSvcContext.CreateQuery(SCS.Identifers.ENTITYNAME)
+                                      where ((string)c[SCS.Identifers.NAME]).Equals((IdentifierName))
+                                      && ((string)c[SCS.Identifers.IDVALUE]).Equals((IdenfierValue))
+                                      && ((EntityReference)c[SCS.Identifers.CUSTOMER]).Id != CurrentCustomerID.Value
+                                      && (int)c[SCS.Identifers.STATECODE] == 0
+                                      select new { IdentifierID = c.Id };
+
+                if (GetIdefierValue.FirstOrDefault() != null)
+                {
+                    ReturnVal = GetIdefierValue.FirstOrDefault().IdentifierID;
+                }
+            }
+            return ReturnVal;
+        }
+
+        public void CreateIdentifier(String IdentifierName, String IdenfierValue,  EntityReference customer)
+        {
+            OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(this.service);
+
+            Entity Identifier = new Entity(SCS.Identifers.ENTITYNAME);
+            Identifier[SCS.Identifers.NAME] = IdentifierName;
+            Identifier[SCS.Identifers.IDVALUE] = IdenfierValue;
+            Identifier[SCS.Identifers.CUSTOMER] = customer;
+
+            this.service.Create(Identifier);
+
+        }
+
+        public void UpdateIdentifier(Guid IdentifierID, String IdentifierName, String IdenfierValue, Guid CustomerID, Boolean IsClear)
+        {
+            OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(this.service);
+
+           
+
+            var CheckIfIdentifierExists = from c in orgSvcContext.CreateQuery(SCS.Identifers.ENTITYNAME)
+                                          where ((string)c[SCS.Identifers.NAME]).Equals((IdentifierName))
+                                          && (int)c[SCS.Identifers.STATECODE] == 0
+                                          && ((EntityReference)c[SCS.Identifers.CUSTOMER]).Id != CustomerID
+                                          select new { IdentifierID = c.Id }; 
+
+            if(CheckIfIdentifierExists.FirstOrDefault() == null)
+            {
+                //Create
+
+                this.CreateIdentifier(IdentifierName, IdenfierValue, new EntityReference(SCS.AccountContants.ENTITY_NAME, CustomerID));
+
+
+                tracingService.Trace("created idenfier");
+
+            }
+
+            else //update
+            {
+
+                if (IsClear)
+                {
+
+                }
+                else
+                {
+                    Entity Identifier = new Entity(SCS.Identifers.ENTITYNAME);
+                    Identifier[SCS.Identifers.ENTITYID] = IdentifierID;
+                    Identifier[SCS.Identifers.IDVALUE] = IdenfierValue;
+                    Identifier[SCS.Identifers.NAME] = IdentifierName;
+                    this.service.Update(Identifier);
+                    tracingService.Trace("updated idenfier");
+                }
+            }
+
+        }
+
+
     }
 }

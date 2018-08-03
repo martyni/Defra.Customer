@@ -36,5 +36,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)schema\ContactDetails.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)schema\CustomValidator\NulllAttributeValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)schema\ExtEnums\OptionSets.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)schema\Identifers.cs" />
   </ItemGroup>
 </Project>

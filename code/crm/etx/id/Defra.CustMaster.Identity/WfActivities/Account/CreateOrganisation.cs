@@ -42,6 +42,7 @@ namespace Defra.CustMaster.Identity.WfActivities
             Guid CrmGuid = Guid.Empty;
             StringBuilder ErrorMessage = new StringBuilder();
             String UniqueReference = string.Empty;
+            Guid? ExistingID = null;
             try
             {
 
@@ -89,14 +90,18 @@ namespace Defra.CustMaster.Identity.WfActivities
                         if (!String.IsNullOrEmpty(Enum.GetName(typeof(SCSE.defra_OrganisationType), AccountPayload.type)))
                         {
                             //check if crn exists
-
+                           
                             OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(objCommon.service);
-                            var checkCRNExistis = from c in orgSvcContext.CreateQuery("account")
-                                                  where (string)c[Defra.CustMaster.D365.Common.schema.AccountContants.COMPANY_HOUSE_ID] == AccountPayload.crn
-                                                  select new { organisationid = c.Id };
+                            if (AccountPayload.crn != null && AccountPayload.crn != string.Empty)
+                            {
+                                ExistingID =    objCommon.CheckIfSameIdenfierExists(SCS.Identifers.COMPANYHOUSEIDENTIFIERNAME, AccountPayload.crn, null);
+                            }
+                            //var checkCRNExistis = from c in orgSvcContext.CreateQuery("account")
+                            //                      where (string)c[Defra.CustMaster.D365.Common.schema.AccountContants.COMPANY_HOUSE_ID] == AccountPayload.crn
+                            //                      select new { organisationid = c.Id };
 
 
-                            if (checkCRNExistis.FirstOrDefault() == null)
+                            if (ExistingID != null && ExistingID.HasValue )
                             {
                                 objCommon.tracingService.Trace("After completing validation 12" + AccountPayload.type);
                                 optionSetValue = AccountPayload.type;
@@ -107,7 +112,9 @@ namespace Defra.CustMaster.Identity.WfActivities
                                 BusinessTypes.Add(new OptionSetValue(optionSetValue.Value));
                                 AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.TYPE] = BusinessTypes;
                                 AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.NAME] = AccountPayload.name == null ? string.Empty : AccountPayload.name;
-                                AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.COMPANY_HOUSE_ID] = AccountPayload.crn == string.Empty ? null : AccountPayload.crn;
+                                //AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.COMPANY_HOUSE_ID] = AccountPayload.crn == string.Empty ? null : AccountPayload.crn;
+
+                                
                                 AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.TELEPHONE1] = AccountPayload.telephone == null ? string.Empty : AccountPayload.telephone;
                                 if (AccountPayload.validatedwithcompanieshouse != null)
                                 {
@@ -162,6 +169,8 @@ namespace Defra.CustMaster.Identity.WfActivities
                                 AccountObject[Defra.CustMaster.D365.Common.schema.AccountContants.EMAILADDRESS1] = AccountPayload.email;
                                 objCommon.tracingService.Trace("before createing guid:");
                                 CrmGuid = objCommon.service.Create(AccountObject);
+
+                                objCommon.CreateIdentifier(SCS.Identifers.COMPANYHOUSEIDENTIFIERNAME, AccountPayload.crn, new EntityReference(SCS.AccountContants.ENTITY_NAME, CrmGuid));
                                 //create contactdetail record for primary contact details
                                 if (AccountPayload.email != null)
                                 {
