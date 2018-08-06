@@ -43,10 +43,14 @@
                     return BadRequest(new ServiceObject { ErrorCode = 400, ErrorMsg = "B2CObjectid is invalid" });
                 }
             }
+            catch (WebFaultException ex)
+            {
+                return BadRequest(new ServiceObject { ErrorCode = ex.HttpStatusCode, ErrorMsg = ex.ErrorMsg });
+            }
 
             catch (Exception ex)
             {
-                return BadRequest(new ServiceObject { ErrorCode = 500, ErrorMsg = ex.Message});
+                return BadRequest(new ServiceObject { ErrorCode = 500, ErrorMsg = ex.Message });
             }
         }
 
@@ -128,7 +132,7 @@
                 return new AuthzResponse
                 {
                     status = 400,
-                    message = ex.Message,
+                    message = ex.ErrorMsg,
                     version = "1.0.0.0",
                     roles = rolesList,
                     mappings = mappingsList
