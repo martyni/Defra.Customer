@@ -36,17 +36,21 @@
         {
             try
             {
-                if (!string.IsNullOrEmpty(b2cobjectid) && Guid.TryParse(b2cobjectid, out Guid result))
+                if (!string.IsNullOrEmpty(b2cobjectid))// && Guid.TryParse(b2cobjectid, out Guid result))
                     return Ok(_crmApiWrapper.InitialMatch(b2cobjectid));
                 else
                 {
                     return BadRequest(new ServiceObject { ErrorCode = 400, ErrorMsg = "B2CObjectid is invalid" });
                 }
             }
+            catch (WebFaultException ex)
+            {
+                return BadRequest(new ServiceObject { ErrorCode = ex.HttpStatusCode, ErrorMsg = ex.ErrorMsg });
+            }
 
             catch (Exception ex)
             {
-                return BadRequest(new ServiceObject { ErrorCode = 500, ErrorMsg = ex.InnerException.Message });
+                return BadRequest(new ServiceObject { ErrorCode = 500, ErrorMsg = ex.Message });
             }
         }
 
@@ -63,9 +67,9 @@
             List<string> mappingsList = new List<string>();
             try
             {
-                if (!string.IsNullOrEmpty(b2cobjectid) && Guid.TryParse(b2cobjectid, out Guid resultB2Cobject))
+                if (!string.IsNullOrEmpty(b2cobjectid)) // && Guid.TryParse(b2cobjectid, out Guid resultB2Cobject))
                 {
-                    if (!string.IsNullOrEmpty(serviceid) && Guid.TryParse(serviceid, out Guid resultServiceId))
+                    if (!string.IsNullOrEmpty(serviceid)) // && Guid.TryParse(serviceid, out Guid resultServiceId))
                     {
                         ServiceUserLinks serviceUserLinks = _crmApiWrapper.Authz(serviceid, b2cobjectid);
                         //return serviceUserLinks.value;                
@@ -128,7 +132,7 @@
                 return new AuthzResponse
                 {
                     status = 400,
-                    message = ex.Message,
+                    message = ex.ErrorMsg,
                     version = "1.0.0.0",
                     roles = rolesList,
                     mappings = mappingsList
