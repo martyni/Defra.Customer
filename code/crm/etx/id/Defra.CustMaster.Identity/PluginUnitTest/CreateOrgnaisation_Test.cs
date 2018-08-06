@@ -260,6 +260,8 @@ namespace Defra.Test
                 ";
 
 
+
+
             //Inputs
             var inputs = new Dictionary<string, object>() {
                 { "request", InputLoad },
@@ -267,23 +269,26 @@ namespace Defra.Test
 
             var account = fakedContext.CreateQuery<Account>();
 
-            Account AccountObject = new Account {AccountId = new Guid("b7293664-e46a-e811-a83c-000d3ab4f967")
-                                             ,defra_companyhouseid = "142923"
+            Account AccountObject = new Account
+            {
+                AccountId = new Guid("b7293664-e46a-e811-a83c-000d3ab4f967")
+            };
+
+
+            defra_id ID = new defra_id
+            {
+                defra_idId = new Guid("c7293664-e46a-e811-a83c-000d3ab4f967"),
+                defra_Customer = AccountObject.ToEntityReference(),
+                defra_idvalue = "142923",
+                defra_name = "Company Number"
             };
 
             fakedContext.Initialize(new List<Entity>()
-            {   AccountObject
+            {
+                AccountObject, ID
             });
 
             var result = fakedContext.ExecuteCodeActivity<CreateOrganisation>(inputs);
-
-            #region ErrorMessagesToCheck
-
-
-
-
-            #endregion
-
             String ReturnMessage = (String)result["response"];
             AccountResponse ContactResponseObject = Newtonsoft.Json.JsonConvert.DeserializeObject<AccountResponse>(ReturnMessage);
             StringAssert.Contains(ContactResponseObject.code.ToString(), "412");
@@ -335,11 +340,18 @@ namespace Defra.Test
             {
                 AccountId = new Guid("b7293664-e46a-e811-a83c-000d3ab4f967")
                                              ,
-                defra_companyhouseid = "142923"
+               
+            };
+
+            defra_id ID = new defra_id
+            {     
+                defra_idId = new Guid("c7293664-e46a-e811-a83c-000d3ab4f967"),
+                defra_Customer = AccountObject.ToEntityReference(),
+                defra_idvalue = "142923"
             };
 
             fakedContext.Initialize(new List<Entity>()
-            {   AccountObject
+            {   AccountObject, ID
             });
 
             var result = fakedContext.ExecuteCodeActivity<CreateOrganisation>(inputs);
