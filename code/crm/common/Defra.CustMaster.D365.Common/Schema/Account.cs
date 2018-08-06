@@ -9,8 +9,7 @@ namespace Defra.CustMaster.D365.Common.schema
 
         public const string ENTITY_NAME = "account";
         public const string TYPE = "defra_type";
-        public const string NAME = "name";
-        public const string COMPANY_HOUSE_ID = "defra_companyhouseid";
+        public const string NAME = "name";       
         public const string TELEPHONE1 = "telephone1";
         public const string HIERARCHYLEVEL = "defra_hierarchylevel";
         public const string PARENTACCOUNTID = "parentaccountid";

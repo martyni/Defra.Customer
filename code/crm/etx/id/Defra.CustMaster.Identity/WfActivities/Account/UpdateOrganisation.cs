@@ -95,7 +95,7 @@ namespace Defra.CustMaster.Identity.WfActivities
 
                         if (Guid.TryParse(accountPayload.organisationid, out orgId))
                         {
-                            existingAccountRecord = objCommon.service.Retrieve(SCS.AccountContants.ENTITY_NAME, orgId, new Microsoft.Xrm.Sdk.Query.ColumnSet(SCS.AccountContants.UNIQUEREFERENCE, SCS.AccountContants.COMPANY_HOUSE_ID, SCS.AccountContants.PARENTACCOUNTID));
+                            existingAccountRecord = objCommon.service.Retrieve(SCS.AccountContants.ENTITY_NAME, orgId, new Microsoft.Xrm.Sdk.Query.ColumnSet(SCS.AccountContants.UNIQUEREFERENCE, SCS.AccountContants.PARENTACCOUNTID));
                             if (existingAccountRecord != null && existingAccountRecord.Id != null)
                             {
                                 AccountObject.Id = existingAccountRecord.Id;
