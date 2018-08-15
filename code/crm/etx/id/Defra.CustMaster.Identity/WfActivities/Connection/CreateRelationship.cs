@@ -43,6 +43,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
             StringBuilder ErrorMessage = new StringBuilder();
             String UniqueReference = string.Empty;
             Guid? ToConnectId = Guid.Empty;
+            Guid? ConnectionDetailsId = Guid.Empty;
             SCII.Helper objCommon = new SCII.Helper(executionContext);
             try
             {
@@ -310,6 +311,16 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
             #region Finally Block
             finally
             {
+                if (ToConnectId.HasValue)
+                {
+                    localcontext.Trace("started retreiving connection detailsid");
+                    Entity connectionEntity = localcontext.OrganizationService.Retrieve(SCS.Connection.CONNECTIONENTITY, new Guid(ToConnectId.ToString()), new ColumnSet("defra_connectiondetailsid"));
+                    EntityReference connectionDetails = (EntityReference)connectionEntity.Attributes["defra_connectiondetailsid"];
+                    ConnectionDetailsId = connectionDetails.Id;
+                    localcontext.Trace("started retreiving connection detailsid:" + ConnectionDetailsId);
+
+                }
+
                 SCIIR.ConnectContactResponse responsePayload = new SCIIR.ConnectContactResponse()
                 {
                     code = ErrorCode,
@@ -320,7 +331,8 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
                     status = ErrorCode == 200 || ErrorCode == 412 ? "success" : "failure",
                     data = new SCIIR.ConnectContactData()
                     {
-                        connectionid = ToConnectId.HasValue ? ToConnectId.Value.ToString() : String.Empty,
+                        connectionid = ToConnectId.HasValue ? ToConnectId.Value.ToString() : string.Empty,
+                        connectiondetailsid = ConnectionDetailsId.HasValue ? ConnectionDetailsId.Value.ToString() : string.Empty                        
                        
                     }
 
