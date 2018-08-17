@@ -86,7 +86,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Address\AddAddress.cs" />
+    <Compile Include="Address\ValidateAddress.cs" />
     <Compile Include="Common\CustomerAddress.cs" />
+    <Compile Include="Address\SearchCustomerAddress.cs" />
     <Compile Include="ContactDetail\GetContactDetailsTypeOptionSetValue.cs" />
     <Compile Include="LOBServiceUserLink\EnrolmentStatusType.cs" />
     <Compile Include="Common\SearchRecords.cs" />
