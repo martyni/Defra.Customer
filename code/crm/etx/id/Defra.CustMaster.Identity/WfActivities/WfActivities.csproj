@@ -89,6 +89,8 @@
     <Compile Include="Address\ValidateAddress.cs" />
     <Compile Include="Common\CustomerAddress.cs" />
     <Compile Include="Address\SearchCustomerAddress.cs" />
+    <Compile Include="Common\GetHirarchyLeveLOptionSetValue.cs" />
+    <Compile Include="Common\GetHirarchyLevel.cs" />
     <Compile Include="ContactDetail\GetContactDetailsTypeOptionSetValue.cs" />
     <Compile Include="LOBServiceUserLink\EnrolmentStatusType.cs" />
     <Compile Include="Common\SearchRecords.cs" />
