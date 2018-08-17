@@ -36,6 +36,10 @@
         [Input("AddressTypeValue")]
         public InArgument<int> AddressType { get; set; }
 
+        [RequiredArgument]
+        [Input("CustomerId")]
+        public InArgument<Guid> CustomerId { get; set; }
+
         public override void ExecuteCRMWorkFlowActivity(CodeActivityContext executionContext, LocalWorkflowContext crmWorkflowContext)
         {
             string uprn;
@@ -54,6 +58,7 @@
             street = Street.Get(executionContext);
             SCII.Helper objCommon = new SCII.Helper(executionContext);
             type = AddressType.Get(executionContext);
+            Guid customerId = CustomerId.Get(executionContext);
             AddressData addressData = new AddressData();
             Guid addressId = Guid.Empty;
             Guid contactDetailId = Guid.Empty;
@@ -106,6 +111,16 @@
                         throw new Exception("postcode length can not be greater than 25 for NON-UK countries;");
                     }
                 }
+
+                var contactDetailsWithType = from c in orgSvcContext.CreateQuery(SCS.ContactDetails.ENTITY)
+                                             where ((string)c[SCS.ContactDetails.ADDRESSTYPE]).Equals(type) && ((EntityReference)c[SCS.ContactDetails.CUSTOMER]).Id.Equals(customerId)
+                                             select new { contactDetailsId = c.Id };
+                contactDetailId = contactDetailsWithType != null && contactDetailsWithType.FirstOrDefault() != null ? contactDetailsWithType.FirstOrDefault().contactDetailsId : Guid.Empty;
+                if (contactDetailId != Guid.Empty)
+                {
+                    throw new Exception("Contact details of same type already exist for this customer:" + contactDetailId);
+                }
+
             }
             catch (Exception ex)
             {
