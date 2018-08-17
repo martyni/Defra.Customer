@@ -1,4 +1,4 @@
-﻿namespace Defra.CustMaster.Identity.WfActivities.Address
+﻿namespace Defra.CustMaster.Identity.WfActivities
 {
     using System;
     using System.Activities;
