@@ -1,16 +1,16 @@
-﻿using Defra.CustMaster.D365.Common.Ints.Idm.resp;
-using Microsoft.Xrm.Sdk.Client;
-using Microsoft.Xrm.Sdk.Workflow;
-using System;
-using System.Activities;
-using System.Linq;
-using SCS = Defra.CustMaster.D365.Common.schema;
-using SCII = Defra.CustMaster.D365.Common.Ints.Idm;
-using Microsoft.Xrm.Sdk;
-
-namespace Defra.CustMaster.Identity.WfActivities
+﻿namespace Defra.CustMaster.Identity.WfActivities
 {
-    public class CustomerAddress : WorkFlowActivityBase
+    using System;
+    using System.Activities;
+    using System.Linq;
+    using D365.Common.Ints.Idm.resp;
+    using Microsoft.Xrm.Sdk;
+    using Microsoft.Xrm.Sdk.Client;
+    using Microsoft.Xrm.Sdk.Workflow;
+    using SCII = D365.Common.Ints.Idm;
+    using SCS = D365.Common.schema;
+
+    public class SearchCustomerAddress : WorkFlowActivityBase
     {
         [Input("UPRN")]
         public InArgument<string> UPRN { get; set; }
@@ -96,7 +96,6 @@ namespace Defra.CustMaster.Identity.WfActivities
                     crmWorkflowContext.Trace("UK PostCode address:" + addressId);
                 }
             }
-
             else
             {
                 if (addressId == Guid.Empty && street != null && postcode != null && buildingnumber != null)

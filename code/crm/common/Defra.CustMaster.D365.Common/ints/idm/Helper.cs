@@ -44,16 +44,29 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
                                            select new { AddressId = c.Id };
                     addressId = propertyWithUPRN != null && propertyWithUPRN.FirstOrDefault() != null ? propertyWithUPRN.FirstOrDefault().AddressId : Guid.Empty;
                 }
+                if (addressId == Guid.Empty && addressDetails.street != null && addressDetails.postcode != null && addressDetails.buildingnumber != null)
+                {
+                    tracingService.Trace("postcode and street search:started");
+                    var propertyWithDuplicate = from c in orgSvcContext.CreateQuery(SCS.Address.ENTITY)
+                                                where ((string)c[SCS.Address.STREET]).Equals((addressDetails.street.Trim())) && ((string)c[SCS.Address.POSTCODE]).Equals((addressDetails.postcode.Trim())) && ((string)c[SCS.Address.PREMISES]).Equals((addressDetails.buildingnumber.Trim()))
+                                                select new { AddressId = c.Id };
+                    addressId = propertyWithDuplicate != null && propertyWithDuplicate.FirstOrDefault() != null ? propertyWithDuplicate.FirstOrDefault().AddressId : Guid.Empty;
+                }
 
             }
-            if (addressId == Guid.Empty && addressDetails.street != null && addressDetails.postcode != null && addressDetails.buildingnumber != null)
+
+            else
             {
-                tracingService.Trace("postcode and street search:started");
-                var propertyWithDuplicate = from c in orgSvcContext.CreateQuery(SCS.Address.ENTITY)
-                                            where ((string)c[SCS.Address.STREET]).Equals((addressDetails.street.Trim())) && ((string)c[SCS.Address.POSTCODE]).Equals((addressDetails.postcode.Trim())) && ((string)c[SCS.Address.PREMISES]).Equals((addressDetails.buildingnumber.Trim()))
-                                            select new { AddressId = c.Id };
-                addressId = propertyWithDuplicate != null && propertyWithDuplicate.FirstOrDefault() != null ? propertyWithDuplicate.FirstOrDefault().AddressId : Guid.Empty;
+                if (addressId == Guid.Empty && addressDetails.street != null && addressDetails.postcode != null && addressDetails.buildingnumber != null)
+                {
+                    tracingService.Trace("postcode and street search:started");
+                    var propertyWithDuplicate = from c in orgSvcContext.CreateQuery(SCS.Address.ENTITY)
+                                                where ((string)c[SCS.Address.STREET]).Equals((addressDetails.street.Trim())) && ((string)c[SCS.Address.INTERNATIONALPOSTCODE]).Equals((addressDetails.postcode.Trim())) && ((string)c[SCS.Address.PREMISES]).Equals((addressDetails.buildingnumber.Trim()))
+                                                select new { AddressId = c.Id };
+                    addressId = propertyWithDuplicate != null && propertyWithDuplicate.FirstOrDefault() != null ? propertyWithDuplicate.FirstOrDefault().AddressId : Guid.Empty;
+                }
             }
+
             if (addressId == Guid.Empty)
             {
                 Entity address = new Entity(SCS.Address.ENTITY);
