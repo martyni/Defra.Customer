@@ -12,6 +12,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm.Resp
 
     public class ConnectContactData : ResponseDataBase
     {
-        public String connectionid { get; set; }
+        public string connectionid { get; set; }
+        public string connectiondetailsid { get; set; }
     }
 }
