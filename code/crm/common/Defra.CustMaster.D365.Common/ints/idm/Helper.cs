@@ -76,15 +76,21 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
                         address[SCS.Address.UPRN] = addressDetails.uprn;
                 }
                 if (addressDetails.buildingname != null)
-                    address[SCS.Address.NAME] = addressDetails.buildingname;
+                    address[SCS.Address.BUILDINGNAME] = addressDetails.buildingname;
+                if (addressDetails.subbuildingname != null)
+                    address[SCS.Address.SUBBUILDINGNAME] = addressDetails.subbuildingname;
                 if (addressDetails.buildingnumber != null)
                     address[SCS.Address.PREMISES] = addressDetails.buildingnumber;// + "," + addressDetails.buildingname;
                 if (addressDetails.street != null)
                     address[SCS.Address.STREET] = addressDetails.street;
                 if (addressDetails.locality != null)
                     address[SCS.Address.LOCALITY] = addressDetails.locality;
+                if (addressDetails.dependentlocality != null)
+                    address[SCS.Address.DEPENDENTLOCALITY] = addressDetails.dependentlocality;
                 if (addressDetails.town != null)
                     address[SCS.Address.TOWN] = addressDetails.town;
+                if (addressDetails.county != null)
+                    address[SCS.Address.COUNTY] = addressDetails.county;
                 if (addressDetails.postcode != null)
                 {
                     if (addressDetails.country.Trim().ToUpper() == "GBR")
