@@ -29,7 +29,9 @@ namespace Defra.CustMaster.Identity.Plugins
                 OptionSetValueCollection OrganisationTypeValue;
                 OptionSetValueCollection Role;
 
-                if (entity["defra_cminterimorganisationtypevalue"] != null &&  ((int)entity["defra_cminterimorganisationtypevalue"]) != 0 )
+                if (entity.Contains("defra_cminterimorganisationtypevalue") &&
+                    
+                    entity["defra_cminterimorganisationtypevalue"] != null &&  ((int)entity["defra_cminterimorganisationtypevalue"]) != 0 )
                 {
                     //set organistaion type
                     OrganisationTypeValue = new OptionSetValueCollection();
@@ -38,7 +40,9 @@ namespace Defra.CustMaster.Identity.Plugins
 
                 }
 
-                if(entity["defra_cminterimorganisationrolevalue"] != null && ((int)entity["defra_cminterimorganisationrolevalue"]) != 0)
+                if (entity.Contains("defra_cminterimorganisationrolevalue") && 
+                    
+                    entity["defra_cminterimorganisationrolevalue"] != null && ((int)entity["defra_cminterimorganisationrolevalue"]) != 0)
                 {
                     Role = new OptionSetValueCollection();
                     Role.Add(new OptionSetValue((int)entity["defra_cminterimorganisationrolevalue"]));
