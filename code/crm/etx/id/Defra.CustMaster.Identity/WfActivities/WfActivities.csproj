@@ -90,7 +90,7 @@
     <Compile Include="Common\CustomerAddress.cs" />
     <Compile Include="Address\SearchCustomerAddress.cs" />
     <Compile Include="Common\GetHirarchyLeveLOptionSetValue.cs" />
-    <Compile Include="Common\GetHirarchyLevel.cs" />
+    <Compile Include="Common\GetHierarchyLevel.cs" />
     <Compile Include="Common\GetSourceType.cs" />
     <Compile Include="ContactDetail\GetContactDetailsTypeOptionSetValue.cs" />
     <Compile Include="LOBServiceUserLink\EnrolmentStatusType.cs" />
