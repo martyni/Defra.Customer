@@ -17,12 +17,10 @@
 
         [Input("Street")]
         public InArgument<string> Street { get; set; }
-
-        [RequiredArgument]
+       
         [Input("BuildingNumber")]
         public InArgument<string> BuildingNumber { get; set; }
 
-        [RequiredArgument]
         [Input("BuildingName")]
         public InArgument<string> BuildingName { get; set; }
 
@@ -32,13 +30,11 @@
         [Input("Country")]
         public InArgument<string> Country { get; set; }
 
-        [RequiredArgument]
         [Input("AddressTypeValue")]
         public InArgument<int> AddressType { get; set; }
 
-        [RequiredArgument]
         [Input("CustomerId")]
-        public InArgument<Guid> CustomerId { get; set; }
+        public InArgument<string> CustomerId { get; set; }
 
         public override void ExecuteCRMWorkFlowActivity(CodeActivityContext executionContext, LocalWorkflowContext crmWorkflowContext)
         {
@@ -58,7 +54,7 @@
             street = Street.Get(executionContext);
             SCII.Helper objCommon = new SCII.Helper(executionContext);
             type = AddressType.Get(executionContext);
-            Guid customerId = CustomerId.Get(executionContext);
+            Guid customerId = string.IsNullOrEmpty(CustomerId.Get(executionContext)) ? Guid.Empty : new Guid(CustomerId.Get(executionContext));
             AddressData addressData = new AddressData();
             Guid addressId = Guid.Empty;
             Guid contactDetailId = Guid.Empty;
@@ -112,13 +108,16 @@
                     }
                 }
 
-                var contactDetailsWithType = from c in orgSvcContext.CreateQuery(SCS.ContactDetails.ENTITY)
-                                             where ((string)c[SCS.ContactDetails.ADDRESSTYPE]).Equals(type) && ((EntityReference)c[SCS.ContactDetails.CUSTOMER]).Id.Equals(customerId)
-                                             select new { contactDetailsId = c.Id };
-                contactDetailId = contactDetailsWithType != null && contactDetailsWithType.FirstOrDefault() != null ? contactDetailsWithType.FirstOrDefault().contactDetailsId : Guid.Empty;
-                if (contactDetailId != Guid.Empty)
+                if (customerId != Guid.Empty)
                 {
-                    throw new Exception("Contact details of same type already exist for this customer:" + contactDetailId);
+                    var contactDetailsWithType = from c in orgSvcContext.CreateQuery(SCS.ContactDetails.ENTITY)
+                                                 where ((string)c[SCS.ContactDetails.ADDRESSTYPE]).Equals(type) && ((EntityReference)c[SCS.ContactDetails.CUSTOMER]).Id.Equals(customerId)
+                                                 select new { contactDetailsId = c.Id };
+                    contactDetailId = contactDetailsWithType != null && contactDetailsWithType.FirstOrDefault() != null ? contactDetailsWithType.FirstOrDefault().contactDetailsId : Guid.Empty;
+                    if (contactDetailId != Guid.Empty)
+                    {
+                        throw new Exception("Contact details of same type already exist for this customer:" + contactDetailId);
+                    }
                 }
 
             }
