@@ -1,0 +1,7 @@
+"BUName","ParentBUName","Description","Website"
+"Customer-Master-BU","defra-custmstr-dev","The main business unit to own the Customer data",
+"Imports-BU","defra-custmstr-dev","Business unit to capture the Defra Imports specific data",
+"Exports-BU","defra-custmstr-dev","Business unit to capture the Defra Exports specific data",
+"Chemicals-BU","defra-custmstr-dev","Business unit to capture the Defra Checmicals specific data",
+"VMD-BU","defra-custmstr-dev","Business unit to capture the Defra VMD (Veterniray Medicines Directorate specific data",
+"MMO-BU","defra-custmstr-dev","Business unit to capture the Defra MMO (Marine Management Organisation specific data",

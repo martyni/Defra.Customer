@@ -17,6 +17,8 @@
         public override void ExecuteCRMWorkFlowActivity(CodeActivityContext executionContext, LocalWorkflowContext crmWorkflowContext)
         {
             crmWorkflowContext.Trace("Started: Defra.CustMaster.Identity.WfActivities.SetHirarchyLevel");
+            crmWorkflowContext.Trace("Value of hyrarchy level value:" + HirarchyLevel.Get(executionContext));
+
 
             HiarachyLevelOptionSetValue.Set(executionContext, new OptionSetValue(HirarchyLevel.Get(executionContext)));
 
