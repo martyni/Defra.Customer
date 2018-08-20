@@ -20,6 +20,9 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         public string buildingname { get; set; }
 
         [DataMember]
+        public string subbuildingname { get; set; }
+
+        [DataMember]
         [MaxLength(20, ErrorMessage = "Building Number cannot be greater than 20;")]
         public string buildingnumber { get; set; }
 
@@ -40,7 +43,10 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
         public string postcode { get; set; }
 
         [DataMember]
-        public string internationalpostalcode { get; set; }
+        public string county { get; set; }
+
+        [DataMember]
+        public string dependentlocality { get; set; }
 
         [DataMember]
         [Required(ErrorMessage = "country can not be empty")]
