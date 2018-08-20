@@ -3,7 +3,7 @@
     public partial class Address
     {
         public const string ENTITY = "defra_address";
-        public const string NAME = "defra_name";
+        public const string NAME = "defra_buildingname";
         public const string UPRN = "defra_uprn";
         public const string PREMISES = "defra_premises";
         public const string STREET = "defra_street";
