@@ -311,7 +311,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
             #region Finally Block
             finally
             {
-                if (ToConnectId.HasValue)
+                if (ToConnectId.HasValue && !ToConnectId.Value.Equals(Guid.Empty))
                 {
                     localcontext.Trace("started retreiving connection detailsid");
                     Entity connectionEntity = localcontext.OrganizationService.Retrieve(SCS.Connection.CONNECTIONENTITY, new Guid(ToConnectId.ToString()), new ColumnSet("defra_connectiondetailsid"));
