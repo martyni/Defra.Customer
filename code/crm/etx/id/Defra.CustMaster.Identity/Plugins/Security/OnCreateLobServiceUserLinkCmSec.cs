@@ -104,6 +104,7 @@ namespace Defra.CustMaster.Identity.Plugins.Security
         private void ShareRecord(Guid teamId, EntityReference targetEntity)
         {
             _tracingService.Trace("Sharing started with:" + teamId);
+            _tracingService.Trace("Sharing started with:" + targetEntity.LogicalName+":"+targetEntity.Id);
             //sharing
             var grantAccessRequest = new GrantAccessRequest
             {
