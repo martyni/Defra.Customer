@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 using Microsoft.Crm.Sdk.Messages;
+using Microsoft.Xrm.Sdk.Query;
 
 namespace Defra.CustMaster.Identity.Plugins.Security
 {
@@ -24,16 +25,22 @@ namespace Defra.CustMaster.Identity.Plugins.Security
             IOrganizationService service = serviceFactory.CreateOrganizationService(context.UserId);
 
             if (context.InputParameters.Contains("Target") &&
-                context.InputParameters["Target"] is Entity)
+                context.InputParameters["Target"] is EntityReference)
             {
-                Entity entity = (Entity)context.InputParameters["Target"];
-                if (entity.LogicalName != "team")
+                EntityReference entityReference = (EntityReference)context.InputParameters["Target"];
+
+                tracingService.Trace("contains target entity");
+                tracingService.Trace("logical name:" + entityReference.LogicalName);
+
+                if (entityReference.LogicalName != "team")
                     return;
 
-                EntityReferenceCollection RelatedRecords = (EntityReferenceCollection)context.InputParameters["RelatedEntitities"];
+                EntityReferenceCollection RelatedRecords = (EntityReferenceCollection)context.InputParameters["RelatedEntities"];
                 OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(service);
+                //get team name
+                String MemberShipTeamName = (string)service.Retrieve("team",entityReference.Id, new ColumnSet( "name")).Attributes["name"];
+                tracingService.Trace("Membership team name:" + MemberShipTeamName);
 
-                String MemberShipTeamName = (String)entity.Attributes["name"];
                 String OwnerTeamName;
                 Guid[] UserIds;
                 int index = MemberShipTeamName.LastIndexOf("-");
@@ -43,13 +50,12 @@ namespace Defra.CustMaster.Identity.Plugins.Security
                     if (OwnerTeamName != String.Empty)
                     {
                         var GetOwnerTeam = from c in orgSvcContext.CreateQuery("team")
-                                           where (string)c["teamid"] == OwnerTeamName 
-                                           && (int)c["statecode"] == 0
+                                           where (string)c["name"] == OwnerTeamName 
                                            select new
                                            {
                                                teamid = c.Id
                                            };
-
+                        
                         if(GetOwnerTeam.FirstOrDefault() != null)
                         {
                             tracingService.Trace("team found");
