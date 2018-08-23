@@ -84,7 +84,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PluginBase.cs" />
     <Compile Include="Security\OnCreateLobServiceUserLinkCmSec.cs" />
-    <Compile Include="Security\OnPostAssocoateOwnerTeam.cs" />
+    <Compile Include="Security\OnPreValidateAssocoateOwnerTeam.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Defra.CustMaster.snk" />
