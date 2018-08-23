@@ -51,7 +51,7 @@ namespace Defra.CustMaster.Identity.Plugins.Security
                         serviceLink.LinkCriteria.AddCondition(queryCondition1);
                         // add the intersect to the query
                         serviceQuery.LinkEntities.Add(serviceLink);
-                   
+
                         //get the results
                         EntityCollection retrievedServices = service.RetrieveMultiple(serviceQuery);
                         _tracingService.Trace("services record count" + retrievedServices.Entities.Count);
@@ -70,7 +70,7 @@ namespace Defra.CustMaster.Identity.Plugins.Security
                                     QueryExpression teamQuery = new QueryExpression("team");
                                     teamQuery.ColumnSet = new ColumnSet(true);
                                     teamQuery.Criteria.AddCondition("name", ConditionOperator.Equal, ownerTeam);
-                                 
+
                                     EntityCollection entities = service.RetrieveMultiple(teamQuery);
                                     Entity teamEntity = entities.Entities.Count > 0 ? entities[0] : null;
 
@@ -142,25 +142,18 @@ namespace Defra.CustMaster.Identity.Plugins.Security
         private void SetRecordOwner(Guid teamId, Entity targetEntity)
         {
             _tracingService.Trace("Assign started with:" + teamId);
+
+            _tracingService.Trace("Changing the owner to the respective busines unit owner team.");
             if (targetEntity.Attributes.Contains("ownerid"))
             {
-                _tracingService.Trace("Before assign the owner:" + ((EntityReference)targetEntity.Attributes["ownerid"]).Id);
                 targetEntity.Attributes["ownerid"] = new EntityReference("team", teamId);
-                _tracingService.Trace("after assign the owner:" + ((EntityReference)targetEntity.Attributes["ownerid"]).Id);
             }
-
-            //// Assign the record to a team. i.e. owner               
-            //AssignRequest assignRequest = new AssignRequest()
-            //{
-            //    Assignee = new EntityReference
-            //    {
-            //        LogicalName = "team",
-            //        Id = teamId//new Guid("C7BC381B-EC5E-E811-A86F-000D3AB17C7B")
-            //    },
-
-            //    Target = new EntityReference(targetEntity.LogicalName, targetEntity.Id)
-            //};
-            //service.Execute(assignRequest);
+            else
+            {
+                _tracingService.Trace("Adding the ownerid attribute in the Target Entity.");
+                targetEntity.Attributes.Add("ownerid", new EntityReference("team", teamId));
+            }
+            _tracingService.Trace("After assign the owner:" + ((EntityReference)targetEntity.Attributes["ownerid"]).Id);
 
             _tracingService.Trace("Assigned the record:" + targetEntity.Id);
 
