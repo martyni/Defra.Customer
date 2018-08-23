@@ -35,13 +35,14 @@ namespace Defra.CustMaster.Identity.Plugins.Security
                     tracingService.Trace("contains target entity");
                     tracingService.Trace("logical name:" + entityReference.LogicalName);
 
-                    if (entityReference.LogicalName != "team" || entityReference.LogicalName != "systemuser")
+                    if (entityReference.LogicalName != "team" && entityReference.LogicalName != "systemuser")
                         return;
 
                     EntityReferenceCollection RelatedRecords = (EntityReferenceCollection)context.InputParameters["RelatedEntities"];
                     OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(service);
                     //get team name
-                   
+                    tracingService.Trace("after getting related records");
+
                     String OwnerTeamName;
                     Boolean IsUserPartOfAnyOtherTeam = false;
                     int index;
@@ -76,10 +77,15 @@ namespace Defra.CustMaster.Identity.Plugins.Security
                         else if(context.MessageName == "Disassociate")
                         {
                         Guid UserId = entityReference.Id;
-                        Entity UserDetails = service.Retrieve("systemuser", entityReference.Id, new ColumnSet("name", "businessunitid"));
+
+                        tracingService.Trace("getting system user details");
+                        Entity UserDetails = service.Retrieve("systemuser", entityReference.Id, new ColumnSet( "businessunitid"));
                         tracingService.Trace("related record type" + RelatedRecords.FirstOrDefault().LogicalName);
+                        tracingService.Trace("getting team details");
 
                         Entity TeamDetails = service.Retrieve("team", RelatedRecords.FirstOrDefault().Id, new ColumnSet("name", "isdefault", "businessunitid"));
+                        tracingService.Trace("after team details");
+
                         String MemberShipTeamName = (String)TeamDetails["name"];
                         if (MemberShipTeamName.EndsWith("CM-MEMBER"))
                             {
@@ -89,15 +95,20 @@ namespace Defra.CustMaster.Identity.Plugins.Security
                             Guid BusinessUnitId = ((EntityReference)TeamDetails["businessunitid"]).Id;
                                 String TeamBusinessUnitName = (String)service.Retrieve("businessunit", BusinessUnitId, new ColumnSet("name")).Attributes["name"];
                                 Guid? OwnerTeam = GetTeamId(TeamBusinessUnitName + "-CM-OWNER", orgSvcContext);
-                                IsUserPartOfAnyOtherTeam =
-                                    CheckIfUserIsMemberofAnyOtherTeam(TeamDetails.Id,UserId, 
-                                    ((EntityReference)TeamDetails["businessunitid"]).Id,
-                                    orgSvcContext);
-                                if (!IsUserPartOfAnyOtherTeam)
+
+                            //IsUserPartOfAnyOtherTeam = false;
+                            IsUserPartOfAnyOtherTeam =
+                                CheckIfUserIsMemberofAnyOtherTeam(TeamDetails.Id, OwnerTeam,UserId,
+                                ((EntityReference)TeamDetails["businessunitid"]).Id,
+                                orgSvcContext);
+                            if (!IsUserPartOfAnyOtherTeam)
                                 {
                                     tracingService.Trace("before handling remove team member");
-                                    //if user is not part of any other team then remove that user
-                                    RemoveMembersFromTeam(OwnerTeam, RelatedRecords, service);
+                                //if user is not part of any other team then remove that user
+
+                                Guid[] Users = new Guid[1];
+                                Users[0] = UserId;
+                                    RemoveMembersFromTeam(OwnerTeam, Users, service);
                                     tracingService.Trace("after handling remove team member");
                                 }
                             }
@@ -166,7 +177,7 @@ namespace Defra.CustMaster.Identity.Plugins.Security
         }
 
 
-        private Boolean CheckIfUserIsMemberofAnyOtherTeam(Guid CurrentTeamId, Guid UserID, Guid BusinessUnitID, OrganizationServiceContext orgSvcContext)
+        private Boolean CheckIfUserIsMemberofAnyOtherTeam(Guid CurrentTeamId, Guid? OwnerTeam, Guid UserID, Guid BusinessUnitID, OrganizationServiceContext orgSvcContext)
         {
             tracingService.Trace("Searching if user is member of any other team current team id:" + CurrentTeamId);
             var GetMemberTeam = from c in orgSvcContext.CreateQuery("team")
@@ -175,7 +186,8 @@ namespace Defra.CustMaster.Identity.Plugins.Security
                                 where  (Guid)c["businessunitid"] == BusinessUnitID
                                 && (Boolean)c["isdefault"] == false
                                 && (Guid)c["teamid"] != CurrentTeamId
-                                && (Guid) t["userid"] == UserID
+                                && (Guid)c["teamid"] != OwnerTeam.Value
+                                && (Guid) t["systemuserid"] == UserID
                                 select new
                                 {
                                     teamid = c.Id
@@ -188,16 +200,17 @@ namespace Defra.CustMaster.Identity.Plugins.Security
             return GetMemberTeam.ToList().Count > 0 ? true : false; 
         }
 
-        public static void RemoveMembersFromTeam(Guid? TeamId, EntityReferenceCollection Users, IOrganizationService service)
+        public  void RemoveMembersFromTeam(Guid? TeamId, Guid[] Users, IOrganizationService service)
         {
             Guid[] UserIds;
 
             if (TeamId.HasValue)
             {
+                tracingService.Trace("before removal");
+
                 RemoveMembersTeamRequest addRequest = new RemoveMembersTeamRequest();
                 addRequest.TeamId = TeamId.Value;
-                UserIds = Users.Select(x => x.Id).ToArray();
-                addRequest.MemberIds = UserIds;
+                addRequest.MemberIds = Users;
                 service.Execute(addRequest);
             }
         }
