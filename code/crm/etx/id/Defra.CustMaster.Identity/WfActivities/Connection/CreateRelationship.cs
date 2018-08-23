@@ -297,10 +297,12 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
             catch (Exception ex)
             {
                 crmWorkflowContext.Trace("inside catch");
+                crmWorkflowContext.Trace("exception message: " + ex.Message);
+
                 ErrorCode = 500;
                 _ErrorMessage = ex.Message;
-
-               // crmWorkflowContext.Trace(String.Format("message details {0}", ex.Message));
+                _ErrorMessageDetail = ex.Message;
+                // crmWorkflowContext.Trace(String.Format("message details {0}", ex.Message));
                 //_ErrorMessageDetail = ex.Message ;
                 ErrorCode = 400;
                 this.response.Set(executionContext, _ErrorMessageDetail);
