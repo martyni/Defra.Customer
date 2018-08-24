@@ -13,7 +13,10 @@ namespace Defra.CustMaster.Identity.Plugins.Security
     {
         ITracingService tracingService;
         public void Execute(IServiceProvider serviceProvider)
+
         {
+            
+            String RelatedRecordLogicalName;
             tracingService =
                 (ITracingService)serviceProvider.GetService(typeof(ITracingService));
 
@@ -21,7 +24,12 @@ namespace Defra.CustMaster.Identity.Plugins.Security
                 serviceProvider.GetService(typeof(IPluginExecutionContext));
 
             tracingService.Trace("OnPreValidateAssocoateOwnerTeam before assingning teams.");
+            EntityReferenceCollection RelatedRecords = (EntityReferenceCollection)context.InputParameters["RelatedEntities"];
 
+            Relationship relationship = (Relationship)context.InputParameters["Relationship"];
+
+            if (relationship.SchemaName != "teammembership_association")
+                return;
             IOrganizationServiceFactory serviceFactory = (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
             IOrganizationService service = serviceFactory.CreateOrganizationService(context.UserId);
             if (context.MessageName == "Associate" || context.MessageName == "Disassociate")
@@ -38,7 +46,6 @@ namespace Defra.CustMaster.Identity.Plugins.Security
                     if (entityReference.LogicalName != "team" && entityReference.LogicalName != "systemuser")
                         return;
 
-                    EntityReferenceCollection RelatedRecords = (EntityReferenceCollection)context.InputParameters["RelatedEntities"];
                     OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(service);
                     //get team name
                     tracingService.Trace("after getting related records");
@@ -49,7 +56,7 @@ namespace Defra.CustMaster.Identity.Plugins.Security
                     String BusinessUnitName;
                     //process records only if its not a default team
                    
-                        if (context.MessageName == "Associate")
+                        if (context.MessageName == "Associate" && entityReference.LogicalName == "team")
                         {
 
                         Entity TeamDetails = service.Retrieve("team", entityReference.Id, new ColumnSet("name", "isdefault", "businessunitid"));
@@ -74,7 +81,7 @@ namespace Defra.CustMaster.Identity.Plugins.Security
                                 tracingService.Trace("not a member team");
                             }
                         }
-                        else if(context.MessageName == "Disassociate")
+                        else if(context.MessageName == "Disassociate" && entityReference.LogicalName == "systemuser" )
                         {
                         Guid UserId = entityReference.Id;
 
