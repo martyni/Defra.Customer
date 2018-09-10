@@ -89,8 +89,12 @@ namespace Defra.CustMaster.Identity.CoreApp.Controllers
                             }
 
                             string mappingListStatus = serviceUserLink.EnrolmentStatus + ":" + serviceUserLink.EnrolmentStatusText;
+                            if (!mappingsList.Contains(mappingListStatus))
+                            {
+                                mappingsList.Add(mappingListStatus);
+                            }
 
-                            mappingsList.Add(mappingListStatus);
+                           // mappingsList.Add(mappingListStatus);
                         }
 
                         if (serviceUserLinks == null || serviceUserLinks.serviceUserLinks == null || serviceUserLinks.serviceUserLinks.Count == 0)
