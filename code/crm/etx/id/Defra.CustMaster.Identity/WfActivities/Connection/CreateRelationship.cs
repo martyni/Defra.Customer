@@ -297,10 +297,12 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
             catch (Exception ex)
             {
                 crmWorkflowContext.Trace("inside catch");
+                crmWorkflowContext.Trace("exception message: " + ex.Message);
+
                 ErrorCode = 500;
                 _ErrorMessage = ex.Message;
-
-               // crmWorkflowContext.Trace(String.Format("message details {0}", ex.Message));
+                _ErrorMessageDetail = ex.Message;
+                // crmWorkflowContext.Trace(String.Format("message details {0}", ex.Message));
                 //_ErrorMessageDetail = ex.Message ;
                 ErrorCode = 400;
                 this.response.Set(executionContext, _ErrorMessageDetail);
@@ -311,7 +313,7 @@ namespace Defra.CustMaster.Identity.WfActivities.Connection
             #region Finally Block
             finally
             {
-                if (ToConnectId.HasValue)
+                if (ToConnectId.HasValue && !ToConnectId.Value.Equals(Guid.Empty))
                 {
                     localcontext.Trace("started retreiving connection detailsid");
                     Entity connectionEntity = localcontext.OrganizationService.Retrieve(SCS.Connection.CONNECTIONENTITY, new Guid(ToConnectId.ToString()), new ColumnSet("defra_connectiondetailsid"));

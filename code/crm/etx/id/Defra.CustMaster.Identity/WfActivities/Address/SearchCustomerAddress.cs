@@ -60,10 +60,10 @@
                 string countryValue = country.ToUpper();
                 crmWorkflowContext.Trace("Country search started" + country);
 
-                var CountryRecord = from c in orgSvcContext.CreateQuery(SCS.Address.COUNTRY)
+                var countryRecord = from c in orgSvcContext.CreateQuery(SCS.Address.COUNTRY)
                                     where (((string)c["defra_isocodealpha3"]) == countryValue) && (int)c[SCS.ContactDetails.STATECODE] == 0
                                     select new { CountryId = c.Id };
-                Guid countryGuid = CountryRecord != null && CountryRecord.FirstOrDefault() != null ? CountryRecord.FirstOrDefault().CountryId : Guid.Empty;
+                Guid countryGuid = countryRecord != null && countryRecord.FirstOrDefault() != null ? countryRecord.FirstOrDefault().CountryId : Guid.Empty;
                 crmWorkflowContext.Trace("country found" + countryGuid);
                 if (countryGuid != Guid.Empty)
                 {
