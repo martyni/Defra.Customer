@@ -40,30 +40,73 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
                 {
                     tracingService.Trace("UPRN search:started..");
                     var propertyWithUPRN = from c in orgSvcContext.CreateQuery(SCS.Address.ENTITY)
-                                           where ((string)c[SCS.Address.UPRN]).Equals((addressDetails.uprn.Trim()))
+                                           where ((string)c[SCS.Address.UPRN]).Equals(addressDetails.uprn.Trim())
                                            select new { AddressId = c.Id };
                     addressId = propertyWithUPRN != null && propertyWithUPRN.FirstOrDefault() != null ? propertyWithUPRN.FirstOrDefault().AddressId : Guid.Empty;
                 }
-                if (addressId == Guid.Empty && addressDetails.street != null && addressDetails.postcode != null && addressDetails.buildingnumber != null)
+
+                if (addressId == Guid.Empty && addressDetails.street != null && addressDetails.postcode != null && (addressDetails.buildingnumber != null || addressDetails.buildingname != null))
                 {
-                    tracingService.Trace("postcode and street search:started");
-                    var propertyWithDuplicate = from c in orgSvcContext.CreateQuery(SCS.Address.ENTITY)
-                                                where ((string)c[SCS.Address.STREET]).Equals((addressDetails.street.Trim())) && ((string)c[SCS.Address.POSTCODE]).Equals((addressDetails.postcode.Trim())) && ((string)c[SCS.Address.PREMISES]).Equals((addressDetails.buildingnumber.Trim()))
-                                                select new { AddressId = c.Id };
-                    addressId = propertyWithDuplicate != null && propertyWithDuplicate.FirstOrDefault() != null ? propertyWithDuplicate.FirstOrDefault().AddressId : Guid.Empty;
+                    tracingService.Trace("building number,building name,postcode and street search:started");
+                    if (addressDetails.buildingnumber != null && addressDetails.buildingname != null)
+                    {
+                        tracingService.Trace("building number and building name is not null search started");
+
+                        var propertyWithDuplicate = from c in orgSvcContext.CreateQuery(SCS.Address.ENTITY)
+                                                    where ((string)c[SCS.Address.STREET]).Equals(addressDetails.street.Trim()) && ((string)c[SCS.Address.POSTCODE]).Equals(addressDetails.postcode.Trim()) && ((string)c[SCS.Address.PREMISES]).Equals(addressDetails.buildingnumber.Trim()) && ((string)c[SCS.Address.BUILDINGNAME]).Equals(addressDetails.buildingname.Trim())
+                                                    select new { AddressId = c.Id };
+                        addressId = propertyWithDuplicate != null && propertyWithDuplicate.FirstOrDefault() != null ? propertyWithDuplicate.FirstOrDefault().AddressId : Guid.Empty;
+                        tracingService.Trace("building number and building name is not null and address found" + addressId);
+                    }
+                    else if (addressDetails.buildingnumber != null)
+                    {
+                        tracingService.Trace("building number is not null search started");
+                        var propertyWithDuplicate = from c in orgSvcContext.CreateQuery(SCS.Address.ENTITY)
+                                                    where ((string)c[SCS.Address.STREET]).Equals(addressDetails.street.Trim()) && ((string)c[SCS.Address.POSTCODE]).Equals(addressDetails.postcode.Trim()) && ((string)c[SCS.Address.PREMISES]).Equals(addressDetails.buildingnumber.Trim())
+                                                    select new { AddressId = c.Id };
+                        addressId = propertyWithDuplicate != null && propertyWithDuplicate.FirstOrDefault() != null ? propertyWithDuplicate.FirstOrDefault().AddressId : Guid.Empty;
+                        tracingService.Trace("building number is not null and address found");
+                    }
+                    else if (addressDetails.buildingname != null)
+                    {
+                        tracingService.Trace("building name is not null search started");
+                        var propertyWithDuplicate = from c in orgSvcContext.CreateQuery(SCS.Address.ENTITY)
+                                                    where ((string)c[SCS.Address.STREET]).Equals(addressDetails.street.Trim()) && ((string)c[SCS.Address.POSTCODE]).Equals(addressDetails.postcode.Trim()) && ((string)c[SCS.Address.BUILDINGNAME]).Equals(addressDetails.buildingname.Trim())
+                                                    select new { AddressId = c.Id };
+                        addressId = propertyWithDuplicate != null && propertyWithDuplicate.FirstOrDefault() != null ? propertyWithDuplicate.FirstOrDefault().AddressId : Guid.Empty;
+                        tracingService.Trace("building name is not null and address found");
+                    }
                 }
-
             }
-
             else
             {
-                if (addressId == Guid.Empty && addressDetails.street != null && addressDetails.postcode != null && addressDetails.buildingnumber != null)
+                if (addressId == Guid.Empty && addressDetails.street != null && addressDetails.postcode != null && (addressDetails.buildingnumber != null || addressDetails.buildingname != null))
                 {
-                    tracingService.Trace("postcode and street search:started");
-                    var propertyWithDuplicate = from c in orgSvcContext.CreateQuery(SCS.Address.ENTITY)
-                                                where ((string)c[SCS.Address.STREET]).Equals((addressDetails.street.Trim())) && ((string)c[SCS.Address.INTERNATIONALPOSTCODE]).Equals((addressDetails.postcode.Trim())) && ((string)c[SCS.Address.PREMISES]).Equals((addressDetails.buildingnumber.Trim()))
-                                                select new { AddressId = c.Id };
-                    addressId = propertyWithDuplicate != null && propertyWithDuplicate.FirstOrDefault() != null ? propertyWithDuplicate.FirstOrDefault().AddressId : Guid.Empty;
+                    if (addressDetails.buildingnumber != null && addressDetails.buildingname != null)
+                    {
+                        tracingService.Trace("postcode and street search:started");
+                        var propertyWithDuplicate = from c in orgSvcContext.CreateQuery(SCS.Address.ENTITY)
+                                                    where ((string)c[SCS.Address.STREET]).Equals(addressDetails.street.Trim()) && ((string)c[SCS.Address.INTERNATIONALPOSTCODE]).Equals(addressDetails.postcode.Trim()) && ((string)c[SCS.Address.PREMISES]).Equals(addressDetails.buildingnumber.Trim()) && ((string)c[SCS.Address.BUILDINGNAME]).Equals(addressDetails.buildingname.Trim())
+                                                    select new { AddressId = c.Id };
+                        addressId = propertyWithDuplicate != null && propertyWithDuplicate.FirstOrDefault() != null ? propertyWithDuplicate.FirstOrDefault().AddressId : Guid.Empty;
+                    }
+                    else if (addressDetails.buildingnumber != null)
+                    {
+                        tracingService.Trace("postcode and street search:started");
+                        var propertyWithDuplicate = from c in orgSvcContext.CreateQuery(SCS.Address.ENTITY)
+                                                    where ((string)c[SCS.Address.STREET]).Equals(addressDetails.street.Trim()) && ((string)c[SCS.Address.INTERNATIONALPOSTCODE]).Equals(addressDetails.postcode.Trim()) && ((string)c[SCS.Address.PREMISES]).Equals(addressDetails.buildingnumber.Trim())
+                                                    select new { AddressId = c.Id };
+                        addressId = propertyWithDuplicate != null && propertyWithDuplicate.FirstOrDefault() != null ? propertyWithDuplicate.FirstOrDefault().AddressId : Guid.Empty;
+                    }
+                    else if (addressDetails.buildingname != null)
+                    {
+
+                        tracingService.Trace("postcode and street search:started");
+                        var propertyWithDuplicate = from c in orgSvcContext.CreateQuery(SCS.Address.ENTITY)
+                                                    where ((string)c[SCS.Address.STREET]).Equals(addressDetails.street.Trim()) && ((string)c[SCS.Address.INTERNATIONALPOSTCODE]).Equals(addressDetails.postcode.Trim()) && ((string)c[SCS.Address.BUILDINGNAME]).Equals(addressDetails.buildingname.Trim())
+                                                    select new { AddressId = c.Id };
+                        addressId = propertyWithDuplicate != null && propertyWithDuplicate.FirstOrDefault() != null ? propertyWithDuplicate.FirstOrDefault().AddressId : Guid.Empty;
+                    }
                 }
             }
 
@@ -73,24 +116,50 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
                 if (addressDetails.country.Trim().ToUpper() == "GBR")
                 {
                     if (addressDetails.uprn != null)
+                    {
                         address[SCS.Address.UPRN] = addressDetails.uprn;
+                    }
                 }
+
                 if (addressDetails.buildingname != null)
+                {
                     address[SCS.Address.BUILDINGNAME] = addressDetails.buildingname;
+                }
                 if (addressDetails.subbuildingname != null)
+                {
                     address[SCS.Address.SUBBUILDINGNAME] = addressDetails.subbuildingname;
+                }
+
                 if (addressDetails.buildingnumber != null)
+                {
                     address[SCS.Address.PREMISES] = addressDetails.buildingnumber;// + "," + addressDetails.buildingname;
+                }
+
                 if (addressDetails.street != null)
+                {
                     address[SCS.Address.STREET] = addressDetails.street;
+                }
+
                 if (addressDetails.locality != null)
+                {
                     address[SCS.Address.LOCALITY] = addressDetails.locality;
+                }
+
                 if (addressDetails.dependentlocality != null)
+                {
                     address[SCS.Address.DEPENDENTLOCALITY] = addressDetails.dependentlocality;
+                }
+
                 if (addressDetails.town != null)
+                {
                     address[SCS.Address.TOWN] = addressDetails.town;
+                }
+
                 if (addressDetails.county != null)
+                {
                     address[SCS.Address.COUNTY] = addressDetails.county;
+                }
+
                 if (addressDetails.postcode != null)
                 {
                     if (addressDetails.country.Trim().ToUpper() == "GBR")
@@ -105,33 +174,42 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
 
                 bool resultedCompanyHouse;
                 if (addressDetails.fromcompanieshouse != null)
+                {
                     if (Boolean.TryParse(addressDetails.fromcompanieshouse.ToString(), out resultedCompanyHouse))
+                    {
                         address[SCS.Address.FROMCOMPANIESHOUSE] = resultedCompanyHouse;
+                    }
+                }
+
                 if (!string.IsNullOrEmpty(addressDetails.country))
                 {
                     string countryValue = addressDetails.country.ToUpper();
                     tracingService.Trace("Country search started" + addressDetails.country);
 
-                    var CountryRecord = from c in orgSvcContext.CreateQuery(SCS.Address.COUNTRY)
-                                        where (((string)c["defra_isocodealpha3"]) == countryValue)
+                    var countryRecord = from c in orgSvcContext.CreateQuery(SCS.Address.COUNTRY)
+                                        where ((string)c["defra_isocodealpha3"]) == countryValue
                                         select new { CountryId = c.Id };
-                    Guid countryGuid = CountryRecord != null && CountryRecord.FirstOrDefault() != null ? CountryRecord.FirstOrDefault().CountryId : Guid.Empty;
+                    Guid countryGuid = countryRecord != null && countryRecord.FirstOrDefault() != null ? countryRecord.FirstOrDefault().CountryId : Guid.Empty;
                     tracingService.Trace("country found" + countryGuid);
                     if (countryGuid != Guid.Empty)
+                    {
                         address[SCS.Address.COUNTRY] = new EntityReference(SCS.Address.COUNTRY, countryGuid);
+                    }
                     else
                     {
                         tracingService.Trace("country not found:" + addressDetails.country);
                         throw new Exception("country not found:" + addressDetails.country);
                     }
                 }
+
                 tracingService.Trace("creating address started");
                 addressId = this.service.Create(address);
             }
+
             if (addressId != Guid.Empty)
             {
                 var contactDetailsWithType = from c in orgSvcContext.CreateQuery(SCS.ContactDetails.ENTITY)
-                                             where ((string)c[SCS.ContactDetails.ADDRESSTYPE]).Equals((addressDetails.type)) && (((EntityReference)c[SCS.ContactDetails.CUSTOMER]).Id.Equals(customer.Id))
+                                             where ((string)c[SCS.ContactDetails.ADDRESSTYPE]).Equals(addressDetails.type) && ((EntityReference)c[SCS.ContactDetails.CUSTOMER]).Id.Equals(customer.Id)
                                              select new { contactDetailsId = c.Id };
                 contactDetailId = contactDetailsWithType != null && contactDetailsWithType.FirstOrDefault() != null ? contactDetailsWithType.FirstOrDefault().contactDetailsId : Guid.Empty;
                 if (contactDetailId == Guid.Empty)
@@ -153,10 +231,10 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
             {
                 tracingService.Trace("Can not create address:");
             }
+
             addressData.addressid = addressId;
             addressData.contactdetailsid = contactDetailId;
             return addressData;
-
         }
 
         public void UpsertContactDetails(int type, string typeValue, EntityReference customer, bool isUpdate, bool isClear)
@@ -321,7 +399,7 @@ namespace Defra.CustMaster.D365.Common.Ints.Idm
             }
 
         }
-        public void ClearIdentifier(String IdentifierName,Guid CustomerID)
+        public void ClearIdentifier(String IdentifierName, Guid CustomerID)
         {
             OrganizationServiceContext orgSvcContext = new OrganizationServiceContext(this.service);
 
